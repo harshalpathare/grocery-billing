@@ -66,7 +66,26 @@ public class BillController {
         model.addAttribute("nextBillNo", billService.generateBillNumber());
         return "bill/create";
     }
+    // ── RECEIPT PRINT PAGE (for thermal/receipt printer) ──
+    @GetMapping("/{id}/receipt")
+    public String receiptView(@PathVariable Long id, Model model) {
+        Bill bill = billService.getBillById(id);
 
+        // Amount in words
+        BigDecimal total = bill.getTotalAmount() != null
+                ? bill.getTotalAmount() : BigDecimal.ZERO;
+        long rupees = total.longValue();
+        int paise   = total.remainder(BigDecimal.ONE)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(0, java.math.RoundingMode.HALF_UP)
+                .intValue();
+
+        model.addAttribute("bill",         bill);
+        model.addAttribute("rupees",       rupees);
+        model.addAttribute("paise",        paise);
+        model.addAttribute("pageTitle",    "Receipt " + bill.getBillNo());
+        return "bill/receipt";
+    }
     // ─────────────────────────────────────────────────────
     // SAVE BILL
     // The form sends items as indexed arrays:

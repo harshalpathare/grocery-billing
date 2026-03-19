@@ -77,6 +77,13 @@
             <a th:href="@{/bills}" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i>Back
             </a>
+            <!-- Add alongside existing Download PDF button -->
+            <a th:if="${!bill.isGst}"
+               th:href="@{/bills/{id}/receipt(id=${bill.id})}"
+               class="btn btn-sm btn-outline-secondary"
+               target="_blank">
+                <i class="bi bi-receipt me-1"></i>Print Receipt
+            </a>
             <!-- Logout button — add this at the end of ms-auto div -->
             <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
                 <input type="hidden"
@@ -126,19 +133,7 @@
 
             <!-- Customer + Bill Info Row -->
             <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="small text-muted fw-semibold mb-1">BILL TO</div>
-                    <div th:if="${bill.customer != null}">
-                        <div class="fw-bold fs-6" th:text="${bill.customer.name}">Customer</div>
-                        <div class="text-muted small" th:text="${bill.customer.phone}">Phone</div>
-                        <div class="text-muted small"
-                             th:if="${bill.customer.address}"
-                             th:text="${bill.customer.address}">Address</div>
-                    </div>
-                    <div th:unless="${bill.customer != null}"
-                         class="text-muted">Walk-in Customer</div>
-                </div>
-                <<!-- Customer + Bill Info Row -->
+                <!-- Customer + Bill Info Row -->
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="small text-muted fw-semibold mb-1">BILL TO</div>
