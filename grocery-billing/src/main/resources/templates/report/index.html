@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | Grocery Billing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .report-link-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            height: 100%;
+        }
+        .report-link-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            border-color: #4f97ff33;
+            color: inherit;
+        }
+        /* Chart card: fills full column height */
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            height: 100%;
+        }
+        /* Stack card: natural height — stacks without overflow */
+        .stack-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+        <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
+        <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
+        <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i><span>New Bill</span></a>
+        <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
+        <a th:href="@{/credit}" class="nav-link"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
+        <a th:href="@{/reports}" class="nav-link active"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link">
+            <i class="bi bi-gear"></i><span>Settings</span>
+        </a>
+    </div>
+</div>
+
+<div class="main-content" id="mainContent">
+    <nav class="top-navbar">
+        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <h5 class="mb-0 ms-3">Reports &amp; Analytics</h5>
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <a th:href="@{/reports/export/csv}" class="btn btn-sm btn-success">
+                <i class="bi bi-download me-1"></i>Export CSV (This Month)
+            </a>
+            <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+                <button type="submit"
+                        class="btn btn-sm btn-outline-danger"
+                        title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="page-content">
+
+        <!-- ══ ROW 1: TOP STATS ══ -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-primary bg-opacity-10">
+                            <i class="bi bi-currency-rupee text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Today's Sales</div>
+                            <div class="fw-bold fs-5">
+                                ₹<span th:text="${#numbers.formatDecimal(stats.todaySales(), 1, 2)}">0.00</span>
+                            </div>
+                            <div class="text-muted small">
+                                <span th:text="${stats.todayBills()}">0</span> bill(s)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-success bg-opacity-10">
+                            <i class="bi bi-calendar-month text-success"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">This Month Sales</div>
+                            <div class="fw-bold fs-5 text-success">
+                                ₹<span th:text="${#numbers.formatDecimal(stats.monthSales(), 1, 2)}">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-warning bg-opacity-10">
+                            <i class="bi bi-percent text-warning"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Month GST Collected</div>
+                            <div class="fw-bold fs-5 text-warning">
+                                ₹<span th:text="${#numbers.formatDecimal(stats.monthGst(), 1, 2)}">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-danger bg-opacity-10">
+                            <i class="bi bi-exclamation-triangle text-danger"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Total Pending Dues</div>
+                            <div class="fw-bold fs-5 text-danger">
+                                ₹<span th:text="${#numbers.formatDecimal(stats.totalPending(), 1, 2)}">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ROW 2: REPORT LINKS ══ -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <a th:href="@{/reports/daily}" class="report-link-card">
+                    <div class="stat-icon bg-primary bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-calendar-day text-primary"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Daily Report</h6>
+                    <p class="text-muted small mb-0">View all bills for any specific date</p>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a th:href="@{/reports/monthly}" class="report-link-card">
+                    <div class="stat-icon bg-success bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-calendar-month text-success"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Monthly Report</h6>
+                    <p class="text-muted small mb-0">Month-wise sales summary for the year</p>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a th:href="@{/reports/gst}" class="report-link-card">
+                    <div class="stat-icon bg-warning bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-receipt-cutoff text-warning"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">GST Report</h6>
+                    <p class="text-muted small mb-0">CGST + SGST breakdown by date range</p>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a th:href="@{/reports/credit}" class="report-link-card">
+                    <div class="stat-icon bg-danger bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-credit-card text-danger"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Credit Report</h6>
+                    <p class="text-muted small mb-0">Pending dues and payment history</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- ══ ROW 3: CHART + TODAY'S BILLS + DUES ══
+             col-lg-7  = bar chart (left, tall)
+             col-lg-5  = today bills + dues (right, stacked)
+             d-flex flex-column on col-lg-7 + flex-grow-1 on chart-card
+             makes chart stretch to match total height of right column
+        ══ -->
+        <div class="row g-4 mb-4">
+
+            <!-- LEFT: Bar chart -->
+            <div class="col-lg-7 d-flex flex-column">
+                <div class="chart-card flex-grow-1">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-bar-chart me-2 text-primary"></i>
+                            Monthly Sales —
+                            <span th:text="${currentYear}">2024</span>
+                        </h6>
+                        <a th:href="@{/reports/monthly}"
+                           class="btn btn-sm btn-outline-primary">
+                            Full Report →
+                        </a>
+                    </div>
+
+                    <div th:if="${!hasAnySales}"
+                         class="text-center py-4 text-muted">
+                        <i class="bi bi-bar-chart"
+                           style="font-size:40px;opacity:0.2"></i>
+                        <p class="mt-2 small mb-0">
+                            No sales recorded this year yet.
+                        </p>
+                    </div>
+
+                    <div th:each="row, rowStat : ${monthlyData}">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="text-muted small"
+                                  style="width:32px;flex-shrink:0"
+                                  th:text="${row.monthName().substring(0,3)}">
+                                Jan
+                            </span>
+                            <div class="flex-grow-1 mx-2"
+                                 style="background:#f0f4ff;
+                                        border-radius:4px;
+                                        height:8px;
+                                        min-width:0">
+                                <div th:style="'height:8px;'
+                                             + 'border-radius:4px;'
+                                             + 'background:linear-gradient(90deg,#4f97ff,#7bb8ff);'
+                                             + 'width:' + ${indexBarWidths[rowStat.index]} + '%'">
+                                </div>
+                            </div>
+                            <span class="small text-end"
+                                  style="width:82px;flex-shrink:0"
+                                  th:classappend="${indexBarWidths[rowStat.index] > 0}
+                                                  ? 'fw-semibold text-success'
+                                                  : 'text-muted'"
+                                  th:text="'₹' + ${#numbers.formatDecimal(row.sales(),1,2)}">
+                                ₹0.00
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- RIGHT: Today's Bills + Dues stacked with gap -->
+            <div class="col-lg-5 d-flex flex-column gap-4">
+
+                <!-- Today's Bills -->
+                <div class="stack-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-calendar-check me-2 text-success"></i>
+                            Today's Bills
+                            <span class="badge bg-success ms-1"
+                                  th:text="${todayReport.billCount()}">0</span>
+                        </h6>
+                        <a th:href="@{/reports/daily}"
+                           class="btn btn-sm btn-outline-success">View →</a>
+                    </div>
+
+                    <div th:if="${todayReport.bills().isEmpty()}"
+                         class="text-center py-3 text-muted">
+                        <i class="bi bi-inbox" style="font-size:32px;opacity:0.3"></i>
+                        <p class="small mt-2 mb-0">No bills today yet</p>
+                    </div>
+
+                    <div th:unless="${todayReport.bills().isEmpty()}">
+                        <div th:each="bill, s : ${todayReport.bills()}"
+                             th:if="${s.index < 4}"
+                             class="d-flex justify-content-between
+                                    align-items-center py-2 border-bottom">
+                            <div>
+                                <div class="small fw-semibold"
+                                     th:text="${bill.billNo}">BILL</div>
+                                <div class="small text-muted"
+                                     th:text="${bill.customer != null
+                                               ? bill.customer.name : 'Walk-in'}">
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold small text-success">
+                                    ₹<span th:text="${#numbers.formatDecimal(
+                                        bill.totalAmount, 1, 2)}">0</span>
+                                </div>
+                                <span class="badge"
+                                      th:classappend="${bill.paymentStatus.name() == 'PAID'}
+                                                     ? 'bg-success'
+                                                     : (${bill.paymentStatus.name() == 'CREDIT'}
+                                                        ? 'bg-danger'
+                                                        : 'bg-warning text-dark')"
+                                      th:text="${bill.paymentStatus.name()}">
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-2"
+                             th:if="${todayReport.bills().size() > 4}">
+                            <a th:href="@{/reports/daily}" class="small text-primary">
+                                +<span th:text="${todayReport.bills().size() - 4}"></span>
+                                more →
+                            </a>
+                        </div>
+
+                        <div class="d-flex justify-content-between
+                                    align-items-center mt-2 pt-2 border-top">
+                            <span class="small fw-bold text-muted">Today's Total</span>
+                            <span class="fw-bold text-success">
+                                ₹<span th:text="${#numbers.formatDecimal(
+                                    todayReport.totalSales(), 1, 2)}">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Pending Dues -->
+                <div class="stack-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-exclamation-triangle me-2 text-danger"></i>
+                            Top Pending Dues
+                        </h6>
+                        <a th:href="@{/reports/credit}"
+                           class="btn btn-sm btn-outline-danger">View All →</a>
+                    </div>
+
+                    <div th:if="${creditReport.customersWithDues().isEmpty()}"
+                         class="text-center py-3 text-muted">
+                        <i class="bi bi-check-circle-fill text-success"
+                           style="font-size:32px"></i>
+                        <p class="small mt-2 mb-0">No pending dues!</p>
+                    </div>
+
+                    <div th:unless="${creditReport.customersWithDues().isEmpty()}">
+                        <div th:each="c, s : ${creditReport.customersWithDues()}"
+                             th:if="${s.index < 5}"
+                             class="d-flex justify-content-between
+                                    align-items-center py-2 border-bottom">
+                            <div>
+                                <div class="small fw-semibold" th:text="${c.name}">Name</div>
+                                <div class="small text-muted" th:text="${c.phone}">Phone</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-danger small">
+                                    ₹<span th:text="${#numbers.formatDecimal(
+                                        c.balance, 1, 2)}">0</span>
+                                </div>
+                                <a th:href="@{/credit/pay/{id}(id=${c.id})}"
+                                   class="btn btn-success btn-sm py-0 px-2"
+                                   style="font-size:11px">Pay</a>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between
+                                    align-items-center mt-2 pt-2 border-top">
+                            <span class="small fw-bold text-muted">Total Pending</span>
+                            <span class="fw-bold text-danger">
+                                ₹<span th:text="${#numbers.formatDecimal(
+                                    creditReport.totalDues(), 1, 2)}">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- END col-lg-5 -->
+
+        </div>
+        <!-- ══ END ROW 3 ══ -->
+
+        <!-- ══ ROW 4: EXPORT DATA (full width, separate from row above) ══ -->
+        <div class="report-card">
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-download me-2 text-success"></i>Export Data
+            </h6>
+            <form th:action="@{/reports/export/csv}" method="get"
+                  class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">From Date</label>
+                    <input type="date" name="start" class="form-control"
+                           th:value="${#temporals.format(
+                               #temporals.createNow(), 'yyyy-MM-') + '01'}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">To Date</label>
+                    <input type="date" name="end" class="form-control"
+                           th:value="${#temporals.format(
+                               #temporals.createNow(), 'yyyy-MM-dd')}">
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-filetype-csv me-2"></i>Download CSV
+                    </button>
+                </div>
+                <div class="col-md-3">
+                    <a th:href="@{/reports/export/csv}"
+                       class="btn btn-outline-success w-100">
+                        <i class="bi bi-download me-2"></i>This Month (Quick)
+                    </a>
+                </div>
+            </form>
+        </div>
+        <!-- ══ END ROW 4 ══ -->
+
+    </div>
+    <!-- END page-content -->
+
+</div>
+<!-- END main-content -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('sidebarToggle').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    });
+</script>
+</body>
+</html>
