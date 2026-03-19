@@ -149,23 +149,31 @@
                     <!-- Pay button if balance pending -->
                     <div th:if="${customer.balance != null && customer.balance.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
                          class="mt-3">
+
                         <a th:href="@{/credit/pay/{id}(id=${customer.id})}"
                            class="btn btn-success w-100">
                             <i class="bi bi-cash-coin me-2"></i>
                             Receive Payment
                         </a>
+
                         <form th:action="@{/credit/clear/{id}(id=${customer.id})}"
-                              method="post">
+                              method="post"
+                              class="mt-2">  <!-- 👈 Added spacing here -->
+
                             <input type="hidden"
                                    th:name="${_csrf.parameterName}"
                                    th:value="${_csrf.token}">
+
                             <button type="submit"
-                                    class="btn btn-outline-success"
-                                    onclick="return confirm('Clear all dues?')"
-                                    title="Mark all dues as cleared">
-                                <i class="bi bi-check2-all me-1"></i>Clear All
+                                    class="btn btn-outline-success w-100"
+                                    onclick="return confirm('Clear all dues of ₹'
+                     + document.querySelector('.fs-3.fw-bold').textContent.trim()
+                     + ' for this customer?')">
+                                <i class="bi bi-check2-all me-2"></i>
+                                Clear All Dues
                             </button>
                         </form>
+
                     </div>
 
                 </div>

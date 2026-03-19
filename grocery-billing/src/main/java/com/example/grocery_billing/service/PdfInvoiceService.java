@@ -792,4 +792,50 @@ public class PdfInvoiceService {
 
         return result.toString().trim();
     }
+    // ✅ Add this STATIC version alongside your existing instance method
+// The receipt HTML calls this via T() expression
+    public static String numberToWordsStatic(long n) {
+        if (n == 0) return "Zero";
+        if (n < 0)  return "Minus " + numberToWordsStatic(-n);
+
+        final String[] ONES_S = {
+                "", "One", "Two", "Three", "Four", "Five", "Six", "Seven",
+                "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen",
+                "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+        };
+        final String[] TENS_S = {
+                "", "", "Twenty", "Thirty", "Forty", "Fifty",
+                "Sixty", "Seventy", "Eighty", "Ninety"
+        };
+
+        StringBuilder result = new StringBuilder();
+        if (n >= 10_000_000L) {
+            result.append(numberToWordsStatic(n / 10_000_000L))
+                    .append(" Crore ");
+            n %= 10_000_000L;
+        }
+        if (n >= 100_000L) {
+            result.append(numberToWordsStatic(n / 100_000L))
+                    .append(" Lakh ");
+            n %= 100_000L;
+        }
+        if (n >= 1_000L) {
+            result.append(numberToWordsStatic(n / 1_000L))
+                    .append(" Thousand ");
+            n %= 1_000L;
+        }
+        if (n >= 100L) {
+            result.append(ONES_S[(int)(n / 100)])
+                    .append(" Hundred ");
+            n %= 100L;
+        }
+        if (n >= 20L) {
+            result.append(TENS_S[(int)(n / 10)]).append(" ");
+            n %= 10L;
+        }
+        if (n > 0L) {
+            result.append(ONES_S[(int) n]).append(" ");
+        }
+        return result.toString().trim();
+    }
 }
