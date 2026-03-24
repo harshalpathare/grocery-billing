@@ -1,9 +1,11 @@
 package com.example.grocery_billing.controller;
 
 import com.example.grocery_billing.entity.Bill;
+import com.example.grocery_billing.service.ProfitReportService;
 import com.example.grocery_billing.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -284,5 +286,82 @@ public class ReportController {
 
     private String fmtCsv(BigDecimal val) {
         return val != null ? String.format("%.2f", val) : "0.00";
+    }
+    // ── Inject ProfitReportService ────────────────────────
+// Add to constructor / @RequiredArgsConstructor fields:
+    private final ProfitReportService profitReportService;
+
+    // ── PROFIT & LOSS PAGE ────────────────────────────────
+    @GetMapping("/profit")
+    public String profitReport(
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            Model model) {
+
+        LocalDate now = LocalDate.now();
+        if (month == null) month = now.getMonthValue();
+        if (year  == null) year  = now.getYear();
+
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end   = start.withDayOfMonth(
+                start.lengthOfMonth());
+
+        ProfitReportService.ProfitReport report =
+                profitReportService.generateReport(start, end);
+
+        model.addAttribute("report",    report);
+        model.addAttribute("month",     month);
+        model.addAttribute("year",      year);
+        model.addAttribute("monthName",
+                start.format(java.time.format.DateTimeFormatter
+                        .ofPattern("MMMM yyyy")));
+        model.addAttribute("activePage", "reports");
+        model.addAttribute("pageTitle",  "Profit & Loss");
+        return "report/profit";
+    }
+    @GetMapping("/profit/download")
+    public ResponseEntity<byte[]> downloadProfitExcel(
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year) {
+
+        try {
+            LocalDate now = LocalDate.now();
+            if (month == null) month = now.getMonthValue();
+            if (year  == null) year  = now.getYear();
+
+            LocalDate start = LocalDate.of(year, month, 1);
+            LocalDate end   = start.withDayOfMonth(
+                    start.lengthOfMonth());
+
+            String monthName = start.format(
+                    java.time.format.DateTimeFormatter
+                            .ofPattern("MMMM_yyyy"));
+
+            ProfitReportService.ProfitReport report =
+                    profitReportService.generateReport(
+                            start, end);
+
+            byte[] excel = profitReportService
+                    .generateProfitExcel(report, monthName);
+
+            String filename = "ProfitLoss_"
+                    + monthName + ".xlsx";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(
+                    "application/vnd.openxmlformats-"
+                            + "officedocument.spreadsheetml.sheet"));
+            headers.setContentDisposition(
+                    ContentDisposition.attachment()
+                            .filename(filename).build());
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excel);
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError().build();
+        }
     }
 }

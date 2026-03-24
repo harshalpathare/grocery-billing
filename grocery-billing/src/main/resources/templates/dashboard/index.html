@@ -25,6 +25,12 @@
         <a th:href="@{/products}" class="nav-link">
             <i class="bi bi-box-seam"></i> <span>Products</span>
         </a>
+        <a th:href="@{/suppliers}" class="nav-link">
+            <i class="bi bi-truck"></i><span>Suppliers</span>
+        </a>
+        <a th:href="@{/purchases}" class="nav-link">
+            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        </a>
         <a th:href="@{/customers}" class="nav-link">
             <i class="bi bi-people"></i> <span>Customers</span>
         </a>
@@ -143,10 +149,7 @@
                             <!-- Customers card -->
                             <h4 class="mb-0 fw-bold" th:text="${totalCustomers}">0</h4>
 
-                            <!-- Pending credit card -->
-                            <h4 class="mb-0 fw-bold text-danger">
-                                ₹<span th:text="${#numbers.formatDecimal(totalPending, 1, 2)}">0.00</span>
-                            </h4>
+
                             <small class="text-muted">registered</small>
                         </div>
                         <div class="stat-icon bg-info bg-opacity-10">
@@ -203,19 +206,65 @@
         </div>
 
         <!-- Recent Bills placeholder -->
-        <div class="row g-3">
-            <div class="col-12">
-                <div class="table-card">
-                    <h6 class="fw-bold mb-3">Recent Bills</h6>
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-receipt" style="font-size: 48px; opacity: 0.3;"></i>
-                        <p class="mt-2 mb-0">
-                            No bills yet.
-                            <a th:href="@{/bills/new}">Create your first bill →</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <!-- If NO bills -->
+        <div th:if="${#lists.isEmpty(recentBills)}"
+             class="text-center py-4 text-muted">
+            <i class="bi bi-receipt" style="font-size:48px;opacity:0.3;"></i>
+            <p class="mt-2 mb-0">
+                No bills yet.
+                <a th:href="@{/bills/new}">Create your first bill →</a>
+            </p>
+        </div>
+
+        <!-- If bills exist -->
+        <div th:if="${!#lists.isEmpty(recentBills)}"
+             class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Bill No</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="bill, stat : ${recentBills}">
+                    <td th:text="${stat.count}">1</td>
+
+                    <td th:text="${bill.billNo}">B001</td>
+
+                    <td th:text="${bill.customer != null ? bill.customer.name : 'Walk-in'}">
+                        Customer
+                    </td>
+
+                    <td th:text="${#temporals.format(bill.createdAt, 'dd MMM yyyy')}">
+                        Date
+                    </td>
+
+                    <td>
+                        ₹<span th:text="${#numbers.formatDecimal(bill.totalAmount,1,2)}">0</span>
+                    </td>
+
+                    <td>
+                <span th:if="${bill.paymentStatus.name() == 'PAID'}"
+                      class="badge bg-success">Paid</span>
+
+                        <span th:if="${bill.paymentStatus.name() == 'CREDIT'}"
+                              class="badge bg-danger">Credit</span>
+
+                        <span th:if="${bill.paymentStatus.name() == 'PARTIAL'}"
+                              class="badge bg-warning text-dark">Partial</span>
+                    </td>
+                </tr>
+                </tbody>
+
+            </table>
         </div>
 
     </div>

@@ -1,11 +1,11 @@
 package com.example.grocery_billing.service;
 
-
 import com.example.grocery_billing.entity.Customer;
 import com.example.grocery_billing.entity.Transaction;
 import com.example.grocery_billing.repository.CustomerRepository;
 import com.example.grocery_billing.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,22 +14,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * CUSTOMER SERVICE
- *
- * Handles all customer and credit/udhari business logic.
- *
- * Key concepts:
- *  - CREDIT transaction = customer took goods, owes us money
- *  - DEBIT  transaction = customer paid, reduces their balance
- *  - balance = totalCredit - totalPaid
- */
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Slf4j  // ✅ ADDED — fixes log.info() compile error
 public class CustomerService {
 
-    private final CustomerRepository customerRepository;
+    private final CustomerRepository    customerRepository;
     private final TransactionRepository transactionRepository;
 
     // ─────────────────────────────────────────────────────
@@ -44,7 +34,8 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public Customer getCustomerById(Long id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException(
+                        "Customer not found: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -52,39 +43,42 @@ public class CustomerService {
         if (name == null || name.trim().isEmpty()) {
             return getAllActiveCustomers();
         }
-        return customerRepository.findByNameContainingIgnoreCaseAndActiveTrue(name.trim());
+        return customerRepository
+                .findByNameContainingIgnoreCaseAndActiveTrue(
+                        name.trim());
     }
 
-    @Transactional(readOnly = true)
-    // ✅ NEW — refresh all balances before returning
+    // ✅ FIXED: removed @Transactional(readOnly=true)
+    // because we do save() inside to fix out-of-sync balances
+    @Transactional
     public List<Customer> getCustomersWithPendingBalance() {
-        // First fix any customers where balance is out of sync
         List<Customer> allCustomers = customerRepository
                 .findByActiveTrueOrderByNameAsc();
 
         for (Customer c : allCustomers) {
             BigDecimal credit = c.getTotalCredit() != null
                     ? c.getTotalCredit() : BigDecimal.ZERO;
-            BigDecimal paid   = c.getTotalPaid() != null
-                    ? c.getTotalPaid() : BigDecimal.ZERO;
+            BigDecimal paid   = c.getTotalPaid()   != null
+                    ? c.getTotalPaid()   : BigDecimal.ZERO;
             BigDecimal calculatedBalance = credit.subtract(paid);
 
-            // If balance is out of sync, fix it
             if (c.getBalance() == null ||
-                    c.getBalance().compareTo(calculatedBalance) != 0) {
+                    c.getBalance().compareTo(
+                            calculatedBalance) != 0) {
                 c.setBalance(calculatedBalance);
                 customerRepository.save(c);
             }
         }
 
-        // Now return customers with balance > 0
         return customerRepository
-                .findByBalanceGreaterThanAndActiveTrue(BigDecimal.ZERO);
+                .findByBalanceGreaterThanAndActiveTrue(
+                        BigDecimal.ZERO);
     }
 
     @Transactional(readOnly = true)
     public long countActiveCustomers() {
-        return customerRepository.findByActiveTrueOrderByNameAsc().size();
+        return customerRepository
+                .findByActiveTrueOrderByNameAsc().size();
     }
 
     @Transactional(readOnly = true)
@@ -95,10 +89,9 @@ public class CustomerService {
     // ─────────────────────────────────────────────────────
     // SAVE / UPDATE CUSTOMER
     // ─────────────────────────────────────────────────────
-
+    @Transactional
     public Customer saveCustomer(Customer customer) {
 
-        // Trim fields
         if (customer.getName() != null)
             customer.setName(customer.getName().trim());
         if (customer.getPhone() != null)
@@ -108,113 +101,100 @@ public class CustomerService {
         if (customer.getEmail() != null)
             customer.setEmail(customer.getEmail().trim());
 
-        // ── EDIT MODE ─────────────────────────────────────
+        // ── EDIT MODE ──────────────────────────────────
         if (customer.getId() != null) {
-            // Check phone is not taken by another ACTIVE customer
             boolean phoneExists = customerRepository
                     .existsByPhoneAndIdNotAndActiveTrue(
-                            customer.getPhone(), customer.getId());
+                            customer.getPhone(),
+                            customer.getId());
             if (phoneExists) {
                 throw new RuntimeException(
-                        "Phone number " + customer.getPhone()
+                        "Phone " + customer.getPhone()
                                 + " is already registered to another customer.");
             }
             return customerRepository.save(customer);
         }
 
-        // ── NEW CUSTOMER MODE ──────────────────────────────
-
-        // Step 1: Check if phone belongs to an ACTIVE customer
+        // ── NEW CUSTOMER ───────────────────────────────
         boolean activeExists = customerRepository
                 .existsByPhoneAndActiveTrue(customer.getPhone());
         if (activeExists) {
             throw new RuntimeException(
-                    "Phone number " + customer.getPhone()
+                    "Phone " + customer.getPhone()
                             + " is already registered.");
         }
 
-        // Step 2: Check if phone belongs to a DELETED (inactive) customer
-        // If yes — reactivate that record instead of creating a new one
+        // Reactivate soft-deleted customer if same phone
         Optional<Customer> deletedCustomer =
-                customerRepository.findByPhoneAndActiveFalse(customer.getPhone());
+                customerRepository.findByPhoneAndActiveFalse(
+                        customer.getPhone());
 
         if (deletedCustomer.isPresent()) {
-            // Reactivate the old record with updated details
-            com.example.grocery_billing.entity.Customer existing =
-                    deletedCustomer.get();
+            Customer existing = deletedCustomer.get();
             existing.setName(customer.getName());
             existing.setPhone(customer.getPhone());
             existing.setAddress(customer.getAddress());
             existing.setEmail(customer.getEmail());
             existing.setNotes(customer.getNotes());
             existing.setActive(true);
-            // Keep old credit/balance history intact
             return customerRepository.save(existing);
         }
 
-        // Step 3: Completely new customer — just save
         return customerRepository.save(customer);
-    }
-
-    // ── Custom exception for reactivation ─────────────────
-// We use this to signal "success but reactivated" to controller
-    public static class CustomerReactivatedException extends RuntimeException {
-        public CustomerReactivatedException(String message) {
-            super(message);
-        }
     }
 
     // ─────────────────────────────────────────────────────
     // SOFT DELETE
     // ─────────────────────────────────────────────────────
-
+    @Transactional
     public void deleteCustomer(Long id) {
         Customer customer = getCustomerById(id);
-        if (customer.getBalance().compareTo(BigDecimal.ZERO) > 0) {
+
+        BigDecimal balance = customer.getBalance() != null
+                ? customer.getBalance() : BigDecimal.ZERO;
+
+        if (balance.compareTo(BigDecimal.ZERO) > 0) {
             throw new RuntimeException(
-                    "Cannot delete customer with pending balance of ₹"
-                            + customer.getBalance() + ". Clear dues first.");
+                    "Cannot delete customer with pending balance ₹"
+                            + balance + ". Clear dues first.");
         }
         customer.setActive(false);
         customerRepository.save(customer);
     }
 
     // ─────────────────────────────────────────────────────
-    // CREDIT OPERATIONS (Udhari system)
+    // ADD CREDIT (called from BillService)
     // ─────────────────────────────────────────────────────
-
-    /**
-     * Record a credit transaction (customer takes goods on credit).
-     * Called automatically when a bill is saved with CREDIT payment status.
-     *
-     * @param customerId  which customer
-     * @param amount      how much credit taken
-     * @param billId      which bill (optional)
-     * @param description note about the transaction
-     */
-    public Transaction addCredit(Long customerId, BigDecimal amount,
-                                 Long billId, String description) {
+    @Transactional
+    public Transaction addCredit(Long customerId,
+                                 BigDecimal amount,
+                                 Long billId,
+                                 String description) {
         Customer customer = getCustomerById(customerId);
 
-        // Update customer totals
-        customer.setTotalCredit(customer.getTotalCredit().add(amount));
-        customer.updateBalance();  // recalculates balance = totalCredit - totalPaid
+        if (customer.getTotalCredit() == null)
+            customer.setTotalCredit(BigDecimal.ZERO);
+        if (customer.getTotalPaid() == null)
+            customer.setTotalPaid(BigDecimal.ZERO);
+
+        customer.setTotalCredit(
+                customer.getTotalCredit().add(amount));
+        customer.setBalance(
+                customer.getTotalCredit()
+                        .subtract(customer.getTotalPaid()));
         customerRepository.save(customer);
 
-        // Record the transaction
         Transaction transaction = Transaction.builder()
                 .customer(customer)
                 .type(Transaction.TransactionType.CREDIT)
                 .amount(amount)
                 .transactionDate(LocalDate.now())
-                .description(description != null ? description : "Credit purchase")
+                .description(description != null
+                        ? description : "Credit purchase")
                 .balanceAfter(customer.getBalance())
                 .build();
 
-        // Link to bill if provided
         if (billId != null) {
-            // We just set the bill id reference using a proxy
-            // (full Bill object not needed here)
             com.example.grocery_billing.entity.Bill bill =
                     new com.example.grocery_billing.entity.Bill();
             bill.setId(billId);
@@ -224,19 +204,16 @@ public class CustomerService {
         return transactionRepository.save(transaction);
     }
 
-    /**
-     * Record a payment (customer pays back money).
-     * Called from the "Receive Payment" form.
-     *
-     * @param customerId  which customer
-     * @param amount      how much they paid
-     * @param description e.g. "Cash payment", "UPI transfer"
-     */
+    // ─────────────────────────────────────────────────────
+    // RECORD PAYMENT (customer pays back)
+    // ─────────────────────────────────────────────────────
+    @Transactional
     public Transaction recordPayment(Long customerId,
                                      BigDecimal amount,
                                      String description) {
 
-        Customer customer = customerRepository.findById(customerId)
+        Customer customer = customerRepository
+                .findById(customerId)
                 .orElseThrow(() -> new RuntimeException(
                         "Customer not found: " + customerId));
 
@@ -245,31 +222,60 @@ public class CustomerService {
             customer.setTotalCredit(BigDecimal.ZERO);
         if (customer.getTotalPaid() == null)
             customer.setTotalPaid(BigDecimal.ZERO);
-        if (customer.getBalance() == null)
-            customer.setBalance(BigDecimal.ZERO);
 
-        // Recalculate balance freshly before checking
-        BigDecimal currentBalance = customer.getTotalCredit()
+        // ✅ ALWAYS recalculate balance fresh from DB
+        // Never trust the stored balance field
+        BigDecimal realBalance = customer.getTotalCredit()
                 .subtract(customer.getTotalPaid());
-        customer.setBalance(currentBalance);
+        customer.setBalance(realBalance);
 
-        // Cannot pay more than what is owed
-        if (amount.compareTo(currentBalance) > 0) {
+        log.info("recordPayment — {} | realBalance: {} | paying: {}",
+                customer.getName(), realBalance, amount);
+
+        // ✅ GUARD 1: No credit exists at all
+        if (customer.getTotalCredit()
+                .compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException(
-                    "Payment ₹" + amount
-                            + " exceeds pending balance ₹" + currentBalance
-                            + ". Please enter correct amount.");
+                    "Cannot record payment — "
+                            + customer.getName()
+                            + " has no credit history. "
+                            + "Create a credit bill first.");
         }
 
-        // Add to total paid
-        customer.setTotalPaid(customer.getTotalPaid().add(amount));
+        // ✅ GUARD 2: Balance is zero or negative
+        if (realBalance.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException(
+                    customer.getName()
+                            + " has no pending balance. "
+                            + "Current balance: ₹" + realBalance);
+        }
 
-        // Recalculate balance
+        // ✅ GUARD 3: Amount must be positive
+        if (amount == null
+                || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException(
+                    "Payment amount must be greater than zero.");
+        }
+
+        // ✅ GUARD 4: Cannot overpay
+        if (amount.compareTo(realBalance) > 0) {
+            throw new RuntimeException(
+                    "Payment ₹" + amount
+                            + " exceeds balance ₹" + realBalance
+                            + ". Maximum: ₹" + realBalance);
+        }
+
+        // All checks passed — record payment
+        customer.setTotalPaid(
+                customer.getTotalPaid().add(amount));
         customer.setBalance(
                 customer.getTotalCredit()
                         .subtract(customer.getTotalPaid()));
 
-        customerRepository.save(customer);
+        customerRepository.saveAndFlush(customer);
+
+        log.info("Payment OK — new balance: {}",
+                customer.getBalance());
 
         Transaction txn = Transaction.builder()
                 .customer(customer)
@@ -277,19 +283,32 @@ public class CustomerService {
                 .amount(amount)
                 .transactionDate(LocalDate.now())
                 .description(description != null
-                        ? description : "Payment received")
+                        && !description.isBlank()
+                        ? description
+                        : "Payment received")
                 .balanceAfter(customer.getBalance())
                 .build();
 
-        return transactionRepository.save(txn);
+        return transactionRepository.saveAndFlush(txn);
     }
+
     // ─────────────────────────────────────────────────────
     // TRANSACTION HISTORY
     // ─────────────────────────────────────────────────────
-
     @Transactional(readOnly = true)
     public List<Transaction> getTransactionHistory(Long customerId) {
         return transactionRepository
-                .findByCustomerIdOrderByTransactionDateDescCreatedAtDesc(customerId);
+                .findByCustomerIdOrderByTransactionDateDescCreatedAtDesc(
+                        customerId);
+    }
+
+    // ─────────────────────────────────────────────────────
+    // INNER CLASS — kept for backward compatibility
+    // ─────────────────────────────────────────────────────
+    public static class CustomerReactivatedException
+            extends RuntimeException {
+        public CustomerReactivatedException(String message) {
+            super(message);
+        }
     }
 }

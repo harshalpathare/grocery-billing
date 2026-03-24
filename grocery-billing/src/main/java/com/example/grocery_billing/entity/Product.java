@@ -46,6 +46,13 @@ public class Product {
             columnDefinition = "VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String nameMr;
 
+    // Add this field to Product entity
+    @Column(name = "cost_price", precision = 10, scale = 2)
+    private BigDecimal costPrice;
+
+    // ✅ ADD THIS
+    @Column(name = "hsn_code", length = 20)
+    private String hsnCode;
     // ── Price ────────────────────────────────────────────
     // BigDecimal is used for money — never use double/float for prices!
     // precision=10 means max 10 digits total

@@ -4,17 +4,18 @@ import com.example.grocery_billing.entity.*;
 import com.example.grocery_billing.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class BillService {
 
@@ -156,10 +157,16 @@ public class BillService {
         if (customerId != null) {
             updateCustomerCredit(savedBill, customerId, paidAmount, creditAmount);
         }
-
+        bill.setCreatedAt(LocalDateTime.now());
         return savedBill;
     }
-
+    public List<Bill> getRecentBills(int limit) {
+        return billRepository
+                .findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
+                .limit(limit)
+                .toList();
+    }
     // ─────────────────────────────────────────────────────
     // UPDATE CUSTOMER CREDIT — extracted as separate method
     // This keeps createBill() clean and avoids the txn bug

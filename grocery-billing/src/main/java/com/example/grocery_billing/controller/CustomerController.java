@@ -37,34 +37,34 @@ public class CustomerController {
     // LIST ALL CUSTOMERS
     // ─────────────────────────────────────────────────────
     @GetMapping
-    public String listCustomers(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String filter,
-            Model model) {
+    public String listCustomers(Model model) {
+        List<Customer> customers =
+                customerService.getAllActiveCustomers();
 
-        List<Customer> customers;
+        // ✅ Pre-calculate IDs with dues — no T() needed in HTML
+        java.util.Set<Long> customersWithDues = customers.stream()
+                .filter(c -> c.getBalance() != null
+                        && c.getBalance().compareTo(
+                        java.math.BigDecimal.ZERO) > 0)
+                .map(Customer::getId)
+                .collect(java.util.stream.Collectors.toSet());
 
-        if ("dues".equals(filter)) {
-            customers = customerService.getCustomersWithPendingBalance();
-        } else if (search != null && !search.trim().isEmpty()) {
-            customers = customerService.searchCustomers(search);
-        } else {
-            customers = customerService.getAllActiveCustomers();
-        }
+        // Stats for top cards
+        long totalWithDues = customersWithDues.size();
+        java.math.BigDecimal totalPending = customers.stream()
+                .filter(c -> c.getBalance() != null
+                        && c.getBalance().compareTo(
+                        java.math.BigDecimal.ZERO) > 0)
+                .map(Customer::getBalance)
+                .reduce(java.math.BigDecimal.ZERO,
+                        java.math.BigDecimal::add);
 
-        // ✅ Calculate the count HERE in Java, not in Thymeleaf
-        long customersWithDuesCount = customerService
-                .getCustomersWithPendingBalance().size();
-
-        model.addAttribute("customers", customers);
-        model.addAttribute("search", search);
-        model.addAttribute("filter", filter);
-        model.addAttribute("totalCustomers",        customerService.countActiveCustomers());
-        model.addAttribute("totalPendingBalance",   customerService.getTotalPendingBalance());
-        model.addAttribute("customersWithDuesCount", customersWithDuesCount); // ✅ pre-computed
-        model.addAttribute("activePage", "customers");
-        model.addAttribute("pageTitle", "Customers");
-
+        model.addAttribute("customers",         customers);
+        model.addAttribute("customersWithDues", customersWithDues);
+        model.addAttribute("totalWithDues",     totalWithDues);
+        model.addAttribute("totalPending",      totalPending);
+        model.addAttribute("activePage",        "customers");
+        model.addAttribute("pageTitle",         "All Customers");
         return "customer/list";
     }
     // ─────────────────────────────────────────────────────

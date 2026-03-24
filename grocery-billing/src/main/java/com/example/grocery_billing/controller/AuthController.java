@@ -62,7 +62,7 @@ public class AuthController {
     // ─────────────────────────────────────────────────────
     // SHOP SETTINGS PAGE
     // ─────────────────────────────────────────────────────
-    @GetMapping("/settings")
+    /*@GetMapping("/settings")
     public String settingsPage(Model model, Authentication auth) {
         List<User> users = userRepository.findAll();
 
@@ -74,7 +74,7 @@ public class AuthController {
         model.addAttribute("pageTitle",   "Settings");
 
         return "auth/settings";
-    }
+    }*/
 
     // ─────────────────────────────────────────────────────
     // CREATE NEW USER

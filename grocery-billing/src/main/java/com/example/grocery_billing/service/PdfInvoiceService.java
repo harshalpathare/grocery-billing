@@ -1,5 +1,6 @@
 package com.example.grocery_billing.service;
-
+// ── Add this import at top ──────────────────────────
+import com.example.grocery_billing.service.QrCodeService;
 import com.example.grocery_billing.config.ShopConfig;
 import com.example.grocery_billing.entity.Bill;
 import com.example.grocery_billing.entity.BillItem;
@@ -32,7 +33,8 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class PdfInvoiceService {
-
+    // ── Add field ───────────────────────────────────────
+    private final QrCodeService qrCodeService;
     private final ShopConfig shopConfig;
 
     // ── Colors ────────────────────────────────────────────
@@ -65,6 +67,80 @@ public class PdfInvoiceService {
     private static final DateTimeFormatter DATE_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+    // ── Add QR section in generateInvoicePdf() ──────────
+// Call this BEFORE addTermsAndSignature(doc)
+    private void addUpiQrSection(Document doc, Bill bill) throws Exception {
+        if (!qrCodeService.isUpiConfigured()
+                || bill.getTotalAmount() == null
+                || bill.getTotalAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        String qrBase64 = qrCodeService.generateUpiQrForView(
+                bill.getTotalAmount(), bill.getBillNo());
+
+        if (qrBase64 == null) return;
+
+        PdfPTable t = new PdfPTable(2);
+        t.setWidthPercentage(100);
+        t.setWidths(new float[]{30f, 70f});
+        t.setSpacingBefore(6);
+
+        // QR image cell
+        PdfPCell qrCell = new PdfPCell();
+        qrCell.setBorder(Rectangle.BOX);
+        qrCell.setBorderColor(C_BORDER);
+        qrCell.setBorderWidth(0.8f);
+        qrCell.setPadding(8);
+        qrCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        // Convert base64 back to image
+        byte[] qrBytes = java.util.Base64.getDecoder().decode(qrBase64);
+        com.lowagie.text.Image qrImg =
+                com.lowagie.text.Image.getInstance(qrBytes);
+        qrImg.scaleToFit(80, 80);
+        qrCell.addElement(qrImg);
+
+        Font qrLabelFont = regular(8, C_MUTED);
+        Paragraph qrLabel = new Paragraph("Scan to Pay", qrLabelFont);
+        qrLabel.setAlignment(Element.ALIGN_CENTER);
+        qrCell.addElement(qrLabel);
+
+        Font upiFont = bold(8, C_ACCENT);
+        Paragraph upiLabel = new Paragraph(shopConfig.getUpiId(), upiFont);
+        upiLabel.setAlignment(Element.ALIGN_CENTER);
+        qrCell.addElement(upiLabel);
+
+        // Instructions cell
+        PdfPCell instrCell = new PdfPCell();
+        instrCell.setBorder(Rectangle.BOX);
+        instrCell.setBorderColor(C_BORDER);
+        instrCell.setBorderWidth(0.8f);
+        instrCell.setPadding(10);
+        instrCell.setBackgroundColor(new Color(240, 249, 255));
+
+        instrCell.addElement(new Paragraph("Pay via UPI", bold(10, C_ACCENT)));
+        instrCell.addElement(spacer(4));
+
+        Font stepFont = regular(8, C_BLACK);
+        instrCell.addElement(new Paragraph(
+                "1. Open GPay / PhonePe / Paytm", stepFont));
+        instrCell.addElement(new Paragraph(
+                "2. Tap 'Scan QR Code'", stepFont));
+        instrCell.addElement(new Paragraph(
+                "3. Scan the QR — amount pre-filled", stepFont));
+        instrCell.addElement(new Paragraph(
+                "4. Confirm and pay", stepFont));
+        instrCell.addElement(spacer(4));
+
+        Font upiIdFont = bold(9, C_GREEN);
+        instrCell.addElement(new Paragraph(
+                "UPI ID: " + shopConfig.getUpiId(), upiIdFont));
+
+        t.addCell(qrCell);
+        t.addCell(instrCell);
+        doc.add(t);
+    }
     // ─────────────────────────────────────────────────────
     //  MAIN ENTRY POINT
     // ─────────────────────────────────────────────────────
@@ -81,6 +157,9 @@ public class PdfInvoiceService {
         addItemsTable(doc, bill);
         addTotalsAndGst(doc, bill);
         addAmountInWords(doc, bill);
+        if ("UPI".equals(bill.getPaymentMethod())) {
+            //addUpiQrSection(doc, bill);
+        }
         addTermsAndSignature(doc);
 
         doc.close();

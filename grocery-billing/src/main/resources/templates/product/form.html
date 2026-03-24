@@ -19,6 +19,12 @@
     <nav class="sidebar-nav">
         <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
         <a th:href="@{/products}" class="nav-link active"><i class="bi bi-box-seam"></i> <span>Products</span></a>
+        <a th:href="@{/suppliers}" class="nav-link">
+            <i class="bi bi-truck"></i><span>Suppliers</span>
+        </a>
+        <a th:href="@{/purchases}" class="nav-link">
+            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        </a>
         <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i> <span>Customers</span></a>
         <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i> <span>New Bill</span></a>
         <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i> <span>All Bills</span></a>
@@ -139,7 +145,26 @@
 
                             </div>
                         </div>
-
+                        <!-- Add after the product name fields -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                HSN Code
+                                <span class="badge bg-info ms-1" style="font-size:10px">
+            For GST
+        </span>
+                            </label>
+                            <input type="text"
+                                   th:field="*{hsnCode}"
+                                   class="form-control"
+                                   placeholder="e.g. 1006, 1507, 0402"
+                                   maxlength="20">
+                            <div class="form-text">
+                                Required for GSTR-1 filing.
+                                <a href="https://www.gstn.org.in" target="_blank">
+                                    Find HSN code →
+                                </a>
+                            </div>
+                        </div>
                         <hr class="my-4">
 
                         <!-- ── SECTION: PRICING & GST ── -->

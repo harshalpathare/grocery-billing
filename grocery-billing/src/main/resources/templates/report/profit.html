@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profit & Loss | Grocery Billing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .profit-card {
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .profit-positive { background:#f0fdf4; border-color:#bbf7d0; }
+        .profit-negative { background:#fef2f2; border-color:#fecaca; }
+        .profit-neutral  { background:#f8fafc; border-color:#e2e8f0; }
+        .progress-bar-profit { background: #22c55e; }
+        .progress-bar-cost   { background: #ef4444; }
+        .table-profit th {
+            background: #1e293b;
+            color: white;
+            font-size: 12px;
+            padding: 10px 12px;
+        }
+        .table-profit td { padding: 10px 12px; font-size: 13px; }
+        .margin-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .no-cost-warning {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <i class="bi bi-shop"></i><span>Grocery Bill</span>
+    </div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/}" class="nav-link">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        </a>
+        <a th:href="@{/products}" class="nav-link">
+            <i class="bi bi-box-seam"></i><span>Products</span>
+        </a>
+        <a th:href="@{/suppliers}" class="nav-link">
+            <i class="bi bi-truck"></i><span>Suppliers</span>
+        </a>
+        <a th:href="@{/purchases}" class="nav-link">
+            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        </a>
+        <a th:href="@{/customers}" class="nav-link">
+            <i class="bi bi-people"></i><span>Customers</span>
+        </a>
+        <a th:href="@{/bills/new}" class="nav-link">
+            <i class="bi bi-receipt"></i><span>New Bill</span>
+        </a>
+        <a th:href="@{/bills}" class="nav-link">
+            <i class="bi bi-journal-text"></i><span>All Bills</span>
+        </a>
+        <a th:href="@{/credit}" class="nav-link">
+            <i class="bi bi-credit-card"></i>
+            <span>Credit / Udhari</span>
+        </a>
+        <a th:href="@{/reports}" class="nav-link active">
+            <i class="bi bi-bar-chart"></i><span>Reports</span>
+        </a>
+    </nav>
+    <div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link">
+            <i class="bi bi-gear"></i><span>Settings</span>
+        </a>
+    </div>
+</div>
+
+<div class="main-content" id="mainContent">
+    <nav class="top-navbar">
+        <button class="btn btn-sm btn-outline-secondary"
+                id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <h5 class="mb-0 ms-3">
+            Profit &amp; Loss Report
+        </h5>
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <a th:href="@{/reports}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Reports
+            </a>
+            <form th:action="@{/logout}" method="post"
+                  class="mb-0 d-inline">
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+                <button type="submit"
+                        class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="page-content">
+
+        <!-- Period Selector -->
+        <div class="table-card mb-4">
+            <form th:action="@{/reports/profit}"
+                  method="get"
+                  class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">
+                        Month
+                    </label>
+                    <select name="month" class="form-select">
+                        <option th:each="m : ${#numbers.sequence(1,12)}"
+                                th:value="${m}"
+                                th:text="${#temporals.format(
+                                    #temporals.create(2024,m,1),
+                                    'MMMM')}"
+                                th:selected="${m == month}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">
+                        Year
+                    </label>
+                    <select name="year" class="form-select">
+                        <option th:each="y : ${#numbers.sequence(2024,2030)}"
+                                th:value="${y}"
+                                th:text="${y}"
+                                th:selected="${y == year}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>
+                        View Report
+                    </button>
+                </div>
+                <!-- ✅ ADD THIS -->
+                <div class="col-md-3">
+                    <a th:href="@{/reports/profit/download(
+                   month=${month},year=${year})}"
+                       class="btn btn-success w-100">
+                        <i class="bi bi-file-earmark-excel me-1"></i>
+                        Download Excel
+                    </a>
+                </div>
+
+
+                <div class="col-md-3 text-end">
+                    <h6 class="fw-bold text-primary mb-0"
+                        th:text="${monthName}">Month</h6>
+                    <div class="small text-muted"
+                         th:text="${report.totalBills}
+                             + ' bills analysed'">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- No cost price warning -->
+        <div th:if="${report.totalCost.compareTo(
+                     T(java.math.BigDecimal).ZERO) == 0
+                     and report.totalBills > 0}"
+             class="no-cost-warning mb-4">
+            <i class="bi bi-exclamation-triangle
+                      text-warning me-2"></i>
+            <strong>Cost prices not set!</strong>
+            Profit cannot be calculated accurately.
+            Go to <a th:href="@{/purchases/new}">
+            Purchases</a> to record purchase costs,
+            or set cost price directly on each
+            <a th:href="@{/products}">Product</a>.
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+
+            <!-- Revenue -->
+            <div class="col-md-3">
+                <div class="profit-card profit-neutral">
+                    <div class="small text-muted fw-semibold mb-1">
+                        <i class="bi bi-graph-up-arrow
+                                  text-primary me-1"></i>
+                        Total Revenue
+                    </div>
+                    <div class="fs-3 fw-bold text-primary">
+                        ₹<span th:text="${#numbers.formatDecimal(
+                            report.totalRevenue, 1, 2)}">
+                            0.00
+                        </span>
+                    </div>
+                    <div class="small text-muted mt-1">
+                        From <span th:text="${report.totalBills}">0</span>
+                        bills
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost -->
+            <div class="col-md-3">
+                <div class="profit-card profit-negative">
+                    <div class="small text-muted fw-semibold mb-1">
+                        <i class="bi bi-bag text-danger me-1"></i>
+                        Total Cost
+                    </div>
+                    <div class="fs-3 fw-bold text-danger">
+                        ₹<span th:text="${#numbers.formatDecimal(
+                            report.totalCost, 1, 2)}">0.00</span>
+                    </div>
+                    <div class="small text-muted mt-1">
+                        Cost of goods sold
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profit -->
+            <div class="col-md-3"
+                 th:classappend="${report.totalProfit.compareTo(
+                     T(java.math.BigDecimal).ZERO) >= 0}
+                     ? '' : ''">
+                <div th:class="${report.totalProfit.compareTo(
+                                T(java.math.BigDecimal).ZERO) >= 0}
+                                ? 'profit-card profit-positive'
+                                : 'profit-card profit-negative'">
+                    <div class="small fw-semibold mb-1">
+                        <i class="bi bi-currency-rupee me-1"
+                           th:classappend="${report.totalProfit
+                               .compareTo(T(java.math.BigDecimal).ZERO) >= 0}
+                               ? 'text-success' : 'text-danger'">
+                        </i>
+                        <span th:text="${report.totalProfit
+                            .compareTo(T(java.math.BigDecimal).ZERO) >= 0}
+                            ? 'Net Profit' : 'Net Loss'">
+                        </span>
+                    </div>
+                    <div class="fs-3 fw-bold"
+                         th:classappend="${report.totalProfit
+                             .compareTo(T(java.math.BigDecimal).ZERO) >= 0}
+                             ? 'text-success' : 'text-danger'">
+                        ₹<span th:text="${#numbers.formatDecimal(
+                            report.totalProfit, 1, 2)}">
+                            0.00
+                        </span>
+                    </div>
+                    <div class="small text-muted mt-1">
+                        After cost of goods
+                    </div>
+                </div>
+            </div>
+
+            <!-- Margin -->
+            <div class="col-md-3">
+                <div class="profit-card profit-neutral">
+                    <div class="small text-muted fw-semibold mb-1">
+                        <i class="bi bi-percent
+                                  text-warning me-1"></i>
+                        Profit Margin
+                    </div>
+                    <div class="fs-3 fw-bold text-warning">
+                        <span th:text="${#numbers.formatDecimal(
+                            report.profitMargin, 1, 1)}">
+                            0.0
+                        </span>%
+                    </div>
+                    <div class="small text-muted mt-1">
+                        Of total revenue
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Revenue vs Cost Bar -->
+        <div class="table-card mb-4"
+             th:if="${report.totalRevenue.compareTo(
+                      T(java.math.BigDecimal).ZERO) > 0}">
+            <h6 class="fw-bold mb-3">Revenue vs Cost</h6>
+            <div class="mb-2">
+                <div class="d-flex justify-content-between
+                            small mb-1">
+                    <span>Revenue
+                        ₹<span th:text="${#numbers.formatDecimal(
+                            report.totalRevenue,1,2)}"></span>
+                    </span>
+                    <span>100%</span>
+                </div>
+                <div class="progress" style="height:20px">
+                    <div class="progress-bar progress-bar-profit"
+                         style="width:100%">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="d-flex justify-content-between
+                            small mb-1">
+                    <span class="text-danger">Cost
+                        ₹<span th:text="${#numbers.formatDecimal(
+                            report.totalCost,1,2)}"></span>
+                    </span>
+                    <span th:if="${report.totalRevenue
+                        .compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                          th:text="${#numbers.formatDecimal(
+                              report.totalCost
+                              .multiply(T(java.math.BigDecimal).valueOf(100))
+                              .divide(report.totalRevenue, 1,
+                              T(java.math.RoundingMode).HALF_UP), 1, 1)}
+                              + '%'">
+                    </span>
+                </div>
+                <div class="progress" style="height:20px"
+                     th:if="${report.totalRevenue
+                         .compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                    <div class="progress-bar progress-bar-cost"
+                         th:style="'width:' +
+                             ${report.totalCost
+                             .multiply(T(java.math.BigDecimal).valueOf(100))
+                             .divide(report.totalRevenue, 1,
+                             T(java.math.RoundingMode).HALF_UP)} + '%'">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product wise Profit Table -->
+        <div class="table-card mb-4"
+             th:if="${!report.productRows.isEmpty()}">
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-box-seam me-2
+                          text-primary"></i>
+                Product-wise Profit
+                <span class="badge bg-secondary ms-1"
+                      th:text="${report.totalProducts}">
+                </span>
+            </h6>
+            <div class="table-responsive">
+                <table class="table table-profit
+                              table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th class="text-end">Qty Sold</th>
+                        <th class="text-end">
+                            Sell Price
+                        </th>
+                        <th class="text-end">
+                            Cost Price
+                        </th>
+                        <th class="text-end">Revenue</th>
+                        <th class="text-end">Cost</th>
+                        <th class="text-end">Profit</th>
+                        <th class="text-center">Margin</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row, st
+                                     : ${report.productRows}">
+                        <td class="text-muted small"
+                            th:text="${st.index+1}">
+                        </td>
+                        <td class="fw-semibold"
+                            th:text="${row.productName}">
+                        </td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(
+                                    row.qtySold, 1, 2)}">
+                        </td>
+                        <td class="text-end">
+                            ₹<span th:text="${#numbers.formatDecimal(
+                                    row.sellPrice, 1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-end">
+                                <span th:if="${row.costPrice
+                                    .compareTo(T(java.math.BigDecimal)
+                                    .ZERO) > 0}">
+                                    ₹<span th:text="${#numbers
+                                        .formatDecimal(
+                                        row.costPrice, 1, 2)}">
+                                    </span>
+                                </span>
+                            <span th:unless="${row.costPrice
+                                    .compareTo(T(java.math.BigDecimal)
+                                    .ZERO) > 0}"
+                                  class="text-warning small">
+                                    Not set
+                                </span>
+                        </td>
+                        <td class="text-end">
+                            ₹<span th:text="${#numbers.formatDecimal(
+                                    row.totalRevenue, 1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-end text-danger">
+                            ₹<span th:text="${#numbers.formatDecimal(
+                                    row.totalCost, 1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-end fw-bold"
+                            th:classappend="${row.profitClass}">
+                            ₹<span th:text="${#numbers.formatDecimal(
+                                    row.totalProfit, 1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-center">
+                                <span class="margin-badge"
+                                      th:classappend="${row.margin
+                                          .compareTo(T(java.math.BigDecimal)
+                                          .ZERO) > 0}
+                                          ? 'bg-success bg-opacity-10
+                                             text-success'
+                                          : 'bg-danger bg-opacity-10
+                                             text-danger'"
+                                      th:text="${#numbers.formatDecimal(
+                                          row.margin, 1, 1)} + '%'">
+                                </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot class="table-light fw-bold">
+                    <tr>
+                        <td colspan="5"
+                            class="text-end">TOTAL</td>
+                        <td class="text-end">
+                            ₹<span th:text="${#numbers
+                                    .formatDecimal(
+                                    report.totalRevenue,
+                                    1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-end text-danger">
+                            ₹<span th:text="${#numbers
+                                    .formatDecimal(
+                                    report.totalCost,
+                                    1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-end text-success">
+                            ₹<span th:text="${#numbers
+                                    .formatDecimal(
+                                    report.totalProfit,
+                                    1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-center">
+                                <span class="margin-badge
+                                      bg-success bg-opacity-10
+                                      text-success"
+                                      th:text="${#numbers.formatDecimal(
+                                          report.profitMargin,
+                                          1, 1)} + '%'">
+                                </span>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Daily Breakdown -->
+        <div class="table-card"
+             th:if="${!report.dailyRows.isEmpty()}">
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-calendar3 me-2
+                          text-success"></i>
+                Daily Breakdown
+            </h6>
+            <div class="table-responsive">
+                <table class="table table-profit
+                              table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th class="text-center">Bills</th>
+                        <th class="text-end">Revenue</th>
+                        <th class="text-end">Est. Cost</th>
+                        <th class="text-end">Est. Profit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${report.dailyRows}">
+                        <td th:text="${#temporals.format(
+                                d.date, 'dd MMM yyyy')}">
+                        </td>
+                        <td class="text-center">
+                                <span class="badge bg-secondary"
+                                      th:text="${d.bills}">
+                                </span>
+                        </td>
+                        <td class="text-end">
+                            ₹<span th:text="${#numbers
+                                    .formatDecimal(
+                                    d.revenue, 1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-end text-danger">
+                            ₹<span th:text="${#numbers
+                                    .formatDecimal(
+                                    d.cost, 1, 2)}">
+                                </span>
+                        </td>
+                        <td class="text-end fw-bold"
+                            th:classappend="${d.profit
+                                    .compareTo(T(java.math.BigDecimal)
+                                    .ZERO) >= 0}
+                                    ? 'text-success'
+                                    : 'text-danger'">
+                            ₹<span th:text="${#numbers
+                                    .formatDecimal(
+                                    d.profit, 1, 2)}">
+                                </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${report.totalBills == 0}"
+             class="table-card text-center py-5">
+            <i class="bi bi-bar-chart"
+               style="font-size:56px;opacity:0.2"></i>
+            <p class="mt-3 fw-semibold text-muted">
+                No bills found for
+                <span th:text="${monthName}"></span>
+            </p>
+            <a th:href="@{/bills/new}"
+               class="btn btn-primary mt-2">
+                <i class="bi bi-receipt me-1"></i>
+                Create a Bill
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('sidebarToggle')
+            .addEventListener('click', function () {
+        document.getElementById('sidebar')
+                .classList.toggle('collapsed');
+        document.getElementById('mainContent')
+                .classList.toggle('expanded');
+    });
+</script>
+</body>
+</html>

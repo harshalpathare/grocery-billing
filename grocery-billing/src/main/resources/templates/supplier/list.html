@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Suppliers | Grocery Billing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+        <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
+        <a th:href="@{/suppliers}" class="nav-link active"><i class="bi bi-truck"></i><span>Suppliers</span></a>
+        <a th:href="@{/purchases}" class="nav-link"><i class="bi bi-cart-check"></i><span>Purchases</span></a>
+        <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
+        <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i><span>New Bill</span></a>
+        <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
+        <a th:href="@{/credit}" class="nav-link"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
+        <a th:href="@{/reports}" class="nav-link"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link"><i class="bi bi-gear"></i><span>Settings</span></a>
+    </div>
+</div>
+
+<div class="main-content" id="mainContent">
+    <nav class="top-navbar">
+        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle"><i class="bi bi-list"></i></button>
+        <h5 class="mb-0 ms-3">Suppliers</h5>
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <a th:href="@{/purchases/new}" class="btn btn-success btn-sm">
+                <i class="bi bi-cart-plus me-1"></i>New Purchase
+            </a>
+            <a th:href="@{/suppliers/new}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>Add Supplier
+            </a>
+            <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right"></i></button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="page-content">
+
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-primary bg-opacity-10">
+                            <i class="bi bi-truck text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Total Suppliers</div>
+                            <div class="fw-bold fs-4" th:text="${suppliers.size()}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon bg-danger bg-opacity-10">
+                            <i class="bi bi-cash text-danger"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Total Payable</div>
+                            <div class="fw-bold fs-4 text-danger">
+                                ₹<span th:text="${#numbers.formatDecimal(totalPayable,1,2)}">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supplier Table -->
+        <div class="table-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">
+                    All Suppliers
+                    <span class="badge bg-secondary ms-2" th:text="${suppliers.size()}">0</span>
+                </h6>
+                <a th:href="@{/purchases}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-cart-check me-1"></i>View All Purchases
+                </a>
+            </div>
+
+            <div th:if="${suppliers.isEmpty()}" class="text-center py-5 text-muted">
+                <i class="bi bi-truck" style="font-size:56px;opacity:0.2"></i>
+                <p class="mt-3 fw-semibold mb-1">No suppliers yet</p>
+                <a th:href="@{/suppliers/new}" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-circle me-1"></i>Add First Supplier
+                </a>
+            </div>
+
+            <div th:unless="${suppliers.isEmpty()}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>GSTIN</th>
+                        <th class="text-end">Total Payable</th>
+                        <th class="text-end">Total Paid</th>
+                        <th class="text-end">Balance</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s, st : ${suppliers}">
+                        <td class="text-muted small" th:text="${st.index+1}">1</td>
+                        <td>
+                            <div class="fw-semibold" th:text="${s.name}">Name</div>
+                            <div class="small text-muted" th:text="${s.contactPerson}"></div>
+                        </td>
+                        <td th:text="${s.phone}">Phone</td>
+                        <td>
+                                <span th:if="${s.gstin}" th:text="${s.gstin}"
+                                      class="badge bg-light text-dark border"></span>
+                            <span th:unless="${s.gstin}" class="text-muted small">—</span>
+                        </td>
+                        <td class="text-end">₹<span th:text="${#numbers.formatDecimal(s.totalPayable,1,2)}">0</span></td>
+                        <td class="text-end text-success">₹<span th:text="${#numbers.formatDecimal(s.totalPaid,1,2)}">0</span></td>
+                        <td class="text-end fw-bold"
+                            th:classappend="${s.balance != null and s.balance.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'text-danger' : 'text-success'">
+                            ₹<span th:text="${#numbers.formatDecimal(s.balance,1,2)}">0</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex gap-1 justify-content-center">
+                                <a th:href="@{/suppliers/{id}/edit(id=${s.id})}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <!-- Pay button -->
+                                <button type="button" class="btn btn-sm btn-success"
+                                        data-bs-toggle="modal"
+                                        th:data-bs-target="'#payModal'+${s.id}"
+                                        th:if="${s.balance != null and s.balance.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <i class="bi bi-cash-coin"></i>
+                                </button>
+                                <form th:action="@{/suppliers/{id}/delete(id=${s.id})}"
+                                      method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete supplier?')">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pay Modals -->
+<div th:each="s : ${suppliers}">
+    <div class="modal fade" th:id="'payModal'+${s.id}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h6 class="modal-title">Pay <span th:text="${s.name}"></span></h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-3">
+                        Balance: <strong class="text-danger">₹<span th:text="${#numbers.formatDecimal(s.balance,1,2)}">0</span></strong>
+                    </p>
+                    <form th:action="@{/suppliers/{id}/pay(id=${s.id})}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <div class="mb-3">
+                            <input type="number" name="amount" class="form-control"
+                                   placeholder="Amount paid" step="0.01" min="0.01"
+                                   th:max="${s.balance}" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle me-1"></i>Record Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('sidebarToggle').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    });
+</script>
+</body>
+</html>

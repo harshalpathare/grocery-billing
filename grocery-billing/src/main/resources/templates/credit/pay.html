@@ -2,28 +2,52 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Receive Payment</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receive Payment | Grocery Billing</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .quick-btn { border-radius:20px; font-size:12px; padding:4px 10px; }
+        #qrImage   { transition: opacity 0.3s ease; }
+    </style>
 </head>
-
 <body>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
-
+    <div class="sidebar-brand">
+        <i class="bi bi-shop"></i><span>Grocery Bill</span>
+    </div>
     <nav class="sidebar-nav">
-        <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
-        <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
-        <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
-        <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i><span>New Bill</span></a>
-        <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
-        <a th:href="@{/credit}" class="nav-link active"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
-        <a th:href="@{/reports}" class="nav-link"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
+        <a th:href="@{/}" class="nav-link">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        </a>
+        <a th:href="@{/products}" class="nav-link">
+            <i class="bi bi-box-seam"></i><span>Products</span>
+        </a>
+        <a th:href="@{/suppliers}" class="nav-link">
+            <i class="bi bi-truck"></i><span>Suppliers</span>
+        </a>
+        <a th:href="@{/purchases}" class="nav-link">
+            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        </a>
+        <a th:href="@{/customers}" class="nav-link">
+            <i class="bi bi-people"></i><span>Customers</span>
+        </a>
+        <a th:href="@{/bills/new}" class="nav-link">
+            <i class="bi bi-receipt"></i><span>New Bill</span>
+        </a>
+        <a th:href="@{/bills}" class="nav-link">
+            <i class="bi bi-journal-text"></i><span>All Bills</span>
+        </a>
+        <a th:href="@{/credit}" class="nav-link active">
+            <i class="bi bi-credit-card"></i>
+            <span>Credit / Udhari</span>
+        </a>
+        <a th:href="@{/reports}" class="nav-link">
+            <i class="bi bi-bar-chart"></i><span>Reports</span>
+        </a>
     </nav>
-
     <div class="sidebar-bottom">
         <a th:href="@{/settings}" class="nav-link">
             <i class="bi bi-gear"></i><span>Settings</span>
@@ -32,173 +56,739 @@
 </div>
 
 <div class="main-content" id="mainContent">
-
-    <!-- Top Navbar -->
     <nav class="top-navbar">
-        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+        <button class="btn btn-sm btn-outline-secondary"
+                id="sidebarToggle">
             <i class="bi bi-list"></i>
         </button>
-
         <h5 class="mb-0 ms-3">Receive Payment</h5>
-
-        <div class="ms-auto">
-            <a th:href="@{/credit}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Back
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <a th:href="@{/credit}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back
             </a>
-
-            <!-- Logout -->
-            <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
+            <form th:action="@{/logout}" method="post"
+                  class="mb-0 d-inline">
                 <input type="hidden"
                        th:name="${_csrf.parameterName}"
                        th:value="${_csrf.token}">
-                <button type="submit" class="btn btn-sm btn-outline-danger">
+                <button type="submit"
+                        class="btn btn-sm btn-outline-danger">
                     <i class="bi bi-box-arrow-right"></i>
                 </button>
             </form>
         </div>
     </nav>
 
-    <!-- Page Content -->
     <div class="page-content">
-        <div class="row justify-content-center">
+
+        <div th:if="${errorMessage}"
+             class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+
+            <!-- LEFT: Payment Form -->
             <div class="col-lg-5">
-
-                <!-- Error -->
-                <div th:if="${errorMessage}" class="alert alert-danger">
-                    <i class="bi bi-exclamation-circle me-2"></i>
-                    <span th:text="${errorMessage}"></span>
-                </div>
-
                 <div class="table-card">
 
-                    <!-- Customer Summary -->
-                    <div class="text-center mb-4 p-3 bg-light rounded">
-                        <div class="fw-bold fs-5" th:text="${customer.name}">Name</div>
-                        <div class="text-muted small" th:text="${customer.phone}">Phone</div>
+                    <!-- Customer Info -->
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10
+                                    d-flex align-items-center justify-content-center"
+                             style="width:52px;height:52px">
+                            <i class="bi bi-person text-primary"
+                               style="font-size:22px"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0"
+                                th:text="${customer.name}">Customer</h6>
+                            <div class="small text-muted"
+                                 th:text="${customer.phone}">Phone</div>
+                        </div>
+                    </div>
 
-                        <div class="mt-2">
-                            <span class="text-muted small">Pending Balance:</span>
-                            <span class="fs-4 fw-bold text-danger ms-2">
-                                ₹<span th:text="${#numbers.formatDecimal(customer.balance,1,2)}">0.00</span>
+                    <!-- Pending Balance -->
+                    <div class="p-3 rounded mb-4"
+                         style="background:#fff5f5;border:1px solid #ffcccc">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small fw-semibold">
+                                Pending Balance
                             </span>
+                            <span class="fs-4 fw-bold text-danger">
+                                ₹<span th:text="${#numbers.formatDecimal(
+                                    customer.balance, 1, 2)}">0.00</span>
+                            </span>
+                        </div>
+                        <div class="small text-muted mt-1">
+                            Credit: ₹<span th:text="${#numbers.formatDecimal(
+                                customer.totalCredit, 1, 2)}">0</span>
+                            &nbsp;|&nbsp;
+                            Paid: ₹<span th:text="${#numbers.formatDecimal(
+                                customer.totalPaid, 1, 2)}">0</span>
                         </div>
                     </div>
 
                     <!-- Payment Form -->
-                    <form th:action="@{/credit/pay/{id}(id=${customer.id})}" method="post">
-
+                    <form th:action="@{/credit/pay/{id}(id=${customer.id})}"
+                          method="post" id="paymentForm">
                         <input type="hidden"
                                th:name="${_csrf.parameterName}"
                                th:value="${_csrf.token}">
 
+                        <!-- Hidden fields for split amounts -->
+                        <input type="hidden" id="hiddenCashPart"
+                               name="cashPart" value="0">
+                        <input type="hidden" id="hiddenUpiPart"
+                               name="upiPart" value="0">
+
+                        <!-- Payment Mode — 4 options -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Payment Mode
+                            </label>
+                            <div class="row g-2">
+
+                                <!-- CASH -->
+                                <div class="col-3">
+                                    <input type="radio"
+                                           class="btn-check"
+                                           name="paymentMode"
+                                           id="modeCash"
+                                           value="CASH"
+                                           checked
+                                           onchange="handleModeChange()">
+                                    <label class="btn btn-outline-secondary w-100"
+                                           for="modeCash">
+                                        <i class="bi bi-cash d-block mb-1"
+                                           style="font-size:18px"></i>
+                                        <span style="font-size:12px">Cash</span>
+                                    </label>
+                                </div>
+
+                                <!-- UPI -->
+                                <div class="col-3">
+                                    <input type="radio"
+                                           class="btn-check"
+                                           name="paymentMode"
+                                           id="modeUpi"
+                                           value="UPI"
+                                           onchange="handleModeChange()">
+                                    <label class="btn btn-outline-primary w-100"
+                                           for="modeUpi">
+                                        <i class="bi bi-qr-code d-block mb-1"
+                                           style="font-size:18px"></i>
+                                        <span style="font-size:12px">UPI</span>
+                                    </label>
+                                </div>
+
+                                <!-- CASH + UPI SPLIT -->
+                                <div class="col-3">
+                                    <input type="radio"
+                                           class="btn-check"
+                                           name="paymentMode"
+                                           id="modeSplit"
+                                           value="CASH_UPI"
+                                           onchange="handleModeChange()">
+                                    <label class="btn btn-outline-warning w-100"
+                                           for="modeSplit">
+                                        <i class="bi bi-split d-block mb-1"
+                                           style="font-size:18px"></i>
+                                        <span style="font-size:12px">Split</span>
+                                    </label>
+                                </div>
+
+                                <!-- BANK -->
+                                <div class="col-3">
+                                    <input type="radio"
+                                           class="btn-check"
+                                           name="paymentMode"
+                                           id="modeBank"
+                                           value="BANK"
+                                           onchange="handleModeChange()">
+                                    <label class="btn btn-outline-success w-100"
+                                           for="modeBank">
+                                        <i class="bi bi-bank d-block mb-1"
+                                           style="font-size:18px"></i>
+                                        <span style="font-size:12px">Bank</span>
+                                    </label>
+                                </div>
+
+                            </div>
+                        </div>
+
                         <!-- Amount -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold">
-                                Payment Amount (₹) <span class="text-danger">*</span>
+                                Amount (₹)
                             </label>
-
                             <div class="input-group input-group-lg">
-                                <span class="input-group-text">₹</span>
-                                <input type="number" name="amount"
-                                       class="form-control"
-                                       step="0.01"
-                                       min="1"
-                                       th:max="${customer.balance}"
-                                       placeholder="0.00"
-                                       required>
+                                <span class="input-group-text fw-bold">₹</span>
+                                <input type="number"
+                                       name="amount"
+                                       id="paymentAmount"
+                                       class="form-control form-control-lg fw-bold"
+                                       th:value="${balanceAmt}"
+                                       step="0.01" min="0.01"
+                                       required
+                                       oninput="handleAmountChange()">
                             </div>
 
-                            <div class="form-text">
-                                Maximum payable:
-                                ₹<span th:text="${#numbers.formatDecimal(customer.balance,1,2)}"></span>
-                            </div>
-                        </div>
-
-                        <!-- Payment Mode -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Payment Mode</label>
-                            <select name="description" class="form-select">
-                                <option value="Cash payment received">Cash</option>
-                                <option value="UPI payment received">UPI</option>
-                                <option value="Bank transfer received">Bank Transfer</option>
-                                <option value="Cheque payment received">Cheque</option>
-                            </select>
-                        </div>
-
-                        <!-- Quick Amount -->
-                        <div class="mb-4">
-                            <label class="form-label small text-muted">Quick Amount</label>
-
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setAmount(100)">₹100</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setAmount(200)">₹200</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setAmount(500)">₹500</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setAmount(1000)">₹1000</button>
-
-                                <button type="button" class="btn btn-sm btn-outline-primary"
-                                        th:onclick="'setAmount(' + ${customer.balance} + ')'">
-                                    Full Amount
+                            <!-- Quick amount buttons -->
+                            <div class="mt-2 d-flex gap-1 flex-wrap">
+                                <button type="button"
+                                        class="btn btn-outline-secondary quick-btn"
+                                        th:data-amount="${balanceAmt}"
+                                        onclick="quickSet(this.dataset.amount)">
+                                    Full ₹<span th:text="${#numbers.formatDecimal(
+                                        customer.balance, 1, 2)}">0</span>
                                 </button>
+                                <button type="button"
+                                        class="btn btn-outline-secondary quick-btn"
+                                        th:data-amount="${halfAmt}"
+                                        onclick="quickSet(this.dataset.amount)">
+                                    Half ₹<span th:text="${#numbers.formatDecimal(
+                                        halfAmt, 1, 2)}">0</span>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-outline-secondary quick-btn"
+                                        onclick="quickSet(100)">₹100</button>
+                                <button type="button"
+                                        class="btn btn-outline-secondary quick-btn"
+                                        onclick="quickSet(500)">₹500</button>
+                                <button type="button"
+                                        class="btn btn-outline-secondary quick-btn"
+                                        onclick="quickSet(1000)">₹1000</button>
                             </div>
+                        </div>
+
+                        <!-- ✅ CASH + UPI SPLIT FIELDS — hidden by default -->
+                        <div id="splitFields" style="display:none"
+                             class="mb-3 p-3 rounded border border-warning
+                                    bg-warning bg-opacity-10">
+                            <h6 class="fw-semibold text-warning mb-3">
+                                <i class="bi bi-split me-2"></i>
+                                Cash + UPI Split
+                            </h6>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">
+                                        Cash Amount (₹)
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text
+                                                     bg-secondary text-white">
+                                            <i class="bi bi-cash"></i>
+                                        </span>
+                                        <input type="number"
+                                               id="splitCashInput"
+                                               class="form-control"
+                                               placeholder="0.00"
+                                               step="0.01" min="0"
+                                               oninput="calcSplitUpi()">
+                                    </div>
+                                    <div class="form-text">
+                                        Amount paid in cash
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">
+                                        UPI Amount (₹)
+                                        <span class="badge bg-primary"
+                                              style="font-size:10px">
+                                            QR
+                                        </span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text
+                                                     bg-primary text-white">
+                                            <i class="bi bi-qr-code"></i>
+                                        </span>
+                                        <input type="number"
+                                               id="splitUpiInput"
+                                               class="form-control bg-light fw-bold"
+                                               placeholder="0.00"
+                                               readonly>
+                                    </div>
+                                    <div class="form-text text-primary">
+                                        Auto · QR for this amount
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Split summary -->
+                            <div class="mt-2 p-2 bg-white rounded border
+                                        d-flex gap-3 flex-wrap">
+                                <div class="small">
+                                    <i class="bi bi-cash text-secondary me-1"></i>
+                                    Cash:
+                                    <strong class="text-secondary">
+                                        ₹<span id="splitCashLabel">0.00</span>
+                                    </strong>
+                                </div>
+                                <div class="small text-muted">+</div>
+                                <div class="small">
+                                    <i class="bi bi-qr-code text-primary me-1"></i>
+                                    UPI:
+                                    <strong class="text-primary">
+                                        ₹<span id="splitUpiLabel">0.00</span>
+                                    </strong>
+                                </div>
+                                <div class="small text-muted">=</div>
+                                <div class="small">
+                                    Total:
+                                    <strong class="text-success">
+                                        ₹<span id="splitTotalLabel">0.00</span>
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Note (optional)
+                            </label>
+                            <input type="text"
+                                   name="description"
+                                   id="paymentDescription"
+                                   class="form-control"
+                                   placeholder="e.g. Cash payment, GPay transfer...">
+                        </div>
+
+                        <!-- Confirm checkbox -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="paymentDoneCheck">
+                            <label class="form-check-label fw-semibold"
+                                   for="paymentDoneCheck">
+                                I confirm that payment is completed
+                            </label>
                         </div>
 
                         <!-- Submit -->
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success px-4 flex-grow-1">
-                                <i class="bi bi-check-circle me-2"></i>Confirm Payment
-                            </button>
-                            <a th:href="@{/credit}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
+                        <button type="submit"
+                                id="recordBtn"
+                                class="btn btn-success w-100 py-2 fs-6 fw-bold"
+                                disabled>
+                            <i class="bi bi-check-circle me-2"></i>
+                            Record Payment
+                        </button>
 
                     </form>
 
-                    <!-- ✅ Clear Full Udhari -->
-                    <hr class="my-3">
+                    <!-- Clear All -->
+                    <hr>
+                    <form th:action="@{/credit/clear/{id}(id=${customer.id})}"
+                          method="post">
+                        <input type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
+                        <button type="submit"
+                                class="btn btn-outline-success w-100"
+                                th:data-balance="${#numbers.formatDecimal(
+                                    customer.balance, 1, 2)}"
+                                th:data-name="${customer.name}"
+                                onclick="return confirmClear(this)">
+                            <i class="bi bi-check2-all me-2"></i>
+                            Clear All Dues
+                            (₹<span th:text="${#numbers.formatDecimal(
+                                customer.balance, 1, 2)}">0</span>)
+                        </button>
+                    </form>
 
-                    <div class="p-3 bg-light rounded border">
-                        <p class="small fw-semibold mb-2">
-                            <i class="bi bi-check2-all me-1 text-success"></i>
-                            Clear Full Udhari
-                        </p>
+                </div>
+            </div>
 
-                        <p class="small text-muted mb-3">
-                            This will mark ALL pending dues as cleared.
-                        </p>
+            <!-- RIGHT: UPI QR Panel -->
+            <div class="col-lg-5" id="upiQrSection"
+                 style="display:none">
+                <div class="table-card text-center">
 
-                        <form th:action="@{/credit/clear/{id}(id=${customer.id})}" method="post">
-                            <input type="hidden"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}">
+                    <h6 class="fw-bold mb-1">
+                        <i class="bi bi-qr-code me-2 text-primary"></i>
+                        Scan &amp; Pay via UPI
+                    </h6>
+                    <p class="small text-muted mb-3">
+                        Customer scans with GPay / PhonePe / Paytm
+                    </p>
 
-                            <button type="submit"
-                                    class="btn btn-success w-100"
-                                    onclick="return confirm('Clear full dues?')">
-                                <i class="bi bi-check2-all me-2"></i>
-                                Clear All Dues
-                                (₹<span th:text="${#numbers.formatDecimal(customer.balance,1,2)}">0</span>)
-                            </button>
-                        </form>
+                    <!-- QR Image Box -->
+                    <div class="d-inline-block p-3 border rounded-3
+                                bg-white mb-3"
+                         style="box-shadow:0 4px 16px rgba(0,0,0,0.1)">
+
+                        <img id="qrImage" src="" alt="UPI QR"
+                             style="width:200px;height:200px;
+                                    display:none;
+                                    border-radius:4px;
+                                    transition:opacity 0.3s ease">
+
+                        <div id="qrPlaceholder"
+                             style="width:200px;height:200px;
+                                    display:flex;
+                                    flex-direction:column;
+                                    align-items:center;
+                                    justify-content:center;
+                                    background:#f8f9fa;
+                                    border-radius:8px">
+                            <i class="bi bi-qr-code"
+                               style="font-size:48px;opacity:0.3"></i>
+                            <p class="small mt-2 mb-0 text-muted">
+                                Generating QR...
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- UPI ID -->
+                    <div class="mb-2">
+                        <div class="small text-muted">UPI ID</div>
+                        <div class="fw-bold text-primary"
+                             th:text="${upiId}">shop@upi</div>
+                    </div>
+
+                    <!-- QR Amount -->
+                    <div class="p-2 rounded mb-3"
+                         style="background:#f0f9ff;border:1px solid #bfdbfe">
+                        <div class="small text-muted">QR Amount</div>
+                        <div class="fs-4 fw-bold text-primary">
+                            ₹<span id="qrAmountDisplay"
+                                   th:text="${#numbers.formatDecimal(
+                                       balanceAmt, 1, 2)}">0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- App badges -->
+                    <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+                        <span class="badge bg-light text-dark border">GPay</span>
+                        <span class="badge bg-light text-dark border">PhonePe</span>
+                        <span class="badge bg-light text-dark border">Paytm</span>
+                        <span class="badge bg-light text-dark border">BHIM</span>
+                    </div>
+
+                    <!-- Timer -->
+                    <div class="mb-2 small text-danger fw-semibold">
+                        QR expires in <span id="qrTimer">60</span> seconds
+                    </div>
+
+                    <!-- Refresh -->
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm w-100"
+                            onclick="refreshQr()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Refresh QR
+                    </button>
+
+                    <div class="mt-3 small text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        After customer pays, tick checkbox and click
+                        <strong>Record Payment</strong>
                     </div>
 
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
 
-<script>
-    document.getElementById('sidebarToggle').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-        document.getElementById('mainContent').classList.toggle('expanded');
-    });
+        // ── Server values ─────────────────────────────────
+        const CUSTOMER_ID    = /*[[${customer.id}]]*/ 0;
+        const MAX_BALANCE    = /*[[${balanceAmt}]]*/ 0;
+        const UPI_CONFIGURED = /*[[${upiId != null}]]*/ false;
 
-    function setAmount(val) {
-        document.querySelector('input[name="amount"]').value = val.toFixed(2);
-    }
+        // ── State ─────────────────────────────────────────
+        let qrTimerInterval = null;
+        let qrDebounceTimer = null;
+
+        // ── Sidebar ───────────────────────────────────────
+        document.getElementById('sidebarToggle')
+                .addEventListener('click', function () {
+            document.getElementById('sidebar')
+                    .classList.toggle('collapsed');
+            document.getElementById('mainContent')
+                    .classList.toggle('expanded');
+        });
+
+        // ── Checkbox enables Record button ────────────────
+        document.getElementById('paymentDoneCheck')
+                .addEventListener('change', function () {
+            document.getElementById('recordBtn').disabled =
+                    !this.checked;
+        });
+
+        // ── HANDLE PAYMENT MODE CHANGE ────────────────────
+        function handleModeChange() {
+            const mode        = document.querySelector(
+                    'input[name="paymentMode"]:checked').value;
+            const qrSection   =
+                    document.getElementById('upiQrSection');
+            const splitFields =
+                    document.getElementById('splitFields');
+
+            // Reset both panels
+            qrSection.style.display   = 'none';
+            splitFields.style.display = 'none';
+            stopTimer();
+
+            const amt = parseFloat(
+                    document.getElementById(
+                            'paymentAmount').value) || MAX_BALANCE;
+
+            if (mode === 'UPI') {
+                // Full UPI — show QR for full amount
+                qrSection.style.display = 'block';
+                if (amt > 0) generateQr(amt);
+
+            } else if (mode === 'CASH_UPI') {
+                // Split — show both split fields and QR panel
+                splitFields.style.display = 'block';
+                qrSection.style.display   = 'block';
+                // Pre-fill split with 0 cash + full amount on UPI
+                document.getElementById('splitCashInput').value = '';
+                calcSplitUpi();
+
+            } else {
+                // Cash / Bank — hide everything
+                qrSection.style.display = 'none';
+            }
+        }
+
+        // ── CALCULATE UPI SPLIT AMOUNT ────────────────────
+        function calcSplitUpi() {
+            const total    = parseFloat(
+                    document.getElementById(
+                            'paymentAmount').value) || MAX_BALANCE;
+            const cashPaid = parseFloat(
+                    document.getElementById(
+                            'splitCashInput').value) || 0;
+            const upiAmt   = Math.max(0, total - cashPaid);
+
+            // Update split display fields
+            document.getElementById('splitUpiInput').value       =
+                    upiAmt.toFixed(2);
+            document.getElementById('splitCashLabel').textContent =
+                    cashPaid.toFixed(2);
+            document.getElementById('splitUpiLabel').textContent  =
+                    upiAmt.toFixed(2);
+            document.getElementById('splitTotalLabel').textContent =
+                    total.toFixed(2);
+            document.getElementById('qrAmountDisplay').textContent =
+                    upiAmt.toFixed(2);
+
+            // Update hidden fields for form submission
+            document.getElementById('hiddenCashPart').value =
+                    cashPaid.toFixed(2);
+            document.getElementById('hiddenUpiPart').value  =
+                    upiAmt.toFixed(2);
+
+            // Generate QR for UPI portion (debounced)
+            clearTimeout(qrDebounceTimer);
+            if (upiAmt > 0) {
+                qrDebounceTimer = setTimeout(() => {
+                    generateQr(upiAmt);
+                }, 500);
+            }
+        }
+
+        // ── GENERATE QR ───────────────────────────────────
+        function generateQr(amt) {
+            if (!UPI_CONFIGURED) {
+                showError('UPI not configured. Check Settings.');
+                return;
+            }
+            if (!amt || amt <= 0) return;
+
+            // Fade out current QR smoothly
+            const img = document.getElementById('qrImage');
+            if (img && img.style.display !== 'none') {
+                img.style.opacity = '0.3';
+            }
+
+            // Update amount display immediately
+            document.getElementById('qrAmountDisplay')
+                    .textContent = parseFloat(amt).toFixed(2);
+
+            // Fetch from server
+            fetch('/credit/qr/' + CUSTOMER_ID
+                    + '?amount=' + parseFloat(amt).toFixed(2))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok' && data.qr) {
+                        const newSrc =
+                                'data:image/png;base64,' + data.qr;
+                        // Preload before showing — no flicker
+                        const preload   = new Image();
+                        preload.onload  = () => {
+                            showQrImage(newSrc);
+                            startTimer();
+                        };
+                        preload.onerror = () =>
+                                showError('QR load failed');
+                        preload.src     = newSrc;
+                    } else {
+                        showError(data.message || 'Failed');
+                    }
+                })
+                .catch(() => {
+                    showError('Network error. Try again.');
+                    if (img) img.style.opacity = '1';
+                });
+        }
+
+        // ── SHOW QR IMAGE ─────────────────────────────────
+        function showQrImage(src) {
+            const img         = document.getElementById('qrImage');
+            const placeholder =
+                    document.getElementById('qrPlaceholder');
+
+            if (placeholder) placeholder.style.display = 'none';
+
+            if (img) {
+                img.style.opacity = '0';
+                img.style.display = 'block';
+                img.src           = src;
+                setTimeout(() => { img.style.opacity = '1'; }, 30);
+            }
+        }
+
+        // ── SHOW ERROR ────────────────────────────────────
+        function showError(msg) {
+            const placeholder =
+                    document.getElementById('qrPlaceholder');
+            if (placeholder) {
+                placeholder.style.display = 'flex';
+                placeholder.innerHTML     =
+                        '<div class="text-center text-danger">'
+                        + '<i class="bi bi-exclamation-circle"'
+                        + ' style="font-size:36px"></i>'
+                        + '<p class="small mt-2 mb-0">'
+                        + msg + '</p></div>';
+            }
+            const img = document.getElementById('qrImage');
+            if (img) img.style.display = 'none';
+        }
+
+        // ── TIMER ─────────────────────────────────────────
+        function startTimer() {
+            stopTimer();
+            let t  = 60;
+            const el = document.getElementById('qrTimer');
+            if (el) el.textContent = t;
+
+            qrTimerInterval = setInterval(() => {
+                t--;
+                if (el) el.textContent = t;
+                if (t <= 0) {
+                    stopTimer();
+                    if (el) el.textContent = 'Expired';
+                    const img = document.getElementById('qrImage');
+                    if (img) img.style.opacity = '0.3';
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (qrTimerInterval) {
+                clearInterval(qrTimerInterval);
+                qrTimerInterval = null;
+            }
+        }
+
+        // ── REFRESH QR ────────────────────────────────────
+        function refreshQr() {
+            const mode = document.querySelector(
+                    'input[name="paymentMode"]:checked').value;
+
+            if (mode === 'CASH_UPI') {
+                // For split — refresh QR for UPI portion only
+                const upiAmt = parseFloat(
+                        document.getElementById(
+                                'splitUpiInput').value) || 0;
+                if (upiAmt > 0) generateQr(upiAmt);
+                else alert('Enter cash amount first.');
+            } else {
+                // For full UPI
+                const amt = parseFloat(
+                        document.getElementById(
+                                'paymentAmount').value) || 0;
+                if (amt <= 0) {
+                    alert('Please enter a valid amount first.');
+                    return;
+                }
+                generateQr(amt);
+            }
+        }
+
+        // ── QUICK SET AMOUNT ──────────────────────────────
+        function quickSet(amt) {
+            const max = parseFloat(MAX_BALANCE) || 0;
+            let   val = parseFloat(amt);
+
+            if (isNaN(val) || val <= 0) return;
+            if (val > max) val = max;
+
+            document.getElementById('paymentAmount').value =
+                    val.toFixed(2);
+            document.getElementById('qrAmountDisplay')
+                    .textContent = val.toFixed(2);
+
+            const mode = document.querySelector(
+                    'input[name="paymentMode"]:checked').value;
+
+            clearTimeout(qrDebounceTimer);
+
+            if (mode === 'UPI') {
+                generateQr(val);
+            } else if (mode === 'CASH_UPI') {
+                calcSplitUpi();
+            }
+        }
+
+        // ── HANDLE AMOUNT TYPING ──────────────────────────
+        function handleAmountChange() {
+            const amt  = parseFloat(
+                    document.getElementById(
+                            'paymentAmount').value) || 0;
+            const mode = document.querySelector(
+                    'input[name="paymentMode"]:checked').value;
+
+            document.getElementById('qrAmountDisplay')
+                    .textContent = amt.toFixed(2);
+
+            clearTimeout(qrDebounceTimer);
+
+            if (mode === 'UPI' && amt > 0) {
+                // Debounce for typing
+                qrDebounceTimer = setTimeout(() => {
+                    generateQr(amt);
+                }, 800);
+
+            } else if (mode === 'CASH_UPI') {
+                calcSplitUpi();
+            }
+        }
+
+        // ── CONFIRM CLEAR DUES ────────────────────────────
+        function confirmClear(btn) {
+            const balance = btn.dataset.balance;
+            const name    = btn.dataset.name;
+            return confirm(
+                    'Clear all dues of ₹' + balance
+                    + ' for ' + name + '?');
+        }
+
+    /*]]>*/
 </script>
-
 </body>
 </html>

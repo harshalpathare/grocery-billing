@@ -56,6 +56,12 @@
     <nav class="sidebar-nav">
         <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
         <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
+        <a th:href="@{/suppliers}" class="nav-link">
+            <i class="bi bi-truck"></i><span>Suppliers</span>
+        </a>
+        <a th:href="@{/purchases}" class="nav-link">
+            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        </a>
         <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
         <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i><span>New Bill</span></a>
         <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
@@ -201,6 +207,32 @@
                     </div>
                     <h6 class="fw-bold mb-1">Credit Report</h6>
                     <p class="text-muted small mb-0">Pending dues and payment history</p>
+                </a>
+            </div>
+            <!-- Add as 5th report link card -->
+            <div class="col-md-3">
+                <a th:href="@{/reports/gstr1}" class="report-link-card">
+                    <div class="stat-icon bg-success bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-file-earmark-excel text-success"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">GSTR-1 Export</h6>
+                    <p class="text-muted small mb-0">
+                        Export GST bills for CA filing
+                    </p>
+                </a>
+            </div>
+            <!-- ✅ ADD THIS RIGHT HERE -->
+            <div class="col-md-3">
+                <a th:href="@{/reports/profit}" class="report-link-card">
+                    <div class="stat-icon bg-success bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-currency-rupee text-success"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Profit &amp; Loss</h6>
+                    <p class="text-muted small mb-0">
+                        Revenue vs cost, product margins
+                    </p>
                 </a>
             </div>
         </div>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'PO ' + ${po.poNumber}">Purchase Order</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+        <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
+        <a th:href="@{/suppliers}" class="nav-link"><i class="bi bi-truck"></i><span>Suppliers</span></a>
+        <a th:href="@{/purchases}" class="nav-link active"><i class="bi bi-cart-check"></i><span>Purchases</span></a>
+        <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
+        <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i><span>New Bill</span></a>
+        <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
+        <a th:href="@{/credit}" class="nav-link"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
+        <a th:href="@{/reports}" class="nav-link"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link"><i class="bi bi-gear"></i><span>Settings</span></a>
+    </div>
+</div>
+
+<div class="main-content" id="mainContent">
+    <nav class="top-navbar">
+        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle"><i class="bi bi-list"></i></button>
+        <h5 class="mb-0 ms-3" th:text="${po.poNumber}">PO</h5>
+        <div class="ms-auto d-flex gap-2">
+            <a th:href="@{/purchases}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>All POs
+            </a>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="row g-4">
+
+            <!-- Left: PO Details -->
+            <div class="col-lg-8">
+                <div class="table-card mb-4">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="small text-muted fw-semibold">PO Number</div>
+                            <div class="fw-bold" th:text="${po.poNumber}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="small text-muted fw-semibold">Date</div>
+                            <div th:text="${#temporals.format(po.orderDate,'dd MMMM yyyy')}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="small text-muted fw-semibold">Supplier</div>
+                            <div th:text="${po.supplier != null ? po.supplier.name : 'Direct'}"></div>
+                        </div>
+                        <div class="col-md-4" th:if="${po.supplierInvoiceNo}">
+                            <div class="small text-muted fw-semibold">Supplier Invoice</div>
+                            <div th:text="${po.supplierInvoiceNo}"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="small text-muted fw-semibold">Payment Status</div>
+                            <span class="badge"
+                                  th:classappend="${po.paymentStatus.name()=='PAID'}
+                                                 ? 'bg-success'
+                                                 : (${po.paymentStatus.name()=='PARTIAL'}
+                                                    ? 'bg-warning text-dark':'bg-danger')"
+                                  th:text="${po.paymentStatus.name()}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Product</th>
+                                <th class="text-end">Qty</th>
+                                <th class="text-end">Unit Cost</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item, st : ${po.items}">
+                                <td th:text="${st.index+1}">1</td>
+                                <td>
+                                    <div class="fw-semibold"
+                                         th:text="${item.productNameSnapshot}"></div>
+                                    <div class="small text-muted"
+                                         th:if="${item.product != null}"
+                                         th:text="'Sell: ₹' + ${#numbers.formatDecimal(item.product.price,1,2)}">
+                                    </div>
+                                </td>
+                                <td class="text-end"
+                                    th:text="${#numbers.formatDecimal(item.quantity,1,3)}">
+                                </td>
+                                <td class="text-end">
+                                    ₹<span th:text="${#numbers.formatDecimal(item.unitCost,1,2)}"></span>
+                                </td>
+                                <td class="text-end fw-bold">
+                                    ₹<span th:text="${#numbers.formatDecimal(item.totalCost,1,2)}"></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                            <tfoot class="table-light">
+                            <tr>
+                                <td colspan="4" class="text-end fw-semibold">Subtotal</td>
+                                <td class="text-end">₹<span th:text="${#numbers.formatDecimal(po.subtotal,1,2)}"></span></td>
+                            </tr>
+                            <tr th:if="${po.taxAmount != null and po.taxAmount > 0}">
+                                <td colspan="4" class="text-end fw-semibold">Tax/GST</td>
+                                <td class="text-end">+₹<span th:text="${#numbers.formatDecimal(po.taxAmount,1,2)}"></span></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold fs-6">TOTAL</td>
+                                <td class="text-end fw-bold fs-6 text-primary">
+                                    ₹<span th:text="${#numbers.formatDecimal(po.totalAmount,1,2)}"></span>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Summary -->
+            <div class="col-lg-4">
+                <div class="table-card">
+                    <h6 class="fw-bold mb-3">Purchase Summary</h6>
+                    <div class="p-3 rounded text-center mb-3"
+                         style="background:#f0f9ff;border:1px solid #bfdbfe">
+                        <div class="small text-muted">Total Purchase Value</div>
+                        <div class="fs-3 fw-bold text-primary">
+                            ₹<span th:text="${#numbers.formatDecimal(po.totalAmount,1,2)}">0</span>
+                        </div>
+                    </div>
+
+                    <div class="small text-muted mb-2">Stock Updated</div>
+                    <div th:each="item : ${po.items}"
+                         class="d-flex justify-content-between align-items-center
+                                py-1 border-bottom">
+                        <span class="small" th:text="${item.productNameSnapshot}"></span>
+                        <span class="badge bg-success"
+                              th:text="'+' + ${#numbers.formatDecimal(item.quantity,1,0)}">
+                        </span>
+                    </div>
+
+                    <div class="mt-3">
+                        <a th:href="@{/purchases/new}"
+                           class="btn btn-primary w-100 btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>New Purchase
+                        </a>
+                    </div>
+                    <!-- Pay Button -->
+                    <div th:if="${po.paymentStatus.name() != 'PAID'}"
+                         class="mt-2">
+                        <button type="button"
+                                class="btn btn-success w-100 btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#payModal">
+                            <i class="bi bi-cash-coin me-1"></i>
+                            Mark as Paid
+                        </button>
+                    </div>
+
+                    <!-- Already paid badge -->
+                    <div th:if="${po.paymentStatus.name() == 'PAID'}"
+                         class="mt-2 alert alert-success py-2 text-center small">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Fully Paid ✅
+                    </div>
+
+                    <!-- Delete -->
+                    <form th:action="@{/purchases/{id}/delete(id=${po.id})}"
+                          method="post" class="mt-2"
+                          onsubmit="return confirm('Delete this PO? Stock will be reversed.')">
+                        <input type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
+                        <button type="submit"
+                                class="btn btn-outline-danger w-100 btn-sm">
+                            <i class="bi bi-trash me-1"></i>Delete PO
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('sidebarToggle').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    });
+</script>
+
+<!-- Pay Modal -->
+<div class="modal fade" id="payModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h6 class="modal-title">
+                    Record Payment for
+                    <span th:text="${po.poNumber}"></span>
+                </h6>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3">
+                    Total:
+                    <strong class="text-danger">
+                        ₹<span th:text="${#numbers.formatDecimal(
+                            po.totalAmount,1,2)}">0</span>
+                    </strong>
+                </p>
+                <form th:action="@{/purchases/{id}/pay(id=${po.id})}"
+                      method="post">
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">
+                            Amount Paid (₹)
+                        </label>
+                        <input type="number"
+                               name="amountPaid"
+                               class="form-control"
+                               th:value="${po.totalAmount}"
+                               step="0.01" min="0.01"
+                               required>
+                    </div>
+                    <button type="submit"
+                            class="btn btn-success w-100">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Confirm Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
