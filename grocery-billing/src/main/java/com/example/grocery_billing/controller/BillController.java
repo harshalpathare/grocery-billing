@@ -1,5 +1,4 @@
 package com.example.grocery_billing.controller;
-import com.example.grocery_billing.service.WhatsAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.grocery_billing.config.ShopConfig;
 import com.example.grocery_billing.entity.Bill;
@@ -394,25 +393,7 @@ public class BillController {
     // ─────────────────────────────────────────────────────
 // SEND BILL ON WHATSAPP
 // ─────────────────────────────────────────────────────
-    @Autowired
-    private WhatsAppService whatsAppService;
 
-    @PostMapping("/{id}/send-whatsapp")
-    @ResponseBody
-    public Map<String, String> sendWhatsApp(@PathVariable Long id) {
-        Map<String, String> result = new HashMap<>();
-        try {
-            Bill bill = billService.getBillById(id);
-            whatsAppService.sendBillOnWhatsApp(bill);
-            result.put("status", "success");
-            result.put("message", "Bill sent on WhatsApp successfully! ✅");
-        } catch (Exception e) {
-            log.error("WhatsApp send failed for bill {}: {}", id, e.getMessage());
-            result.put("status", "error");
-            result.put("message", e.getMessage());
-        }
-        return result;
-    }
     // ─────────────────────────────────────────────────────
     // HELPER — Extract UPI amount from notes
     // ─────────────────────────────────────────────────────

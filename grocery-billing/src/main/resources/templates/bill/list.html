@@ -184,15 +184,7 @@
                             </a>
 
                             <!-- ✅ WhatsApp Button (only if customer has phone) -->
-                            <button type="button"
-                                    class="btn btn-sm btn-success me-1"
-                                    th:if="${bill.customer != null and bill.customer.phone != null}"
-                                    th:data-id="${bill.id}"
-                                    th:data-no="${bill.billNo}"
-                                    onclick="sendWhatsApp(this)"
-                                    title="Send on WhatsApp">
-                                <i class="bi bi-whatsapp"></i>
-                            </button>
+
 
                             <!-- Delete -->
                             <button type="button"
@@ -239,17 +231,7 @@
     </div>
 </div>
 
-<!-- ✅ WhatsApp Toast Notification -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-    <div id="waToast" class="toast align-items-center text-white border-0"
-         role="alert" aria-live="assertive">
-        <div class="d-flex">
-            <div class="toast-body fw-bold" id="waToastMsg">Sending...</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                    data-bs-dismiss="toast"></button>
-        </div>
-    </div>
-</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -265,48 +247,8 @@
         document.getElementById('deleteForm').action = '/bills/' + btn.dataset.id + '/delete';
     }
 
-    // ✅ Send WhatsApp
-    function sendWhatsApp(btn) {
-        const billId = btn.dataset.id;
-        const billNo = btn.dataset.no;
 
-        // Show loading spinner on button
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-        fetch(`/bills/${billId}/send-whatsapp`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            // Restore button
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-whatsapp"></i>';
-
-            const toast = document.getElementById('waToast');
-            const msg   = document.getElementById('waToastMsg');
-
-            if (data.status === 'success') {
-                toast.classList.remove('bg-danger');
-                toast.classList.add('bg-success');
-                msg.textContent = '✅ Bill ' + billNo + ' sent on WhatsApp!';
-            } else {
-                toast.classList.remove('bg-success');
-                toast.classList.add('bg-danger');
-                msg.textContent = '❌ ' + data.message;
-            }
-
-            new bootstrap.Toast(toast, { delay: 4000 }).show();
-        })
-        .catch(err => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-whatsapp"></i>';
-            alert('Error: ' + err.message);
-        });
-    }
 </script>
 </body>
 </html>
