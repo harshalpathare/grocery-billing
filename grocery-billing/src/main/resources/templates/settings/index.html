@@ -184,13 +184,13 @@
                             <div class="col-md-6">
                                 <label class="form-label
                                               fw-semibold">
-                                    Website / Social
+                                    Shop Logo URL
                                 </label>
                                 <input type="text"
                                        name="shop.logo-url"
                                        class="form-control"
                                        th:value="${settings['shop.logo-url']}"
-                                       placeholder="www.myshop.com">
+                                       placeholder="https://example.com/logo.png">
                             </div>
 
                         </div>
@@ -240,16 +240,32 @@
                             <div class="col-12">
                                 <label class="form-label
                                               fw-semibold">
-                                    Invoice Footer Text
+                                    Terms & Conditions
+                                </label>
+                                <textarea name="shop.terms"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="1. Goods once sold cannot be returned.">
+                                    <th:block th:text="${settings['shop.terms']}"></th:block>
+                                </textarea>
+                                <div class="form-text">
+                                    Printed strictly at the bottom of the invoice.
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label
+                                              fw-semibold">
+                                    Thank You Message
                                 </label>
                                 <textarea name="shop.invoice-footer"
                                           class="form-control"
                                           rows="2"
-                                          placeholder="Thank you for shopping with us!">
+                                          placeholder="Thank you for shopping with us! Visit again.">
                                     <th:block th:text="${settings['shop.invoice-footer']}"></th:block>
                                 </textarea>
                                 <div class="form-text">
-                                    Appears at bottom of every invoice
+                                    Personalized note placed above the Terms & Conditions.
                                 </div>
                             </div>
 
@@ -337,6 +353,7 @@
                              style="background:#1e1f2e;
                                     color:white;
                                     min-height:100px">
+                            <img id="prevLogo" src="" alt="Shop Logo" style="max-height: 50px; display: none; margin: 0 auto 10px auto; border-radius: 4px;">
                             <div class="fw-bold fs-5"
                                  id="prevName">
                                 My Grocery Store
@@ -435,6 +452,16 @@
         const gstin = document.querySelector(
                 '[name="shop.gstin"]').value
                 || '';
+        const logo = document.querySelector(
+                '[name="shop.logo-url"]').value
+                || '';
+
+        if (logo.trim() !== '') {
+             document.getElementById('prevLogo').style.display = 'block';
+             document.getElementById('prevLogo').src = logo;
+        } else {
+             document.getElementById('prevLogo').style.display = 'none';
+        }
 
         document.getElementById('prevName')
                 .textContent = name;
