@@ -71,7 +71,7 @@ public class CustomerController {
     // VIEW CUSTOMER PROFILE
     // ─────────────────────────────────────────────────────
     @GetMapping("/{id}")
-    public String viewCustomer(@PathVariable Long id, Model model) {
+    public String viewCustomer(@PathVariable("id") Long id, Model model) {
         Customer customer = customerService.getCustomerById(id);
         List<Transaction> transactions =
                 customerService.getTransactionHistory(id);
@@ -144,7 +144,7 @@ public class CustomerController {
     // SHOW EDIT FORM
     // ─────────────────────────────────────────────────────
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable("id") Long id, Model model) {
         model.addAttribute("customer", customerService.getCustomerById(id));
         model.addAttribute("activePage", "customers");
         model.addAttribute("pageTitle", "Edit Customer");
@@ -157,7 +157,7 @@ public class CustomerController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/{id}/edit")
     public String updateCustomer(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @ModelAttribute("customer") Customer customer,
             BindingResult bindingResult,
             Model model,
@@ -187,7 +187,7 @@ public class CustomerController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/{id}/delete")
     public String deleteCustomer(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             RedirectAttributes redirectAttributes) {
         try {
             customerService.deleteCustomer(id);
@@ -199,3 +199,4 @@ public class CustomerController {
         return "redirect:/customers";
     }
 }
+

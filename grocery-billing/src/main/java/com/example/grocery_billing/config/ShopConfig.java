@@ -17,4 +17,5 @@ public class ShopConfig {
     private String fssaiNo;
     private String upiId;
     private String bankDetails;
+    private String thankYouMsg = "Thank you for shopping! Visit again.";
 }

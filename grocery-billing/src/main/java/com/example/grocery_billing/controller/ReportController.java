@@ -114,7 +114,7 @@ public class ReportController {
     // ─────────────────────────────────────────────────────
     @GetMapping("/monthly")
     public String monthlyReport(
-            @RequestParam(required = false) Integer year,
+            @RequestParam(value = "year", required = false) Integer year,
             Model model) {
 
         if (year == null) year = LocalDate.now().getYear();
@@ -294,8 +294,8 @@ public class ReportController {
     // ── PROFIT & LOSS PAGE ────────────────────────────────
     @GetMapping("/profit")
     public String profitReport(
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "year", required = false) Integer year,
             Model model) {
 
         LocalDate now = LocalDate.now();
@@ -321,8 +321,8 @@ public class ReportController {
     }
     @GetMapping("/profit/download")
     public ResponseEntity<byte[]> downloadProfitExcel(
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year) {
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "year", required = false) Integer year) {
 
         try {
             LocalDate now = LocalDate.now();
@@ -365,3 +365,4 @@ public class ReportController {
         }
     }
 }
+

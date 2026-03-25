@@ -13,7 +13,7 @@ public interface SupplierRepository
     List<Supplier> findByActiveTrueOrderByNameAsc();
 
     List<Supplier> findByNameContainingIgnoreCaseAndActiveTrue(
-            String name);
+            @org.springframework.data.repository.query.Param("name") String name);
 
     @Query("SELECT COALESCE(SUM(s.balance),0) " +
             "FROM Supplier s WHERE s.active=true " +

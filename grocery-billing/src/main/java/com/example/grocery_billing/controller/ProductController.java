@@ -1,6 +1,8 @@
 package com.example.grocery_billing.controller;
 
-
+import com.example.grocery_billing.repository.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
 import com.example.grocery_billing.entity.Product;
 import com.example.grocery_billing.service.ProductService;
 import jakarta.validation.Valid;
@@ -12,7 +14,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * PRODUCT CONTROLLER
@@ -41,8 +46,8 @@ public class ProductController {
     // ─────────────────────────────────────────────────────
     @GetMapping
     public String listProducts(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String category,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "category", required = false) String category,
             Model model) {
 
         List<Product> products;
@@ -119,7 +124,7 @@ public class ProductController {
     // GET /products/{id}/edit
     // ─────────────────────────────────────────────────────
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable("id") Long id, Model model) {
         Product product = productService.getProductById(id);
         model.addAttribute("product", product);
         model.addAttribute("categories", productService.getAllCategories());
@@ -133,12 +138,45 @@ public class ProductController {
     // SAVE EDITED PRODUCT
     // POST /products/{id}/edit
     // ─────────────────────────────────────────────────────
+    @PostMapping("/{id}/edit")
+    public String updateProduct(
+            @PathVariable("id") Long id,
+            @Valid @ModelAttribute("product") Product product,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", productService.getAllCategories());
+            model.addAttribute("activePage", "products");
+            model.addAttribute("pageTitle", "Edit Product");
+            model.addAttribute("isEdit", true);
+            return "product/form";
+        }
+
+        try {
+            Product existingProduct = productService.getProductById(id);
+            product.setId(id);
+            product.setCreatedAt(existingProduct.getCreatedAt());
+            
+            productService.saveProduct(product);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Product '" + product.getNameEn() + "' updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Error updating product: " + e.getMessage());
+        }
+
+        return "redirect:/products";
+    }
+
+    // ─────────────────────────────────────────────────────
     // ── UPDATE STOCK ──────────────────────────────────────
     @PostMapping("/{id}/stock")
     public String updateStock(
-            @PathVariable Long id,
-            @RequestParam(required = false) Integer addQty,
-            @RequestParam(required = false) Integer setQty,
+            @PathVariable("id") Long id,
+            @RequestParam(value = "addQty", required = false) Integer addQty,
+            @RequestParam(value = "setQty", required = false) Integer setQty,
             RedirectAttributes redirectAttributes) {
         try {
             Product product = productService.getProductById(id);
@@ -177,7 +215,7 @@ public class ProductController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/{id}/delete")
     public String deleteProduct(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             RedirectAttributes redirectAttributes) {
         try {
             productService.deleteProduct(id);
@@ -198,8 +236,8 @@ public class ProductController {
     @GetMapping("/search")
     @ResponseBody  // @ResponseBody = return JSON, not a view name
     public ResponseEntity<List<ProductSearchDto>> searchProducts(
-            @RequestParam String q,
-            @RequestParam(defaultValue = "en") String lang) {
+            @RequestParam("q") String q,
+            @RequestParam(value = "lang", defaultValue = "en") String lang) {
 
         List<Product> products = productService.searchForBilling(q);
 
@@ -217,7 +255,37 @@ public class ProductController {
 
         return ResponseEntity.ok(result);
     }
+    // ─────────────────────────────────────────────────────
+// BARCODE LOOKUP API
+// ─────────────────────────────────────────────────────
+    @GetMapping("/barcode")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> findByBarcode(
+            @RequestParam("b") String barcode) {
 
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Optional<Product> product = productService.findByBarcode(barcode);
+
+            if (product.isPresent()) {
+                Product p = product.get();
+                result.put("found",    true);
+                result.put("id",       p.getId());
+                result.put("name",     p.getNameEn());
+                result.put("price",    p.getPrice());
+                result.put("unit",     p.getUnit());
+                result.put("stock",    p.getStockQty());
+                result.put("barcode",  p.getBarcode());
+            } else {
+                result.put("found",   false);
+                result.put("message", "Product not found for barcode: " + barcode);
+            }
+        } catch (Exception e) {
+            result.put("found",   false);
+            result.put("message", e.getMessage());
+        }
+        return ResponseEntity.ok(result);
+    }
     // ─────────────────────────────────────────────────────
     // DTO (Data Transfer Object) for the search API
     // A simple record — just data, no JPA annotations
@@ -232,3 +300,4 @@ public class ProductController {
             Integer stockQty
     ) {}
 }
+

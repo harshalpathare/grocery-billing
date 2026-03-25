@@ -275,6 +275,24 @@
                             </div>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Barcode</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-upc"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       name="barcode"
+                                       id="barcode"
+                                       th:value="${product?.barcode}"
+                                       placeholder="Scan or enter barcode number">
+                            </div>
+                            <div class="form-text">
+                                Leave empty to skip. Must be unique per product.
+                            </div>
+                        </div>
+
                         <!-- ── FORM BUTTONS ── -->
                         <div class="d-flex gap-2 pt-3 border-top">
                             <button type="submit" class="btn btn-primary px-4">
@@ -315,6 +333,9 @@
                             </div>
                         </div>
                     </div>
+                    <div class="text-center mt-3 pt-3 border-top" id="barcodeContainer" style="display:none;">
+                        <svg id="previewBarcode" style="max-height: 80px; width: auto;"></svg>
+                    </div>
                 </div>
 
             </div>
@@ -324,6 +345,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script>
     document.getElementById('sidebarToggle').addEventListener('click', function () {
         document.getElementById('sidebar').classList.toggle('collapsed');
@@ -331,7 +353,7 @@
     });
 
     // Live Preview: updates as you type
-    const fields = ['nameEn', 'nameHi', 'nameMr', 'price', 'gstPercent', 'unit'];
+    const fields = ['nameEn', 'nameHi', 'nameMr', 'price', 'gstPercent', 'unit', 'barcode'];
 
     fields.forEach(id => {
         const el = document.getElementById(id);
@@ -342,6 +364,7 @@
     document.getElementById('gstPercent')?.addEventListener('change', updatePreview);
     document.getElementById('unit')?.addEventListener('change', updatePreview);
 
+
     function updatePreview() {
         const nameEn = document.getElementById('nameEn')?.value || '';
         const nameHi = document.getElementById('nameHi')?.value || '';
@@ -349,6 +372,7 @@
         const price  = document.getElementById('price')?.value || '0';
         const gst    = document.getElementById('gstPercent')?.value || '0';
         const unit   = document.getElementById('unit')?.value || 'piece';
+        const barcode= document.getElementById('barcode')?.value || '';
 
         if (nameEn.trim()) {
             document.getElementById('previewCard').style.display = 'block';
@@ -358,6 +382,25 @@
             document.getElementById('previewPrice').textContent  = parseFloat(price || 0).toFixed(2);
             document.getElementById('previewGst').textContent    = gst;
             document.getElementById('previewUnit').textContent   = unit;
+            
+            // Handle Barcode Graphic
+            if (barcode.trim()) {
+                document.getElementById('barcodeContainer').style.display = 'block';
+                try {
+                    JsBarcode("#previewBarcode", barcode.trim(), {
+                        format: "CODE128",
+                        lineColor: "#000",
+                        width: 2,
+                        height: 40,
+                        displayValue: true,
+                        fontSize: 14
+                    });
+                } catch(e) {
+                    console.log("Invalid barcode sequence", e);
+                }
+            } else {
+                document.getElementById('barcodeContainer').style.display = 'none';
+            }
         } else {
             document.getElementById('previewCard').style.display = 'none';
         }

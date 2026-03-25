@@ -14,23 +14,23 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     List<Transaction> findByCustomerIdOrderByTransactionDateDescCreatedAtDesc(
-            Long customerId);
+            @org.springframework.data.repository.query.Param("customerId") Long customerId);
 
     List<Transaction> findByTransactionDateBetweenOrderByTransactionDateDesc(
-            LocalDate start, LocalDate end);
+            @org.springframework.data.repository.query.Param("start") LocalDate start, @org.springframework.data.repository.query.Param("end") LocalDate end);
 
     List<Transaction> findByTypeOrderByTransactionDateDesc(
-            Transaction.TransactionType type);
+            @org.springframework.data.repository.query.Param("type") Transaction.TransactionType type);
 
     List<Transaction> findByCustomerIdAndTypeOrderByTransactionDateDesc(
-            Long customerId, Transaction.TransactionType type);
+            @org.springframework.data.repository.query.Param("customerId") Long customerId, @org.springframework.data.repository.query.Param("type") Transaction.TransactionType type);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
             "WHERE t.type = 'DEBIT' AND t.transactionDate BETWEEN :start AND :end")
     java.math.BigDecimal getTotalPaymentsCollected(
-            @Param("start") LocalDate start,
-            @Param("end") LocalDate end);
+            @org.springframework.data.repository.query.Param("start") LocalDate start,
+            @org.springframework.data.repository.query.Param("end") LocalDate end);
 
     // ✅ ADD THIS — finds all transactions linked to a specific bill
-    List<Transaction> findByBillId(Long billId);
+    List<Transaction> findByBillId(@org.springframework.data.repository.query.Param("billId") Long billId);
 }

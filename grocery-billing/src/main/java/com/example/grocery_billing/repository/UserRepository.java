@@ -9,8 +9,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     // Spring Security uses this to load user by username at login
-    Optional<User> findByUsername(String username);
+    Optional<User> findByUsername(@org.springframework.data.repository.query.Param("username") String username);
 
     // Check if username already exists (for registration)
-    boolean existsByUsername(String username);
+    boolean existsByUsername(@org.springframework.data.repository.query.Param("username") String username);
 }

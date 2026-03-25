@@ -56,7 +56,7 @@ public class SupplierController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id,
+    public String editForm(@PathVariable("id") Long id,
                            Model model) {
         model.addAttribute("supplier",
                 supplierService.getById(id));
@@ -66,7 +66,7 @@ public class SupplierController {
     }
 
     @PostMapping("/{id}/edit")
-    public String update(@PathVariable Long id,
+    public String update(@PathVariable("id") Long id,
                          @ModelAttribute Supplier supplier,
                          RedirectAttributes ra) {
         try {
@@ -82,7 +82,7 @@ public class SupplierController {
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id,
+    public String delete(@PathVariable("id") Long id,
                          RedirectAttributes ra) {
         supplierService.delete(id);
         ra.addFlashAttribute("successMessage",
@@ -94,8 +94,8 @@ public class SupplierController {
 // should record against a PO, not directly
     @PostMapping("/{id}/pay")
     public String pay(
-            @PathVariable Long id,
-            @RequestParam java.math.BigDecimal amount,
+            @PathVariable("id") Long id,
+            @RequestParam("amount") java.math.BigDecimal amount,
             RedirectAttributes ra) {
         try {
             Supplier s = supplierService.getById(id);
@@ -195,3 +195,4 @@ public class SupplierController {
         }
     }
 }
+

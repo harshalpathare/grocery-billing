@@ -64,7 +64,7 @@ public class BillController {
     // RECEIPT PRINT PAGE
     // ─────────────────────────────────────────────────────
     @GetMapping("/{id}/receipt")
-    public String receiptView(@PathVariable Long id, Model model) {
+    public String receiptView(@PathVariable("id") Long id, Model model) {
         Bill bill = billService.getBillById(id);
 
         BigDecimal total = bill.getTotalAmount() != null
@@ -107,20 +107,20 @@ public class BillController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/new")
     public String saveBill(
-            @RequestParam(required = false)        Long       customerId,
-            @RequestParam(required = false)        String     customBillNo,
-            @RequestParam(required = false)        String     billDate,
-            @RequestParam(defaultValue = "false")  boolean    isGst,
-            @RequestParam(defaultValue = "CASH")   String     paymentMethod,
-            @RequestParam(required = false)        BigDecimal cashPaidAmount,
-            @RequestParam(required = false)        BigDecimal upiAmount,
-            @RequestParam(defaultValue = "0")      BigDecimal transportCost,
-            @RequestParam(defaultValue = "0")      BigDecimal extraCost,
-            @RequestParam(defaultValue = "0")      BigDecimal discount,
-            @RequestParam(required = false)        String     notes,
-            @RequestParam(defaultValue = "en")     String     invoiceLang,
-            @RequestParam(required = false)        BigDecimal paidAmount,
-            @RequestParam(required = false)        BigDecimal creditAmount,
+            @RequestParam(value = "customerId", required = false) Long customerId,
+            @RequestParam(value = "customBillNo", required = false) String customBillNo,
+            @RequestParam(value = "billDate", required = false) String billDate,
+            @RequestParam(value = "isGst", defaultValue = "false") boolean isGst,
+            @RequestParam(value = "paymentMethod", defaultValue = "CASH") String paymentMethod,
+            @RequestParam(value = "cashPaidAmount", required = false) BigDecimal cashPaidAmount,
+            @RequestParam(value = "upiAmount", required = false) BigDecimal upiAmount,
+            @RequestParam(value = "transportCost", defaultValue = "0") BigDecimal transportCost,
+            @RequestParam(value = "extraCost", defaultValue = "0") BigDecimal extraCost,
+            @RequestParam(value = "discount", defaultValue = "0") BigDecimal discount,
+            @RequestParam(value = "notes", required = false) String notes,
+            @RequestParam(value = "invoiceLang", defaultValue = "en") String invoiceLang,
+            @RequestParam(value = "paidAmount", required = false) BigDecimal paidAmount,
+            @RequestParam(value = "creditAmount", required = false) BigDecimal creditAmount,
             @RequestParam("productIds")            List<Long>       productIds,
             @RequestParam("quantities")            List<BigDecimal> quantities,
             @RequestParam("unitPrices")            List<BigDecimal> unitPrices,
@@ -258,7 +258,7 @@ public class BillController {
     // VIEW SINGLE BILL
     // ─────────────────────────────────────────────────────
     @GetMapping("/{id}")
-    public String viewBill(@PathVariable Long id, Model model) {
+    public String viewBill(@PathVariable("id") Long id, Model model) {
         Bill bill = billService.getBillById(id);
 
         // Pre-calculate GST per item
@@ -347,7 +347,7 @@ public class BillController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/{id}/delete")
     public String deleteBill(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             RedirectAttributes redirectAttributes) {
         try {
             billService.deleteBill(id);
@@ -367,7 +367,7 @@ public class BillController {
     @GetMapping("/qr")
     @ResponseBody
     public java.util.Map<String, String> generateQr(
-            @RequestParam BigDecimal amount,
+            @RequestParam("amount") BigDecimal amount,
             @RequestParam(required = false,
                     defaultValue = "Bill") String note) {
 
@@ -413,3 +413,4 @@ public class BillController {
         }
     }
 }
+

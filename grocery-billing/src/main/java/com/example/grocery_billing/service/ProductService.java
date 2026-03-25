@@ -73,8 +73,17 @@ public class ProductService {
     }
 
     // ─────────────────────────────────────────────────────
+    // FIND BY BARCODE
+    // ─────────────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public Optional<Product> findByBarcode(String barcode) {
+        return productRepository.findByBarcode(barcode);
+    }
+
+    // ─────────────────────────────────────────────────────
     // SAVE (both create and update)
     // ─────────────────────────────────────────────────────
+    @org.springframework.transaction.annotation.Transactional
     public Product saveProduct(Product product) {
         // Trim all text fields
         if (product.getNameEn() != null) {
@@ -86,6 +95,25 @@ public class ProductService {
         if (product.getNameMr() != null) {
             product.setNameMr(product.getNameMr().trim());
         }
+        
+        // Handle barcode uniqueness when reusing a deleted product's barcode
+        if (product.getBarcode() != null && !product.getBarcode().trim().isEmpty()) {
+            product.setBarcode(product.getBarcode().trim());
+            Optional<Product> existingWithBarcode = productRepository.findByBarcode(product.getBarcode());
+            
+            if (existingWithBarcode.isPresent() && !existingWithBarcode.get().getId().equals(product.getId())) {
+                Product old = existingWithBarcode.get();
+                if (!old.getActive()) {
+                    // Old product was deleted. Free up its barcode so this new product can use it!
+                    old.setBarcode(old.getBarcode() + "_del_" + old.getId());
+                    // ⚠️ CRITICAL: Use saveAndFlush to update the database IMMEDIATELY before insert
+                    productRepository.saveAndFlush(old);
+                } else {
+                    throw new RuntimeException("Barcode '" + product.getBarcode() + "' is already in use by active product: " + old.getNameEn());
+                }
+            }
+        }
+        
         return productRepository.save(product);
     }
 
@@ -97,6 +125,12 @@ public class ProductService {
     public void deleteProduct(Long id) {
         Product product = getProductById(id);
         product.setActive(false);
+        
+        // Free up the barcode so it can be reused by a new product in the future
+        if (product.getBarcode() != null && !product.getBarcode().isEmpty()) {
+            product.setBarcode(product.getBarcode() + "_del_" + product.getId());
+        }
+        
         productRepository.save(product);
     }
 

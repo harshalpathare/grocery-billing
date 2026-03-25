@@ -28,8 +28,8 @@ public class GstrController {
     // ─────────────────────────────────────────────────────
     @GetMapping
     public String gstr1Page(
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "year", required = false) Integer year,
             Model model) {
 
         // Default to current month
@@ -57,8 +57,8 @@ public class GstrController {
     // ─────────────────────────────────────────────────────
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadGstr1(
-            @RequestParam int month,
-            @RequestParam int year) {
+            @RequestParam("month") int month,
+            @RequestParam("year") int year) {
 
         try {
             byte[] excel = gstrService.generateGstr1Excel(
@@ -91,3 +91,4 @@ public class GstrController {
         }
     }
 }
+

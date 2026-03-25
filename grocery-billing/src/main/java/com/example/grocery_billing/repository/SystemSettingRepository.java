@@ -7,5 +7,5 @@ import java.util.Optional;
 public interface SystemSettingRepository
         extends JpaRepository<SystemSetting, String> {
 
-    Optional<SystemSetting> findByKey(String key);
+    Optional<SystemSetting> findByKey(@org.springframework.data.repository.query.Param("key") String key);
 }

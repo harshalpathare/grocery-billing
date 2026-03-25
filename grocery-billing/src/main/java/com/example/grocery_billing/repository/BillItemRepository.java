@@ -13,7 +13,7 @@ import java.util.List;
 public interface BillItemRepository extends JpaRepository<BillItem, Long> {
 
     // All items in a specific bill
-    List<BillItem> findByBillId(Long billId);
+    List<BillItem> findByBillId(@org.springframework.data.repository.query.Param("billId") Long billId);
 
     // Top selling products (for reports dashboard)
     @Query("SELECT bi.product.nameEn, SUM(bi.quantity) as totalQty " +
@@ -22,7 +22,7 @@ public interface BillItemRepository extends JpaRepository<BillItem, Long> {
             "GROUP BY bi.product.id, bi.product.nameEn " +
             "ORDER BY totalQty DESC")
     List<Object[]> findTopSellingProducts(
-            @Param("start") LocalDate start,
-            @Param("end") LocalDate end
+            @org.springframework.data.repository.query.Param("start") LocalDate start,
+            @org.springframework.data.repository.query.Param("end") LocalDate end
     );
 }

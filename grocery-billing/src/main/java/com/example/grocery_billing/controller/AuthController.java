@@ -42,8 +42,8 @@ public class AuthController {
     // ─────────────────────────────────────────────────────
     @GetMapping("/login")
     public String loginPage(
-            @RequestParam(required = false) String error,
-            @RequestParam(required = false) String logout,
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "logout", required = false) String logout,
             Model model) {
 
         if (error != null) {
@@ -81,10 +81,10 @@ public class AuthController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/users/new")
     public String createUser(
-            @RequestParam String username,
-            @RequestParam String fullName,
-            @RequestParam String password,
-            @RequestParam String role,
+            @RequestParam("username") String username,
+            @RequestParam("fullName") String fullName,
+            @RequestParam("password") String password,
+            @RequestParam("role") String role,
             RedirectAttributes redirectAttributes) {
 
         // Check username availability
@@ -121,10 +121,10 @@ public class AuthController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/users/{id}/change-password")
     public String changePassword(
-            @PathVariable Long id,
-            @RequestParam String currentPassword,
-            @RequestParam String newPassword,
-            @RequestParam String confirmPassword,
+            @PathVariable("id") Long id,
+            @RequestParam("currentPassword") String currentPassword,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword,
             Authentication auth,
             RedirectAttributes redirectAttributes) {
 
@@ -176,7 +176,7 @@ public class AuthController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/users/{id}/delete")
     public String deleteUser(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             Authentication auth,
             RedirectAttributes redirectAttributes) {
 
@@ -212,7 +212,7 @@ public class AuthController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/users/{id}/toggle")
     public String toggleUser(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             Authentication auth,
             RedirectAttributes redirectAttributes) {
 
@@ -233,3 +233,4 @@ public class AuthController {
         return "redirect:/settings";
     }
 }
+
