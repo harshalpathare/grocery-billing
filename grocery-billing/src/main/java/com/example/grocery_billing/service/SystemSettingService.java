@@ -28,10 +28,9 @@ public class SystemSettingService {
     public static final String SHOP_FSSAI   = "shop.fssai-no";
     public static final String SHOP_UPI_ID  = "shop.upi-id";
     public static final String SHOP_BANK    = "shop.bank-details";
-    public static final String INVOICE_FOOTER
-            = "shop.invoice-footer";
-    public static final String SHOP_LOGO_URL
-            = "shop.logo-url";
+    public static final String INVOICE_FOOTER = "shop.invoice-footer";
+    public static final String SHOP_LOGO_URL  = "shop.logo-url";
+    public static final String SHOP_TERMS     = "shop.terms";
 
     // ── GET ───────────────────────────────────────────
     public String get(String key) {
@@ -92,6 +91,15 @@ public class SystemSettingService {
 
         String upiId = get(SHOP_UPI_ID);
         if (upiId != null) shopConfig.setUpiId(upiId);
+        
+        String footer = get(INVOICE_FOOTER);
+        if (footer != null) shopConfig.setThankYouMsg(footer);
+        
+        String logoUrl = get(SHOP_LOGO_URL);
+        if (logoUrl != null) shopConfig.setLogoUrl(logoUrl);
+        
+        String terms = get(SHOP_TERMS);
+        if (terms != null) shopConfig.setTerms(terms);
     }
 
     // ── GET ALL AS MAP ────────────────────────────────
@@ -113,10 +121,11 @@ public class SystemSettingService {
                 shopConfig.getPhone());
         map.putIfAbsent(SHOP_GSTIN,
                 shopConfig.getGstin());
-        map.putIfAbsent(SHOP_FSSAI,
-                shopConfig.getFssaiNo());
-        map.putIfAbsent(SHOP_UPI_ID,
-                shopConfig.getUpiId());
+        map.putIfAbsent(SHOP_FSSAI, shopConfig.getFssaiNo());
+        map.putIfAbsent(SHOP_UPI_ID, shopConfig.getUpiId());
+        map.putIfAbsent(INVOICE_FOOTER, shopConfig.getThankYouMsg());
+        map.putIfAbsent(SHOP_LOGO_URL, shopConfig.getLogoUrl());
+        map.putIfAbsent(SHOP_TERMS, shopConfig.getTerms());
 
         return map;
     }

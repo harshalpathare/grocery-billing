@@ -276,6 +276,9 @@
 <div class="receipt">
 
   <!-- ── SHOP HEADER ── -->
+  <div class="text-center" style="text-align: center; margin-bottom: 4px;" th:if="${@shopConfig.logoUrl != null and !@shopConfig.logoUrl.isEmpty()}">
+    <img th:src="${@shopConfig.logoUrl}" alt="Shop Logo" style="max-height: 45px; display: block; margin: 0 auto;">
+  </div>
   <div class="shop-name" th:text="${@shopConfig.name}">
     MY GROCERY STORE
   </div>
@@ -442,23 +445,19 @@
     Only
   </div>
 
-  <hr class="divider">
-
   <!-- Footer -->
   <div class="footer">
     <!-- ── UPI QR FOR RECEIPT ── -->
-    <!-- ✅ UPI QR — shows on SCREEN only, hidden when printing -->
     <div th:if="${upiQrBase64 != null}"
          class="upi-screen-only">
       <hr class="divider">
 
-      <!-- QR Display Box — full width, easy to scan -->
+      <!-- QR Display Box -->
       <div style="text-align:center;padding:8px 0">
         <div style="font-size:12px;font-weight:bold;margin-bottom:6px">
           📱 Scan & Pay via UPI
         </div>
 
-        <!-- Large QR for easy scanning -->
         <img th:src="'data:image/png;base64,' + ${upiQrBase64}"
              alt="UPI QR"
              style="width:160px;height:160px;
@@ -473,23 +472,27 @@
           GPay · PhonePe · Paytm · BHIM
         </div>
 
-        <!-- Animated pulse to grab attention -->
         <div style="font-size:10px;color:#28a745;
                     margin-top:4px;font-weight:bold"
              class="scan-hint">
           ↑ Show this to customer for scanning ↑
         </div>
       </div>
-
       <hr class="divider">
     </div>
-        <span th:text="${@shopConfig.thankYouMsg}">
+
+        <span th:text="${@shopConfig.thankYouMsg}" style="display:block; margin-top:6px; font-weight:bold;">
             Thank you for shopping with us!
         </span>
-    <br>
-    <span style="font-size:9px">
+        
+    <div th:if="${@shopConfig.terms != null and !@shopConfig.terms.isEmpty()}" style="margin-top: 8px; text-align: left; font-size: 9px; padding-top: 5px; border-top: 1px dashed #ccc;">
+        <strong style="display:block; margin-bottom: 2px;">Terms & Conditions:</strong>
+        <div style="white-space: pre-wrap;" th:text="${@shopConfig.terms}"></div>
+    </div>
+    
+    <div style="font-size:9px; margin-top: 12px; border-top: 1px dashed #ccc; padding-top: 4px;">
             Visit again · Powered by Grocery Billing System
-        </span>
+    </div>
   </div>
 
   <!-- Extra space for paper cutter -->

@@ -229,6 +229,17 @@ public class PdfInvoiceService {
         taxLabel.setSpacingAfter(2);
         cell.addElement(taxLabel);
 
+        if (shopConfig.getLogoUrl() != null && !shopConfig.getLogoUrl().isBlank()) {
+            try {
+                com.lowagie.text.Image logo = com.lowagie.text.Image.getInstance(new java.net.URL(shopConfig.getLogoUrl()));
+                logo.scaleToFit(80, 80);
+                logo.setAlignment(Element.ALIGN_CENTER);
+                cell.addElement(logo);
+            } catch (Exception e) {
+                // Ignore missing logo
+            }
+        }
+
         Paragraph shopName = new Paragraph(shopConfig.getName().toUpperCase(), bold(20, C_WHITE));
         shopName.setAlignment(Element.ALIGN_CENTER);
         shopName.setSpacingAfter(3);
@@ -671,12 +682,26 @@ public class PdfInvoiceService {
         Font tf = regular(7, new Color(70, 70, 80));
         Font tb = bold(7, C_ACCENT);
 
-        left.addElement(new Paragraph("--Interest @24% will be charged on the bill if not paid on the due date.", tf));
-        left.addElement(new Paragraph("--Goods are sent at owner's risk and our responsibility ceases on the goods leaving our premises.", tf));
-        left.addElement(new Paragraph("--Goods once sold will not be taken back.", tf));
-        left.addElement(spacer(4));
-        left.addElement(new Paragraph("-- SUBJECT TO LOCAL JURISDICTION", tf));
-        left.addElement(new Paragraph("-- CHEQUE RETURN CHARGES RS. 300/-", tf));
+        String termsText = shopConfig.getTerms();
+        if (termsText != null && !termsText.isBlank()) {
+            for (String line : termsText.split("\n")) {
+                left.addElement(new Paragraph(line.trim(), tf));
+            }
+        } else {
+            left.addElement(new Paragraph("--Interest @24% will be charged on the bill if not paid on the due date.", tf));
+            left.addElement(new Paragraph("--Goods are sent at owner's risk and our responsibility ceases on the goods leaving our premises.", tf));
+            left.addElement(new Paragraph("--Goods once sold will not be taken back.", tf));
+            left.addElement(spacer(4));
+            left.addElement(new Paragraph("-- SUBJECT TO LOCAL JURISDICTION", tf));
+            left.addElement(new Paragraph("-- CHEQUE RETURN CHARGES RS. 300/-", tf));
+        }
+        
+        left.addElement(spacer(6));
+        
+        if (shopConfig.getThankYouMsg() != null && !shopConfig.getThankYouMsg().isBlank()) {
+            left.addElement(new Paragraph(shopConfig.getThankYouMsg(), bold(8, C_BLACK)));
+            left.addElement(spacer(2));
+        }
         left.addElement(spacer(4));
         left.addElement(new Paragraph("Firm GST No : " + shopConfig.getGstin(), tb));
         left.addElement(new Paragraph("FSSAI No: "     + shopConfig.getFssaiNo(), tb));
