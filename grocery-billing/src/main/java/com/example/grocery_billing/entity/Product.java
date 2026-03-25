@@ -31,7 +31,8 @@ public class Product {
     @Size(max = 100)
     @Column(name = "name_en", nullable = false, length = 100)
     private String nameEn;
-
+    @Column(unique = true)
+    private String barcode;
     // ── Hindi name ───────────────────────────────────────
     // columnDefinition = "VARCHAR(100) CHARACTER SET utf8mb4"
     // This ensures Hindi characters are stored correctly

@@ -12,22 +12,22 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-    Optional<Customer> findByPhone(String phone);
+    Optional<Customer> findByPhone(@org.springframework.data.repository.query.Param("phone") String phone);
 
     // ✅ NEW — find soft-deleted customer by phone
-    Optional<Customer> findByPhoneAndActiveFalse(String phone);
+    Optional<Customer> findByPhoneAndActiveFalse(@org.springframework.data.repository.query.Param("phone") String phone);
 
     // ✅ Check phone among ACTIVE customers only
-    boolean existsByPhoneAndActiveTrue(String phone);
+    boolean existsByPhoneAndActiveTrue(@org.springframework.data.repository.query.Param("phone") String phone);
 
     // ✅ Check phone among ACTIVE customers, excluding current customer (for edit)
-    boolean existsByPhoneAndIdNotAndActiveTrue(String phone, Long id);
+    boolean existsByPhoneAndIdNotAndActiveTrue(@org.springframework.data.repository.query.Param("phone") String phone, @org.springframework.data.repository.query.Param("id") Long id);
 
-    List<Customer> findByNameContainingIgnoreCaseAndActiveTrue(String name);
+    List<Customer> findByNameContainingIgnoreCaseAndActiveTrue(@org.springframework.data.repository.query.Param("name") String name);
 
     List<Customer> findByActiveTrueOrderByNameAsc();
 
-    List<Customer> findByBalanceGreaterThanAndActiveTrue(BigDecimal amount);
+    List<Customer> findByBalanceGreaterThanAndActiveTrue(@org.springframework.data.repository.query.Param("amount") BigDecimal amount);
 
 
 

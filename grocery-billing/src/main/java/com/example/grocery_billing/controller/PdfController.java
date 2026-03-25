@@ -42,7 +42,7 @@ public class PdfController {
     // GET /bills/pdf/{id}
     // ─────────────────────────────────────────────────────
     @GetMapping("/{id}")
-    public ResponseEntity<byte[]> downloadInvoice(@PathVariable Long id) {
+    public ResponseEntity<byte[]> downloadInvoice(@PathVariable("id") Long id) {
         try {
             // 1. Load the bill
             Bill bill = billService.getBillById(id);
@@ -82,7 +82,7 @@ public class PdfController {
     // GET /bills/pdf/{id}/preview
     // ─────────────────────────────────────────────────────
     @GetMapping("/{id}/preview")
-    public ResponseEntity<byte[]> previewInvoice(@PathVariable Long id) {
+    public ResponseEntity<byte[]> previewInvoice(@PathVariable("id") Long id) {
         try {
             Bill bill = billService.getBillById(id);
             byte[] pdfBytes = pdfInvoiceService.generateInvoicePdf(bill);
@@ -104,3 +104,4 @@ public class PdfController {
         }
     }
 }
+

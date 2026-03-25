@@ -69,3 +69,4 @@ public class SettingsController {
         return "redirect:/settings";
     }
 }
+

@@ -1,7 +1,9 @@
 package com.example.grocery_billing.controller;
 
 import com.example.grocery_billing.entity.PurchaseOrder;
-import com.example.grocery_billing.service.*;
+import com.example.grocery_billing.service.PurchaseOrderService;
+import com.example.grocery_billing.service.SupplierService;
+import com.example.grocery_billing.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,13 +47,12 @@ public class PurchaseOrderController {
 
     @PostMapping("/new")
     public String save(
-            @RequestParam(required = false) Long    supplierId,
-            @RequestParam(required = false) String  poNumber,
-            @RequestParam(required = false) String  orderDate,
-            @RequestParam(required = false) String  supplierInvoiceNo,
-            @RequestParam(defaultValue = "0")
-            BigDecimal taxAmount,
-            @RequestParam(required = false) String  notes,
+            @RequestParam(value = "supplierId", required = false) Long supplierId,
+            @RequestParam(value = "poNumber", required = false) String poNumber,
+            @RequestParam(value = "orderDate", required = false) String orderDate,
+            @RequestParam(value = "supplierInvoiceNo", required = false) String supplierInvoiceNo,
+            @RequestParam(value = "taxAmount", defaultValue = "0") BigDecimal taxAmount,
+            @RequestParam(value = "notes", required = false) String notes,
             @RequestParam("productIds")
             List<Long>       productIds,
             @RequestParam("quantities")
@@ -124,7 +125,7 @@ public class PurchaseOrderController {
     }
 
     @GetMapping("/{id}")
-    public String view(@PathVariable Long id, Model model) {
+    public String view(@PathVariable("id") Long id, Model model) {
         PurchaseOrder po = poService.getById(id);
         model.addAttribute("po",        po);
         model.addAttribute("activePage","purchases");
@@ -133,7 +134,7 @@ public class PurchaseOrderController {
         return "purchase/view";
     }
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id,
+    public String delete(@PathVariable("id") Long id,
                          RedirectAttributes ra) {
         try {
             poService.delete(id);
@@ -147,8 +148,8 @@ public class PurchaseOrderController {
     }
     @PostMapping("/{id}/pay")
     public String markPaid(
-            @PathVariable Long id,
-            @RequestParam(required = false) BigDecimal amountPaid,
+            @PathVariable("id") Long id,
+            @RequestParam(value = "amountPaid", required = false) BigDecimal amountPaid,
             RedirectAttributes ra) {
         try {
             poService.markAsPaid(id, amountPaid);
@@ -161,3 +162,4 @@ public class PurchaseOrderController {
         return "redirect:/purchases/" + id;
     }
 }
+

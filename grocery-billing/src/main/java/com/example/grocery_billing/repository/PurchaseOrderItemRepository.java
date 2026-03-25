@@ -7,7 +7,7 @@ import java.util.List;
 public interface PurchaseOrderItemRepository
         extends JpaRepository<PurchaseOrderItem, Long> {
 
-    List<PurchaseOrderItem> findByPurchaseOrderId(Long poId);
+    List<PurchaseOrderItem> findByPurchaseOrderId(@org.springframework.data.repository.query.Param("poId") Long poId);
 
-    List<PurchaseOrderItem> findByProductId(Long productId);
+    List<PurchaseOrderItem> findByProductId(@org.springframework.data.repository.query.Param("productId") Long productId);
 }

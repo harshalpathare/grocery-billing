@@ -42,8 +42,8 @@ public class CreditController {
     @GetMapping("/qr")
     @ResponseBody
     public String getQr(
-            @RequestParam BigDecimal amount,
-            @RequestParam Long customerId) {
+            @RequestParam("amount") BigDecimal amount,
+            @RequestParam("customerId") Long customerId) {
 
         Customer customer = customerService.getCustomerById(customerId);
 
@@ -58,8 +58,8 @@ public class CreditController {
     // ─────────────────────────────────────────────────────
     @GetMapping("/pay/{customerId}")
     public String showPaymentForm(
-            @PathVariable Long customerId,
-            @RequestParam(required = false) BigDecimal amount,
+            @PathVariable("customerId") Long customerId,
+            @RequestParam(value = "amount", required = false) BigDecimal amount,
             Model model) {
 
         Customer customer = customerService.getCustomerById(customerId);
@@ -99,8 +99,8 @@ public class CreditController {
     @GetMapping("/qr/{customerId}")
     @ResponseBody
     public java.util.Map<String, String> generateQr(
-            @PathVariable Long customerId,
-            @RequestParam BigDecimal amount) {
+            @PathVariable("customerId") Long customerId,
+            @RequestParam("amount") BigDecimal amount) {
 
         java.util.Map<String, String> result = new java.util.HashMap<>();
         try {
@@ -127,13 +127,13 @@ public class CreditController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/pay/{customerId}")
     public String processPayment(
-            @PathVariable Long customerId,
-            @RequestParam BigDecimal amount,
-            @RequestParam(required = false) String description,
+            @PathVariable("customerId") Long customerId,
+            @RequestParam("amount") BigDecimal amount,
+            @RequestParam(value = "description", required = false) String description,
             @RequestParam(required = false,
                     defaultValue = "CASH") String paymentMode,
-            @RequestParam(required = false) BigDecimal cashPart,
-            @RequestParam(required = false) BigDecimal upiPart,
+            @RequestParam(value = "cashPart", required = false) BigDecimal cashPart,
+            @RequestParam(value = "upiPart", required = false) BigDecimal upiPart,
             RedirectAttributes redirectAttributes) {
 
         if (amount == null
@@ -177,7 +177,7 @@ public class CreditController {
     // ─────────────────────────────────────────────────────
     @PostMapping("/clear/{customerId}")
     public String clearDues(
-            @PathVariable Long customerId,
+            @PathVariable("customerId") Long customerId,
             RedirectAttributes redirectAttributes) {
 
         try {
@@ -218,3 +218,4 @@ public class CreditController {
         return "redirect:/credit";
     }
 }
+

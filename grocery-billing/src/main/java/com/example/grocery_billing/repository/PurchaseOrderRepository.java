@@ -13,22 +13,22 @@ import java.util.Optional;
 public interface PurchaseOrderRepository
         extends JpaRepository<PurchaseOrder, Long> {
 
-    List<PurchaseOrder> findBySupplierId(Long supplierId,
-                                         Sort sort);
+    List<PurchaseOrder> findBySupplierId(@org.springframework.data.repository.query.Param("supplierId") Long supplierId,
+                                         @org.springframework.data.repository.query.Param("sort") Sort sort);
 
     List<PurchaseOrder> findByOrderDateBetween(
-            LocalDate start, LocalDate end);
+            @org.springframework.data.repository.query.Param("start") LocalDate start, @org.springframework.data.repository.query.Param("end") LocalDate end);
 
     @Query("SELECT COALESCE(MAX(p.poNumber),'')" +
             " FROM PurchaseOrder p WHERE p.poNumber" +
             " LIKE CONCAT('PO-',:year,'-%')")
-    Optional<String> findLastPoForYear(String year);
+    Optional<String> findLastPoForYear(@org.springframework.data.repository.query.Param("year") String year);
 
-    boolean existsByPoNumber(String poNumber);
+    boolean existsByPoNumber(@org.springframework.data.repository.query.Param("poNumber") String poNumber);
 
     @Query("SELECT COALESCE(SUM(p.totalAmount),0)" +
             " FROM PurchaseOrder p" +
             " WHERE p.orderDate BETWEEN :start AND :end")
-    BigDecimal getTotalPurchasesBetween(LocalDate start,
-                                        LocalDate end);
+    BigDecimal getTotalPurchasesBetween(@org.springframework.data.repository.query.Param("start") LocalDate start,
+                                        @org.springframework.data.repository.query.Param("end") LocalDate end);
 }

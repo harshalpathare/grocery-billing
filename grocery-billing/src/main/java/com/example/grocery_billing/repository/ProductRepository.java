@@ -1,5 +1,5 @@
 package com.example.grocery_billing.repository;
-
+import java.util.Optional;
 import com.example.grocery_billing.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,10 +16,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // Search products by English name (case-insensitive)
     // Spring auto-generates SQL: WHERE name_en LIKE %keyword%
-    List<Product> findByNameEnContainingIgnoreCaseAndActiveTrue(String keyword);
+    List<Product> findByNameEnContainingIgnoreCaseAndActiveTrue(@org.springframework.data.repository.query.Param("keyword") String keyword);
 
     // Find by category
-    List<Product> findByCategoryAndActiveTrue(String category);
+    List<Product> findByCategoryAndActiveTrue(@org.springframework.data.repository.query.Param("category") String category);
 
     // Custom query: search across all 3 languages at once
     // Used for the billing page search box
@@ -27,11 +27,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(LOWER(p.nameEn) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             " LOWER(p.nameHi) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             " LOWER(p.nameMr) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    List<Product> searchByAllLanguages(@Param("keyword") String keyword);
+    List<Product> searchByAllLanguages(@org.springframework.data.repository.query.Param("keyword") String keyword);
 
     // Check if a product name already exists (prevent duplicates)
-    Optional<Product> findByNameEnIgnoreCase(String nameEn);
+    Optional<Product> findByNameEnIgnoreCase(@org.springframework.data.repository.query.Param("nameEn") String nameEn);
 
+
+    Optional<Product> findByBarcode(@org.springframework.data.repository.query.Param("barcode") String barcode);
     // Get all distinct categories
     @Query("SELECT DISTINCT p.category FROM Product p WHERE p.category IS NOT NULL AND p.active = true")
     List<String> findAllCategories();

@@ -1,7 +1,13 @@
 package com.example.grocery_billing.service;
 
-import com.example.grocery_billing.entity.*;
-import com.example.grocery_billing.repository.*;
+import com.example.grocery_billing.entity.Product;
+import com.example.grocery_billing.entity.PurchaseOrder;
+import com.example.grocery_billing.entity.PurchaseOrderItem;
+import com.example.grocery_billing.entity.Supplier;
+import com.example.grocery_billing.repository.ProductRepository;
+import com.example.grocery_billing.repository.PurchaseOrderItemRepository;
+import com.example.grocery_billing.repository.PurchaseOrderRepository;
+import com.example.grocery_billing.repository.SupplierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -22,6 +28,35 @@ public class PurchaseOrderService {
     private final PurchaseOrderItemRepository poItemRepository;
     private final ProductRepository           productRepository;
     private final SupplierRepository          supplierRepository;
+
+    @jakarta.annotation.PostConstruct
+    @Transactional
+    public void fixCorruptedSupplierBalances() {
+        log.info("Running one-time auto-correction for Supplier Balances...");
+        System.out.println("====== FIXING SUPPLIER BALANCES ======");
+        List<Supplier> allSuppliers = supplierRepository.findAll();
+        for (Supplier s : allSuppliers) {
+            List<PurchaseOrder> pos = poRepository.findBySupplierId(s.getId(), org.springframework.data.domain.Sort.unsorted());
+            
+            BigDecimal realPayable = BigDecimal.ZERO;
+            BigDecimal realPaid = BigDecimal.ZERO;
+            
+            for (PurchaseOrder po : pos) {
+                if (po.getTotalAmount() != null) {
+                    realPayable = realPayable.add(po.getTotalAmount());
+                }
+                if (po.getAmountPaid() != null) {
+                    realPaid = realPaid.add(po.getAmountPaid());
+                }
+            }
+            
+            s.setTotalPayable(realPayable);
+            s.setTotalPaid(realPaid);
+            s.updateBalance();
+            supplierRepository.save(s);
+        }
+        System.out.println("====== SUPPLIER BALANCES FIXED ======");
+    }
 
     // ── READ ─────────────────────────────────────────────
     public List<PurchaseOrder> getAll() {
@@ -98,13 +133,20 @@ public class PurchaseOrderService {
                     .orElse(null);
             if (supplier != null
                     && po.getTotalAmount() != null) {
-                BigDecimal current =
+                BigDecimal currentPayable =
                         supplier.getTotalPayable() != null
                                 ? supplier.getTotalPayable()
                                 : BigDecimal.ZERO;
                 supplier.setTotalPayable(
-                        current.subtract(po.getTotalAmount())
+                        currentPayable.subtract(po.getTotalAmount())
                                 .max(BigDecimal.ZERO));
+                                
+                // ✅ Reverse the payment that was already given to this PO
+                if (po.getAmountPaid() != null && po.getAmountPaid().compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal currentPaid = supplier.getTotalPaid() != null ? supplier.getTotalPaid() : BigDecimal.ZERO;
+                    supplier.setTotalPaid(currentPaid.subtract(po.getAmountPaid()).max(BigDecimal.ZERO));
+                }
+                
                 supplier.updateBalance();
                 supplierRepository.save(supplier);
             }
@@ -112,22 +154,25 @@ public class PurchaseOrderService {
 
         poRepository.delete(po);
     }
+    
     @Transactional
     public void markAsPaid(Long id, BigDecimal amountPaid) {
         PurchaseOrder po = getById(id);
+
+        BigDecimal oldAmountPaid = po.getAmountPaid() != null ? po.getAmountPaid() : BigDecimal.ZERO;
 
         po.setAmountPaid(amountPaid != null
                 ? amountPaid : po.getTotalAmount());
 
         BigDecimal total = po.getTotalAmount() != null
                 ? po.getTotalAmount() : BigDecimal.ZERO;
-        BigDecimal paid  = po.getAmountPaid() != null
+        BigDecimal newAmountPaid  = po.getAmountPaid() != null
                 ? po.getAmountPaid() : BigDecimal.ZERO;
 
-        if (paid.compareTo(BigDecimal.ZERO) <= 0) {
+        if (newAmountPaid.compareTo(BigDecimal.ZERO) <= 0) {
             po.setPaymentStatus(
                     PurchaseOrder.PaymentStatus.PENDING);
-        } else if (paid.compareTo(total) >= 0) {
+        } else if (newAmountPaid.compareTo(total) >= 0) {
             po.setPaymentStatus(
                     PurchaseOrder.PaymentStatus.PAID);
         } else {
@@ -137,7 +182,7 @@ public class PurchaseOrderService {
 
         poRepository.save(po);
 
-        // ✅ UPDATE SUPPLIER HERE — only from PO pay
+        // ✅ UPDATE SUPPLIER HERE — only add the DIFFERENCE in payment
         if (po.getSupplier() != null) {
             Supplier supplier = supplierRepository
                     .findById(po.getSupplier().getId())
@@ -147,8 +192,10 @@ public class PurchaseOrderService {
                         supplier.getTotalPaid() != null
                                 ? supplier.getTotalPaid()
                                 : BigDecimal.ZERO;
+                                
+                BigDecimal paymentDifference = newAmountPaid.subtract(oldAmountPaid);
                 supplier.setTotalPaid(
-                        currentPaid.add(paid));
+                        currentPaid.add(paymentDifference).max(BigDecimal.ZERO));
                 supplier.updateBalance();
                 supplierRepository.save(supplier);
             }
