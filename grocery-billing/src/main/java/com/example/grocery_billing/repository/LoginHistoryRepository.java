@@ -11,7 +11,7 @@ public interface LoginHistoryRepository
     List<LoginHistory> findTop20ByOrderByLoginTimeDesc();
 
     List<LoginHistory> findByUserIdOrderByLoginTimeDesc(Long userId);
-
+void deleteByUserId(Long userId);
     // Find latest open session for logout tracking
     Optional<LoginHistory> findTopByUserIdAndLogoutTimeIsNullOrderByLoginTimeDesc(
             Long userId);

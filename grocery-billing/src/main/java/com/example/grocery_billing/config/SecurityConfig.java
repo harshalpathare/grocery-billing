@@ -103,6 +103,11 @@ public class SecurityConfig {
                 // ── Session Management ───────────────────────
                 .sessionManagement(session -> session
                         .maximumSessions(3)
+                )
+
+                // ── Exception Handling ───────────────────────
+                .exceptionHandling(exception -> exception
+                        .accessDeniedPage("/error")
                 );
 
         return http.build();

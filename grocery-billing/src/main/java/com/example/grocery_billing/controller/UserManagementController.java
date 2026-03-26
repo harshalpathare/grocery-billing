@@ -2,6 +2,8 @@ package com.example.grocery_billing.controller;
 
 import com.example.grocery_billing.entity.User;
 import com.example.grocery_billing.repository.UserRepository;
+import com.example.grocery_billing.repository.LoginHistoryRepository;
+import com.example.grocery_billing.repository.ActivityLogRepository;
 import com.example.grocery_billing.service.ActivityLogService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UserManagementController {
 
     private final UserRepository userRepository;
+    private final LoginHistoryRepository loginHistoryRepository;
+    private final ActivityLogRepository activityLogRepository;
     private final PasswordEncoder passwordEncoder;
     private final ActivityLogService activityLogService;
 
@@ -99,12 +103,25 @@ public class UserManagementController {
             return "redirect:/settings/users";
         }
 
-        userRepository.delete(user);
-        activityLogService.log(
-                "DELETE", "USER", id,
-                "Deleted user " + user.getUsername(),
-                request);
-        ra.addFlashAttribute("successMessage", "User deleted successfully.");
+        try {
+            // ── Delete all login history records for this user first ──
+            loginHistoryRepository.deleteByUserId(id);
+            
+            // ── Delete all activity log records for this user ──
+            activityLogRepository.deleteByUserId(id);
+            
+            // ── Now delete the user ──
+            userRepository.delete(user);
+            
+            activityLogService.log(
+                    "DELETE", "USER", id,
+                    "Deleted user " + user.getUsername(),
+                    request);
+            ra.addFlashAttribute("successMessage", "User deleted successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error deleting user: " + e.getMessage());
+        }
+        
         return "redirect:/settings/users";
     }
 }

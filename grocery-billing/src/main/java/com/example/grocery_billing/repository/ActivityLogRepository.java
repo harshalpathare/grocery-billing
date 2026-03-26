@@ -12,7 +12,7 @@ public interface ActivityLogRepository
     List<ActivityLog> findTop50ByOrderByCreatedAtDesc();
 
     List<ActivityLog> findByUserIdOrderByCreatedAtDesc(Long userId);
-
+void deleteByUserId(Long userId);
     List<ActivityLog> findByCreatedAtBetweenOrderByCreatedAtDesc(
             LocalDateTime start, LocalDateTime end);
 
