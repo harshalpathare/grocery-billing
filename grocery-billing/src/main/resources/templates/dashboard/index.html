@@ -46,6 +46,11 @@
         <a th:href="@{/reports}" class="nav-link">
             <i class="bi bi-bar-chart"></i> <span>Reports</span>
         </a>
+        <a th:href="@{/activity}" class="nav-link"
+           th:classappend="${activePage == 'activity'} ? 'active' : ''">
+            <i class="bi bi-clock-history"></i>
+            <span>Activity Log</span>
+        </a>
     </nav>
     <div class="sidebar-bottom">
         <a th:href="@{/settings}" class="nav-link">
