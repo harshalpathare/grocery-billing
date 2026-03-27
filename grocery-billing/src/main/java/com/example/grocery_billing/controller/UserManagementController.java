@@ -92,6 +92,31 @@ public class UserManagementController {
         return "redirect:/settings/users";
     }
 
+    @PostMapping("/{id}/toggle")
+    public String toggleUserStatus(@PathVariable Long id,
+                                   RedirectAttributes ra,
+                                   HttpServletRequest request) {
+
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            ra.addFlashAttribute("errorMessage", "User not found.");
+            return "redirect:/settings/users";
+        }
+
+        user.setEnabled(!Boolean.TRUE.equals(user.getEnabled()));
+        userRepository.save(user);
+
+        activityLogService.log(
+                "UPDATE", "USER", id,
+                (user.getEnabled() ? "Activated " : "Disabled ") + "user " + user.getUsername(),
+                request);
+
+        ra.addFlashAttribute("successMessage",
+                "User " + user.getUsername() + " has been " + (user.getEnabled() ? "activated" : "disabled") + ".");
+
+        return "redirect:/settings/users";
+    }
+
     @PostMapping("/{id}/delete")
     public String deleteUser(@PathVariable Long id,
                              RedirectAttributes ra,
