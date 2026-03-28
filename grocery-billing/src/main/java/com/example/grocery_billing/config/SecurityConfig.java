@@ -16,20 +16,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * SECURITY CONFIGURATION
- * Compatible with Spring Security 6.1+ / Spring Boot 3.2+
- *
- * Key change: AntPathRequestMatcher is no longer needed for logout.
- * Spring Security 6.x uses the newer fluent API directly.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomUserDetailsService userDetailsService;
+    private final CustomUserDetailsService  userDetailsService;
+
+    // ✅ Three new handlers for activity logging
+    private final LoginSuccessHandler       loginSuccessHandler;
+    private final LoginFailureHandler       loginFailureHandler;
+    private final AppLogoutSuccessHandler   appLogoutSuccessHandler;
 
     // ── Password Encoder ─────────────────────────────────
     @Bean
@@ -57,13 +55,16 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/favicon.ico"
+                                "/favicon.ico",
+                                "/admin/users",
+                                "/admin/promote/**"
                         ).permitAll()
 
                         // Admin only
                         .requestMatchers(
                                 "/settings/**",
-                                "/users/**"
+                                "/users/**",
+                                "/activity/**"   // ✅ Activity log — admin only
                         ).hasRole("ADMIN")
 
                         // Everything else requires login
@@ -76,17 +77,15 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .usernameParameter("username")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/", true)
-                        .failureUrl("/login?error=true")
+                        .successHandler(loginSuccessHandler)  // ✅ logs login + redirects to /
+                        .failureHandler(loginFailureHandler)  // ✅ logs failed login + redirects to /login?error
                         .permitAll()
                 )
 
                 // ── Logout ───────────────────────────────────
-                // ✅ No AntPathRequestMatcher needed in Spring Security 6.1+
-                // Use logoutUrl() directly — Spring handles POST /logout automatically
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout=true")
+                        .logoutSuccessHandler(appLogoutSuccessHandler) // ✅ logs logout + redirects to /login?logout
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID", "remember-me")
                         .clearAuthentication(true)
@@ -104,6 +103,11 @@ public class SecurityConfig {
                 // ── Session Management ───────────────────────
                 .sessionManagement(session -> session
                         .maximumSessions(3)
+                )
+
+                // ── Exception Handling ───────────────────────
+                .exceptionHandling(exception -> exception
+                        .accessDeniedPage("/error")
                 );
 
         return http.build();

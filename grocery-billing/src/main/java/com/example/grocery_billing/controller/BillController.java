@@ -5,6 +5,7 @@ import com.example.grocery_billing.config.ShopConfig;
 import com.example.grocery_billing.entity.Bill;
 import com.example.grocery_billing.entity.Customer;
 import com.example.grocery_billing.repository.TransactionRepository;
+import com.example.grocery_billing.service.ActivityLogService;
 import com.example.grocery_billing.service.BillService;
 import com.example.grocery_billing.service.CustomerService;
 import com.example.grocery_billing.service.ProductService;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,6 +37,9 @@ public class BillController {
     private final ProductService        productService;
     private final QrCodeService         qrCodeService;
     private final TransactionRepository transactionRepository;
+
+    @Autowired
+    private ActivityLogService activityLogService;
 
     // ─────────────────────────────────────────────────────
     // LIST ALL BILLS
@@ -125,7 +131,8 @@ public class BillController {
             @RequestParam("productIds")            List<Long>       productIds,
             @RequestParam("quantities")            List<BigDecimal> quantities,
             @RequestParam("unitPrices")            List<BigDecimal> unitPrices,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
 
         if (productIds == null || productIds.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage",
@@ -242,6 +249,13 @@ public class BillController {
                     savedBill.getPaymentStatus(),
                     savedBill.getPaymentMethod());
 
+            activityLogService.log(
+                "CREATE", "BILL",
+                savedBill.getId(),
+                "Created bill " + savedBill.getBillNo()
+                    + " for ₹" + savedBill.getTotalAmount(),
+                request);
+
             redirectAttributes.addFlashAttribute("successMessage",
                     "Bill " + savedBill.getBillNo()
                             + " created successfully!");
@@ -253,6 +267,8 @@ public class BillController {
                     "Error: " + e.getMessage());
             return "redirect:/bills/new";
         }
+
+        
     }
 
     // ─────────────────────────────────────────────────────
@@ -349,9 +365,13 @@ public class BillController {
     @PostMapping("/{id}/delete")
     public String deleteBill(
             @PathVariable Long id,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
         try {
             billService.deleteBill(id);
+            activityLogService.log(
+                "DELETE", "BILL", id,
+                "Deleted bill #" + id, request);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Bill deleted successfully.");
         } catch (Exception e) {

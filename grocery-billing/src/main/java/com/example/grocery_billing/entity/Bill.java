@@ -87,7 +87,9 @@ public class Bill {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
     // ── Relationship: Bill has MANY BillItems ─────────────
     // cascade = ALL: saving a Bill automatically saves its items
     // orphanRemoval = true: if you remove an item from the list, it's deleted from DB
