@@ -20,6 +20,13 @@
         <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
         <a th:href="@{/credit}" class="nav-link"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
         <a th:href="@{/reports}" class="nav-link"><i class="bi bi-bar-chart"></i><span>Reports</span></a>        <a th:href="@{/activity}" class="nav-link"           th:classappend="${activePage == 'activity'} ? 'active' : ''">            <i class="bi bi-clock-history"></i>            <span>Activity Log</span>        </a>
+        <a th:href="@{/insights}" class="nav-link"
+           th:classappend="${activePage == 'insights'} ? 'active' : ''">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>AI Insights</span>
+        </a>
+
+
     </nav>
     <div class="sidebar-bottom">
         <a th:href="@{/settings}" class="nav-link"><i class="bi bi-gear"></i><span>Settings</span></a>

@@ -16,6 +16,7 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
 
     Optional<Bill> findByBillNo(String billNo);
 
+    List<Bill> findByBillDateGreaterThanEqual(LocalDate date);
     List<Bill> findByCustomerIdOrderByBillDateDesc(Long customerId);
 
     List<Bill> findByBillDateOrderByCreatedAtDesc(LocalDate date);
