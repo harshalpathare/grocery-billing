@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
+
 <!-- ===================== SIDEBAR ===================== -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-brand">
@@ -15,7 +16,7 @@
         <span>Grocery Bill</span>
     </div>
     <nav class="sidebar-nav">
-        <a th:href="@{/}" class="nav-link active">
+        <a th:href="@{/}" class="nav-link">
             <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
         </a>
         <a th:href="@{/products}" class="nav-link">
@@ -42,7 +43,8 @@
         <a th:href="@{/reports}" class="nav-link">
             <i class="bi bi-bar-chart"></i> <span>Reports</span>
         </a>
-        <a th:href="@{/activity}" class="nav-link" sec:authorize="hasRole('ADMIN')"
+        <a th:href="@{/activity}" class="nav-link active"
+           sec:authorize="hasRole('ADMIN')"
            th:classappend="${activePage == 'activity'} ? 'active' : ''">
             <i class="bi bi-clock-history"></i>
             <span>Activity Log</span>
@@ -54,28 +56,25 @@
         </a>
     </nav>
     <div class="sidebar-bottom">
-        <a th:href="@{/settings}" class="nav-link" sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{/settings}" class="nav-link"
+           sec:authorize="hasRole('ADMIN')">
             <i class="bi bi-gear"></i><span>Settings</span>
         </a>
     </div>
 </div>
 
-<!-- sidebar same as other pages 
-
 <div class="main-content" id="mainContent">
     <nav class="top-navbar">
+        <button class="btn btn-sm btn-outline-secondary"
+                id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
         <h5 class="mb-0 ms-3">
             <i class="bi bi-clock-history me-2"></i>Activity Log
         </h5>
-         
-    </nav>
--->
-<div class="main-content" id="mainContent">
-    <nav class="top-navbar">
-        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle"><i class="bi bi-list"></i></button>
-        <h5 class="mb-0 ms-3">Activity Log</h5>
         <div class="ms-auto d-flex align-items-center gap-2">
-            <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
+            <form th:action="@{/logout}" method="post"
+                  class="mb-0 d-inline">
                 <input type="hidden"
                        th:name="${_csrf.parameterName}"
                        th:value="${_csrf.token}">
@@ -88,7 +87,6 @@
         </div>
     </nav>
 
-
     <div class="page-content">
 
         <!-- ── TODAY'S PERFORMANCE ── -->
@@ -100,46 +98,47 @@
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th class="text-center">Total Actions</th>
-                            <th class="text-center">Created</th>
-                            <th class="text-center">Deleted</th>
-                            <th>Filter</th>
-                        </tr>
+                    <tr>
+                        <th>Employee</th>
+                        <th class="text-center">Total Actions</th>
+                        <th class="text-center">Created</th>
+                        <th class="text-center">Deleted</th>
+                        <th>Filter</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="p : ${performance}">
-                            <td>
-                                <i class="bi bi-person-circle me-2 text-primary"></i>
-                                <strong th:text="${p.username}">user</strong>
-                            </td>
-                            <td class="text-center">
+                    <tr th:each="p : ${performance}">
+                        <td>
+                            <i class="bi bi-person-circle me-2 text-primary"></i>
+                            <strong th:text="${p.username}">user</strong>
+                        </td>
+                        <td class="text-center">
                                 <span class="badge bg-primary"
                                       th:text="${p.totalActions}">0</span>
-                            </td>
-                            <td class="text-center">
+                        </td>
+                        <td class="text-center">
                                 <span class="badge bg-success"
                                       th:text="${p.creates}">0</span>
-                            </td>
-                            <td class="text-center">
+                        </td>
+                        <td class="text-center">
                                 <span class="badge bg-danger"
                                       th:text="${p.deletes}">0</span>
-                            </td>
-                            <td>
-                                <a th:each="u : ${users}"
-                                   th:if="${u.username == p.username}"
-                                   th:href="@{/activity(userId=${u.id})}"
-                                   class="btn btn-sm btn-outline-primary">
-                                    View Logs
-                                </a>
-                            </td>
-                        </tr>
-                        <tr th:if="${performance.isEmpty()}">
-                            <td colspan="5" class="text-center text-muted py-3">
-                                No activity today yet
-                            </td>
-                        </tr>
+                        </td>
+                        <td>
+                            <a th:each="u : ${users}"
+                               th:if="${u.username == p.username}"
+                               th:href="@{/activity(userId=${u.id})}"
+                               class="btn btn-sm btn-outline-primary">
+                                View Logs
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${performance.isEmpty()}">
+                        <td colspan="5"
+                            class="text-center text-muted py-3">
+                            No activity today yet
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -150,7 +149,8 @@
             <!-- ── ACTIVITY LOG ── -->
             <div class="col-lg-8">
                 <div class="table-card">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between
+                                align-items-center mb-3">
                         <h6 class="fw-bold mb-0">
                             <i class="bi bi-list-ul me-2 text-success"></i>
                             Activity Log
@@ -161,44 +161,51 @@
                         </a>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0 small">
+                        <table class="table table-hover
+                                      align-middle mb-0 small">
                             <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Details</th>
-                                </tr>
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="log : ${logs}">
-                                    <td class="text-muted"
-                                        th:text="${#temporals.format(
+                            <tr th:each="log : ${logs}">
+                                <td class="text-muted"
+                                    th:text="${#temporals.format(
                                             log.createdAt,
                                             'dd MMM HH:mm')}">
-                                    </td>
-                                    <td>
-                                        <i class="bi bi-person me-1"></i>
-                                        <span th:text="${log.username}"></span>
-                                    </td>
-                                    <td>
+                                </td>
+                                <td>
+                                    <i class="bi bi-person me-1"></i>
+                                    <span th:text="${log.username}">
+                                        </span>
+                                </td>
+                                <td>
                                         <span class="badge"
                                               th:classappend="
-                                                ${log.action == 'CREATE'} ? 'bg-success' :
-                                                (${log.action == 'DELETE'} ? 'bg-danger' :
-                                                (${log.action == 'LOGIN'}  ? 'bg-primary' :
-                                                (${log.action == 'LOGOUT'} ? 'bg-secondary' :
+                                                ${log.action == 'CREATE'}
+                                                    ? 'bg-success' :
+                                                (${log.action == 'DELETE'}
+                                                    ? 'bg-danger' :
+                                                (${log.action == 'LOGIN'}
+                                                    ? 'bg-primary' :
+                                                (${log.action == 'LOGOUT'}
+                                                    ? 'bg-secondary' :
                                                  'bg-warning text-dark')))"
                                               th:text="${log.action}">
                                         </span>
-                                    </td>
-                                    <td th:text="${log.description}"></td>
-                                </tr>
-                                <tr th:if="${logs.isEmpty()}">
-                                    <td colspan="4" class="text-center text-muted py-3">
-                                        No activity logs found
-                                    </td>
-                                </tr>
+                                </td>
+                                <td th:text="${log.description}"></td>
+                            </tr>
+                            <tr th:if="${logs.isEmpty()}">
+                                <td colspan="4"
+                                    class="text-center text-muted py-3">
+                                    No activity logs found
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -209,8 +216,8 @@
             <div class="col-lg-4">
                 <div class="table-card">
                     <h6 class="fw-bold mb-3">
-                        <i class="bi bi-box-arrow-in-right me-2 text-info"></i>
-                        Login History
+                        <i class="bi bi-box-arrow-in-right me-2 text-info">
+                        </i>Login History
                     </h6>
                     <div th:each="h : ${loginHistory}"
                          class="d-flex justify-content-between
@@ -244,10 +251,454 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.getElementById('sidebarToggle').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-        document.getElementById('mainContent').classList.toggle('expanded');
-    });
+    document.getElementById('sidebarToggle')
+        .addEventListener('click', function () {
+            document.getElementById('sidebar')
+                .classList.toggle('collapsed');
+            document.getElementById('mainContent')
+                .classList.toggle('expanded');
+        });
 </script>
+
+<!-- ✅ RAG AI ASSISTANT WIDGET — START -->
+<!-- Floating Button -->
+<button id="ragToggleBtn"
+        onclick="toggleRagChat()"
+        style="position:fixed;bottom:24px;right:24px;
+               width:56px;height:56px;border-radius:50%;
+               background:linear-gradient(135deg,#667eea,#764ba2);
+               border:none;color:white;font-size:22px;
+               box-shadow:0 4px 20px rgba(102,126,234,0.5);
+               cursor:pointer;z-index:9999;
+               transition:transform 0.2s"
+        onmouseover="this.style.transform='scale(1.1)'"
+        onmouseout="this.style.transform='scale(1)'">
+    🤖
+</button>
+
+<!-- Chat Window -->
+<div id="ragChatWindow"
+     style="display:none;position:fixed;bottom:90px;right:24px;
+            width:380px;height:540px;background:white;
+            border-radius:16px;
+            box-shadow:0 8px 40px rgba(0,0,0,0.15);
+            z-index:9998;flex-direction:column;overflow:hidden">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#667eea,#764ba2);
+                padding:16px;color:white;
+                display:flex;align-items:center;
+                justify-content:space-between">
+        <div>
+            <div style="font-weight:700;font-size:15px">
+                🤖 AI Business Assistant
+            </div>
+            <div style="font-size:11px;opacity:0.8"
+                 id="ragStatusText">
+                Ask anything about your shop
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+            <button onclick="toggleTts()"
+                    id="ttsToggleBtn"
+                    title="Voice response ON — click to turn off"
+                    style="background:rgba(255,255,255,0.2);
+                           border:none;color:white;
+                           width:28px;height:28px;
+                           border-radius:50%;cursor:pointer;
+                           font-size:14px">🔊</button>
+            <button onclick="toggleRagChat()"
+                    style="background:rgba(255,255,255,0.2);
+                           border:none;color:white;
+                           width:28px;height:28px;
+                           border-radius:50%;cursor:pointer;
+                           font-size:14px">✕</button>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <div id="ragMessages"
+         style="flex:1;overflow-y:auto;padding:16px;
+                display:flex;flex-direction:column;gap:12px;
+                background:#f8f9fa">
+        <div style="background:white;padding:12px;
+                    border-radius:4px 12px 12px 12px;
+                    box-shadow:0 1px 4px rgba(0,0,0,0.08);
+                    font-size:13px;max-width:90%">
+            👋 Hello! I'm your AI assistant.
+            Type or use <strong>🎤 mic</strong> to speak!
+            <div style="margin-top:8px;
+                        display:flex;flex-wrap:wrap;gap:4px">
+                <button onclick="askQuick('How were sales today?')"
+                        style="font-size:11px;padding:3px 8px;
+                               border:1px solid #667eea;
+                               background:white;color:#667eea;
+                               border-radius:12px;cursor:pointer">
+                    Today sales
+                </button>
+                <button onclick="askQuick(
+                            'What are my top selling products?')"
+                        style="font-size:11px;padding:3px 8px;
+                               border:1px solid #667eea;
+                               background:white;color:#667eea;
+                               border-radius:12px;cursor:pointer">
+                    Top products
+                </button>
+                <button onclick="askQuick(
+                            'Which products are low in stock?')"
+                        style="font-size:11px;padding:3px 8px;
+                               border:1px solid #667eea;
+                               background:white;color:#667eea;
+                               border-radius:12px;cursor:pointer">
+                    Low stock
+                </button>
+                <button onclick="askQuick(
+                            'Which customers have pending udhari?')"
+                        style="font-size:11px;padding:3px 8px;
+                               border:1px solid #667eea;
+                               background:white;color:#667eea;
+                               border-radius:12px;cursor:pointer">
+                    Udhari list
+                </button>
+                <button onclick="askQuick(
+                            'Who are my top customers?')"
+                        style="font-size:11px;padding:3px 8px;
+                               border:1px solid #667eea;
+                               background:white;color:#667eea;
+                               border-radius:12px;cursor:pointer">
+                    Top customers
+                </button>
+                <button onclick="askQuick(
+                            'How was business this week?')"
+                        style="font-size:11px;padding:3px 8px;
+                               border:1px solid #667eea;
+                               background:white;color:#667eea;
+                               border-radius:12px;cursor:pointer">
+                    This week
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div style="padding:12px;background:white;
+                border-top:1px solid #eee">
+        <div id="voiceStatusBar"
+             style="display:none;margin-bottom:8px;
+                    padding:6px 12px;border-radius:20px;
+                    background:linear-gradient(135deg,#ff6b6b,#ee5a24);
+                    color:white;font-size:12px;text-align:center">
+            🎤 Listening... speak now
+        </div>
+        <div id="stopSpeakingBar"
+             style="display:none;margin-bottom:8px">
+            <button onclick="stopSpeaking()"
+                    style="width:100%;padding:5px;border:none;
+                           border-radius:12px;
+                           background:linear-gradient(
+                               135deg,#ff6b6b,#ee5a24);
+                           color:white;font-size:11px;
+                           cursor:pointer">
+                ⏹ Stop Speaking
+            </button>
+        </div>
+        <div id="voiceNotSupported"
+             style="display:none;margin-bottom:6px;
+                    font-size:11px;color:#dc3545;text-align:center">
+            ⚠️ Voice not supported. Use Chrome or Edge.
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+            <input type="text" id="ragInput"
+                   placeholder="Ask about sales, stock, customers..."
+                   style="flex:1;border:1px solid #ddd;
+                          border-radius:20px;padding:8px 14px;
+                          font-size:13px;outline:none;
+                          transition:border-color 0.2s"
+                   onfocus="this.style.borderColor='#667eea'"
+                   onblur="this.style.borderColor='#ddd'"
+                   onkeydown="if(event.key==='Enter')
+                               sendRagMessage()">
+            <button onclick="toggleVoiceInput()"
+                    id="ragVoiceBtn"
+                    title="Click to speak"
+                    style="width:36px;height:36px;border-radius:50%;
+                           background:white;
+                           border:2px solid #667eea;
+                           color:#667eea;cursor:pointer;
+                           font-size:16px;display:flex;
+                           align-items:center;justify-content:center;
+                           transition:all 0.2s;flex-shrink:0">
+                🎤
+            </button>
+            <button onclick="sendRagMessage()"
+                    id="ragSendBtn"
+                    style="width:36px;height:36px;border-radius:50%;
+                           background:linear-gradient(
+                               135deg,#667eea,#764ba2);
+                           border:none;color:white;cursor:pointer;
+                           font-size:16px;display:flex;
+                           align-items:center;justify-content:center;
+                           flex-shrink:0">➤</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes pulse {
+        0%,100% { opacity:1; }
+        50%      { opacity:0.6; }
+    }
+    @keyframes voicePulse {
+        0%,100% { box-shadow:0 0 0 0 rgba(255,107,107,0.4); }
+        50%      { box-shadow:0 0 0 8px rgba(255,107,107,0); }
+    }
+    #voiceStatusBar { animation:pulse 1s ease-in-out infinite; }
+    .voice-active {
+        background:linear-gradient(135deg,#ff6b6b,#ee5a24) !important;
+        border-color:#ff6b6b !important;
+        color:white !important;
+        animation:voicePulse 1s ease-in-out infinite;
+    }
+</style>
+
+<script>
+    let ragOpen          = false;
+    let recognition      = null;
+    let isListening      = false;
+    let ttsEnabled       = true;
+    let isSpeaking       = false;
+    let currentUtterance = null;
+
+    function toggleRagChat() {
+        ragOpen = !ragOpen;
+        const win = document.getElementById('ragChatWindow');
+        win.style.display = ragOpen ? 'flex' : 'none';
+        if (ragOpen) {
+            document.getElementById('ragInput').focus();
+        } else {
+            if (isListening) stopVoiceInput();
+            stopSpeaking();
+        }
+    }
+
+    function askQuick(question) {
+        document.getElementById('ragInput').value = question;
+        sendRagMessage();
+    }
+
+    function sendRagMessage() {
+        const input    = document.getElementById('ragInput');
+        const question = input.value.trim();
+        if (!question) return;
+        appendMessage(question, 'user');
+        input.value = '';
+        const loadingId = appendMessage('⏳ Thinking...', 'bot');
+        document.getElementById('ragSendBtn').disabled  = true;
+        document.getElementById('ragVoiceBtn').disabled = true;
+        const csrfToken = document.querySelector(
+            'input[name="_csrf"]')?.value || '';
+        fetch('/api/rag/ask', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({ question })
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById(loadingId)?.remove();
+            const answer = data.answer || 'No answer.';
+            appendMessage(answer, 'bot');
+            speakText(answer);
+        })
+        .catch(err => {
+            document.getElementById(loadingId)?.remove();
+            appendMessage('❌ Error: ' + err.message, 'bot');
+        })
+        .finally(() => {
+            document.getElementById('ragSendBtn').disabled  = false;
+            document.getElementById('ragVoiceBtn').disabled = false;
+        });
+    }
+
+    function appendMessage(text, type) {
+        const messages = document.getElementById('ragMessages');
+        const id       = 'msg-' + Date.now();
+        const isUser   = type === 'user';
+        const div      = document.createElement('div');
+        div.id = id;
+        div.style.cssText = `display:flex;
+            justify-content:${isUser ? 'flex-end' : 'flex-start'};`;
+        const bubble = document.createElement('div');
+        bubble.style.cssText = `
+            max-width:85%;padding:10px 14px;
+            border-radius:${isUser
+                ? '12px 12px 4px 12px'
+                : '4px 12px 12px 12px'};
+            font-size:13px;line-height:1.6;
+            background:${isUser
+                ? 'linear-gradient(135deg,#667eea,#764ba2)'
+                : 'white'};
+            color:${isUser ? 'white' : '#333'};
+            box-shadow:0 1px 4px rgba(0,0,0,0.08);
+            white-space:pre-wrap;word-break:break-word;`;
+        bubble.textContent = text;
+        div.appendChild(bubble);
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+        return id;
+    }
+
+    function toggleVoiceInput() {
+        isListening ? stopVoiceInput() : startVoiceInput();
+    }
+
+    function startVoiceInput() {
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            document.getElementById('voiceNotSupported')
+                .style.display = 'block';
+            return;
+        }
+        recognition                = new SpeechRecognition();
+        recognition.lang           = 'en-IN';
+        recognition.continuous     = false;
+        recognition.interimResults = true;
+        recognition.onresult = function(event) {
+            let transcript = '';
+            for (let i = event.resultIndex;
+                     i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            document.getElementById('ragInput').value
+                = transcript;
+        };
+        recognition.onend = function() {
+            const val = document.getElementById(
+                'ragInput').value.trim();
+            stopVoiceInput();
+            if (val) setTimeout(() => sendRagMessage(), 300);
+        };
+        recognition.onerror = function(event) {
+            stopVoiceInput();
+            if (event.error === 'not-allowed') {
+                appendMessage('🎤 Microphone permission denied. '
+                    + 'Please allow microphone access.', 'bot');
+            } else if (event.error === 'no-speech') {
+                appendMessage(
+                    '🎤 No speech detected. Try again.', 'bot');
+            }
+        };
+        recognition.start();
+        isListening = true;
+        const voiceBtn = document.getElementById('ragVoiceBtn');
+        voiceBtn.classList.add('voice-active');
+        voiceBtn.textContent = '⏹';
+        voiceBtn.title = 'Click to stop listening';
+        document.getElementById('voiceStatusBar')
+            .style.display = 'block';
+        document.getElementById('ragStatusText')
+            .textContent = '🎤 Listening...';
+        document.getElementById('ragInput')
+            .placeholder = 'Speak now...';
+    }
+
+    function stopVoiceInput() {
+        if (recognition) { recognition.stop(); recognition = null; }
+        isListening = false;
+        const voiceBtn = document.getElementById('ragVoiceBtn');
+        voiceBtn.classList.remove('voice-active');
+        voiceBtn.textContent = '🎤';
+        voiceBtn.title = 'Click to speak';
+        document.getElementById('voiceStatusBar')
+            .style.display = 'none';
+        document.getElementById('ragStatusText')
+            .textContent = 'Ask anything about your shop';
+        document.getElementById('ragInput')
+            .placeholder = 'Ask about sales, stock, customers...';
+    }
+
+    function toggleTts() {
+        ttsEnabled = !ttsEnabled;
+        const btn = document.getElementById('ttsToggleBtn');
+        if (ttsEnabled) {
+            btn.textContent      = '🔊';
+            btn.title            = 'Voice response ON';
+            btn.style.background = 'rgba(255,255,255,0.2)';
+            appendMessage('🔊 Voice response turned ON', 'bot');
+        } else {
+            btn.textContent      = '🔇';
+            btn.title            = 'Voice response OFF';
+            btn.style.background = 'rgba(255,0,0,0.3)';
+            stopSpeaking();
+            appendMessage('🔇 Voice response turned OFF', 'bot');
+        }
+    }
+
+    function speakText(text) {
+        if (!ttsEnabled) return;
+        if (!window.speechSynthesis) return;
+        stopSpeaking();
+        const cleanText = text
+            .replace(/[🤖👋📦⚠️🎯👤💡📊✅❌⏳🔊🔇🎤⏹🏆⭐]/gu,'')
+            .replace(/\*\*/g,'').replace(/\*/g,'')
+            .replace(/#{1,6}/g,'').replace(/\n+/g,'. ').trim();
+        if (!cleanText) return;
+        currentUtterance =
+            new SpeechSynthesisUtterance(cleanText);
+        currentUtterance.lang   = 'en-IN';
+        currentUtterance.rate   = 0.95;
+        currentUtterance.pitch  = 1.0;
+        currentUtterance.volume = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v =>
+            v.lang === 'en-IN' || v.lang === 'en-GB' ||
+            v.name.includes('Google') ||
+            v.name.includes('Microsoft'));
+        if (preferred) currentUtterance.voice = preferred;
+        currentUtterance.onstart = () => {
+            isSpeaking = true;
+            document.getElementById('ragStatusText')
+                .textContent = '🔊 Speaking...';
+            document.getElementById('stopSpeakingBar')
+                .style.display = 'block';
+        };
+        currentUtterance.onend = () => {
+            isSpeaking = false;
+            document.getElementById('ragStatusText')
+                .textContent = 'Ask anything about your shop';
+            document.getElementById('stopSpeakingBar')
+                .style.display = 'none';
+        };
+        currentUtterance.onerror = () => {
+            isSpeaking = false;
+            document.getElementById('stopSpeakingBar')
+                .style.display = 'none';
+        };
+        window.speechSynthesis.speak(currentUtterance);
+    }
+
+    function stopSpeaking() {
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        isSpeaking = false;
+        document.getElementById('stopSpeakingBar')
+            .style.display = 'none';
+        document.getElementById('ragStatusText')
+            .textContent = 'Ask anything about your shop';
+    }
+
+    if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = function() {
+            window.speechSynthesis.getVoices();
+        };
+    }
+</script>
+<!-- ✅ RAG AI ASSISTANT WIDGET — END -->
+
 </body>
 </html>
