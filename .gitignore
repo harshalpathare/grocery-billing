@@ -1,2 +1,7 @@
 **/application-local.properties
 grocery-billing/src/main/resources/application-local.properties
+
+# Environment variables
+.env
+.env.local
+.env.*.local
