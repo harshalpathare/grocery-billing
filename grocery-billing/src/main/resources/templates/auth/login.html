@@ -284,6 +284,11 @@
                  id="ragStatusText">
                 Ask anything about your shop
             </div>
+            <!-- Language indicator -->
+            <div id="langIndicator"
+                 style="font-size:10px;opacity:0.7;margin-top:2px">
+                🌐 English · हिंदी · मराठी
+            </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
             <!-- TTS Toggle -->
@@ -777,6 +782,34 @@
             window.speechSynthesis.getVoices();
         };
     }
+    // ── Language detection & indicator ───────────
+function detectLang(text) {
+    const devanagari = /[\u0900-\u097F]/;
+    if (!devanagari.test(text)) return 'en';
+    // Marathi indicators
+    if (/आहे|काय|किती|कसे/.test(text)) return 'mr';
+    return 'hi';
+}
+
+// Update language indicator when typing
+document.getElementById('ragInput')
+    .addEventListener('input', function() {
+        const lang = detectLang(this.value);
+        const indicator =
+            document.getElementById('langIndicator');
+        if (indicator) {
+            indicator.textContent =
+                lang === 'hi' ? '🇮🇳 हिंदी' :
+                lang === 'mr' ? '🟠 मराठी' :
+                '🌐 English';
+        }
+        // Set voice recognition language
+        if (recognition) {
+            recognition.lang =
+                lang === 'hi' ? 'hi-IN' :
+                lang === 'mr' ? 'mr-IN' : 'en-IN';
+        }
+    });
 </script>
 
 </body>

@@ -204,7 +204,26 @@ public class RagDataService {
         sb.append("\n");
         return sb.toString();
     }
-
+    // ─────────────────────────────────────────────
+// DETECT LANGUAGE FROM QUESTION
+// ─────────────────────────────────────────────
+    public String detectLanguage(String text) {
+        if (text == null) return "en";
+        // Check for Hindi/Marathi Devanagari characters
+        boolean hasDevanagari = text.chars().anyMatch(c ->
+                Character.UnicodeBlock.of(c) ==
+                        Character.UnicodeBlock.DEVANAGARI);
+        if (hasDevanagari) {
+            // Basic check for Marathi-specific words
+            if (text.contains("आहे") || text.contains("काय")
+                    || text.contains("किती")
+                    || text.contains("कसे")) {
+                return "mr"; // Marathi
+            }
+            return "hi"; // Hindi
+        }
+        return "en"; // English
+    }
     // ─────────────────────────────────────────────
     // CUSTOMER CONTEXT
     // ─────────────────────────────────────────────

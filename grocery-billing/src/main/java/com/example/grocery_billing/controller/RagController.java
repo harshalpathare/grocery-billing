@@ -15,19 +15,17 @@ public class RagController {
     private final ClaudeRagService claudeRagService;
 
     @PostMapping("/ask")
-    public Map<String, String> ask(
+    public Map<String, Object> ask(
             @RequestBody Map<String, String> body) {
 
         String question = body.get("question");
-        Map<String, String> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
 
         if (question == null || question.isBlank()) {
             result.put("answer", "Please ask a question.");
             return result;
         }
 
-        String answer = claudeRagService.ask(question);
-        result.put("answer", answer);
-        return result;
+        return claudeRagService.ask(question);
     }
 }

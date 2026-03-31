@@ -42,7 +42,7 @@ public class PdfInvoiceService {
     private static final Color C_DARK_NAVY  = new Color(20,  30,  60);
     private static final Color C_ACCENT     = new Color(30,  80,  160);
     private static final Color C_LIGHT_BLUE = new Color(235, 242, 255);
-    private static final Color C_HEADER_BG  = new Color(20,  30,  60);
+    private static final Color C_HEADER_BG  = new Color(255, 255, 255);
     private static final Color C_TABLE_HEAD = new Color(235, 242, 255);
     private static final Color C_ROW_ALT    = new Color(248, 250, 255);
     private static final Color C_BORDER     = new Color(180, 200, 230);
@@ -224,7 +224,7 @@ public class PdfInvoiceService {
         cell.setPaddingTop(10);
         cell.setPaddingBottom(10);
 
-        Paragraph taxLabel = new Paragraph("TAX INVOICE", bold(9, C_LIGHT_BLUE));
+        Paragraph taxLabel = new Paragraph("TAX INVOICE", bold(9, C_BLACK));
         taxLabel.setAlignment(Element.ALIGN_CENTER);
         taxLabel.setSpacingAfter(2);
         cell.addElement(taxLabel);
@@ -240,12 +240,12 @@ public class PdfInvoiceService {
             }
         }
 
-        Paragraph shopName = new Paragraph(shopConfig.getName().toUpperCase(), bold(20, C_WHITE));
+        Paragraph shopName = new Paragraph(shopConfig.getName().toUpperCase(), bold(20, C_BLACK));
         shopName.setAlignment(Element.ALIGN_CENTER);
         shopName.setSpacingAfter(3);
         cell.addElement(shopName);
 
-        Font addrFont = regular(8, new Color(200, 210, 230));
+        Font addrFont = regular(8, C_BLACK);
 
         Paragraph addr = new Paragraph(shopConfig.getAddress(), addrFont);
         addr.setAlignment(Element.ALIGN_CENTER);

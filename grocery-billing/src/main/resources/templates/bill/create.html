@@ -71,6 +71,11 @@
             <i class="bi bi-graph-up-arrow"></i>
             <span>AI Insights</span>
         </a>
+        <a th:href="@{/profit}" class="nav-link"
+           th:classappend="${activePage == 'profit'} ? 'active' : ''">
+            <i class="bi bi-cash-coin"></i>
+            <span>Profit Predictor</span>
+        </a>
     </nav>
     <div class="sidebar-bottom">
         <a th:href="@{/settings}" class="nav-link">
@@ -1046,6 +1051,11 @@
                  id="ragStatusText">
                 Ask anything about your shop
             </div>
+            <!-- Language indicator -->
+            <div id="langIndicator"
+                 style="font-size:10px;opacity:0.7;margin-top:2px">
+                🌐 English · हिंदी · मराठी
+            </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
             <!-- TTS Toggle -->
@@ -1539,6 +1549,170 @@
             window.speechSynthesis.getVoices();
         };
     }
+    // ─────────────────────────────────────────────
+// ✅ SMART SUGGESTIONS
+// ─────────────────────────────────────────────
+
+// Call this when customer is selected
+document.getElementById('customerSelect')
+    .addEventListener('change', function() {
+        const customerId = this.value;
+        if (customerId) {
+            loadCustomerSuggestions(customerId);
+        } else {
+            loadPopularSuggestions();
+        }
+    });
+
+// Load suggestions for selected customer
+function loadCustomerSuggestions(customerId) {
+    const currentIds = getCurrentProductIds();
+    fetch(`/api/suggestions/customer/${customerId}`
+            + (currentIds.length
+               ? '?currentProducts=' + currentIds.join(',')
+               : ''))
+    .then(r => r.json())
+    .then(data => showSuggestions(data))
+    .catch(() => {});
+}
+
+// Load popular products as suggestions
+function loadPopularSuggestions() {
+    const currentIds = getCurrentProductIds();
+    fetch('/api/suggestions/popular', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ excludeIds: currentIds })
+    })
+    .then(r => r.json())
+    .then(data => showSuggestions(data))
+    .catch(() => {});
+}
+
+// Load frequently bought together
+function loadTogetherSuggestions() {
+    const currentIds = getCurrentProductIds();
+    if (currentIds.length === 0) return;
+    fetch('/api/suggestions/together', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productIds: currentIds })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.length > 0) showSuggestions(data);
+    })
+    .catch(() => {});
+}
+
+// Show suggestions in panel
+function showSuggestions(suggestions) {
+    if (!suggestions || suggestions.length === 0) return;
+
+    const panel = document.getElementById('suggestionsPanel');
+    const list  = document.getElementById('suggestionsList');
+    list.innerHTML = '';
+
+    suggestions.forEach(s => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.style.cssText = `
+            padding:6px 12px;border-radius:20px;
+            border:1px solid #4f97ff;
+            background:white;color:#1a1f2e;
+            font-size:12px;cursor:pointer;
+            transition:all 0.2s;
+            display:flex;align-items:center;gap:6px`;
+        btn.innerHTML = `
+            <span>➕ ${s.productName}</span>
+            <span style="color:#28a745;font-weight:bold">
+                ₹${parseFloat(s.price).toFixed(2)}
+            </span>
+            <span style="color:#888;font-size:10px">
+                ${s.reason}
+            </span>`;
+        btn.onmouseover = () =>
+            btn.style.background = '#e8f0ff';
+        btn.onmouseout  = () =>
+            btn.style.background = 'white';
+        btn.onclick = () => {
+            // Add product to bill
+            addItemRow(s.productId, s.productName,
+                       s.price, 0, 'piece');
+            // Remove from suggestions
+            btn.remove();
+            // Reload together suggestions
+            setTimeout(() => loadTogetherSuggestions(), 300);
+        };
+        list.appendChild(btn);
+    });
+
+    panel.style.display = 'block';
+}
+
+function hideSuggestions() {
+    document.getElementById('suggestionsPanel')
+        .style.display = 'none';
+}
+
+function getCurrentProductIds() {
+    return Array.from(
+        document.querySelectorAll('input[name="productIds"]'))
+        .map(i => parseInt(i.value))
+        .filter(id => id > 0);
+}
+
+// Reload suggestions when items change
+const origAddItemRow = addItemRow;
+// Override addItemRow to trigger suggestions
+const _origRecalculate = recalculate;
+function recalculate() {
+    _origRecalculate();
+    // Refresh together suggestions after items change
+    clearTimeout(window._suggestionTimer);
+    window._suggestionTimer = setTimeout(() => {
+        const custId = document.getElementById(
+            'customerSelect').value;
+        if (custId) {
+            loadCustomerSuggestions(custId);
+        } else {
+            loadTogetherSuggestions();
+        }
+    }, 500);
+}
+
+// Load suggestions on page load
+window.addEventListener('load', () => {
+    loadPopularSuggestions();
+});
+    // ── Language detection & indicator ───────────
+function detectLang(text) {
+    const devanagari = /[\u0900-\u097F]/;
+    if (!devanagari.test(text)) return 'en';
+    // Marathi indicators
+    if (/आहे|काय|किती|कसे/.test(text)) return 'mr';
+    return 'hi';
+}
+
+// Update language indicator when typing
+document.getElementById('ragInput')
+    .addEventListener('input', function() {
+        const lang = detectLang(this.value);
+        const indicator =
+            document.getElementById('langIndicator');
+        if (indicator) {
+            indicator.textContent =
+                lang === 'hi' ? '🇮🇳 हिंदी' :
+                lang === 'mr' ? '🟠 मराठी' :
+                '🌐 English';
+        }
+        // Set voice recognition language
+        if (recognition) {
+            recognition.lang =
+                lang === 'hi' ? 'hi-IN' :
+                lang === 'mr' ? 'mr-IN' : 'en-IN';
+        }
+    });
 </script>
 
 
