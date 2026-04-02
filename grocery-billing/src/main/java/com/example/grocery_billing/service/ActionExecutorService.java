@@ -63,31 +63,32 @@ public class ActionExecutorService {
     // ─────────────────────────────────────────────
     private Map<String, Object> parseActionFromResponse(String response) {
         try {
-            // Look for ```json...``` or regular JSON in response
-            String jsonStr = response;
-
-            if (response.contains("```json")) {
-                int start = response.indexOf("```json") + 7;
-                int end = response.indexOf("```", start);
-                if (end > start) {
-                    jsonStr = response.substring(start, end).trim();
+            int start = response.indexOf("{");
+            int end = response.lastIndexOf("}");
+            
+            if (start != -1 && end != -1 && end > start) {
+                String jsonStr = response.substring(start, end + 1);
+                Map<String, Object> parsed = objectMapper.readValue(jsonStr, Map.class);
+                
+                // If it successfully parsed, see if it has an "action" key
+                if (parsed.containsKey("action")) {
+                    return parsed;
                 }
-            } else if (response.contains("{\"action\"")) {
-                int start = response.indexOf("{");
-                int end = response.lastIndexOf("}");
-                if (end > start) {
-                    jsonStr = response.substring(start, end + 1);
+                
+                // Fallback for LLM hallucinations where it uses empty string key: {"": "list_customers"}
+                if (parsed.containsKey("")) {
+                    String val = parsed.get("").toString();
+                    if (val.contains("_")) {
+                        parsed.put("action", val);
+                        return parsed;
+                    }
                 }
-            } else {
-                return null;
             }
-
-            Map<String, Object> parsed = objectMapper
-                    .readValue(jsonStr, Map.class);
-            return parsed;
+            
+            return null;
 
         } catch (Exception e) {
-            log.debug("No structured action found in response");
+            log.debug("No structured action found in response (Parse failed)");
             return null;
         }
     }
@@ -177,6 +178,8 @@ public class ActionExecutorService {
                 // REPORTING & ANALYTICS
                 // ═══════════════════════════════════════
                 case "get_customer":
+                case "get_customer_info":
+                case "get_customer_details":
                     result = getCustomerInfo(action);
                     break;
                 case "get_dashboard_summary":
@@ -618,9 +621,30 @@ public class ActionExecutorService {
             return result;
         }
 
+        if (phone != null) {
+            phone = phone.replaceAll("\\D+", "");
+            if (phone.length() > 10) {
+                phone = phone.substring(phone.length() - 10);
+            }
+        } else {
+            phone = "";
+        }
+
+        if (!phone.matches("^[6-9]\\d{9}$")) {
+            result.put("success", false);
+            result.put("message", "Invalid 10-digit Indian mobile number format. Got: " + phone);
+            return result;
+        }
+
+        if (customerRepository.findByPhone(phone).isPresent()) {
+            result.put("success", false);
+            result.put("message", "A customer with this phone number (" + phone + ") already exists in our system.");
+            return result;
+        }
+
         Customer customer = new Customer();
         customer.setName(name.trim());
-        customer.setPhone(phone != null ? phone.trim() : "");
+        customer.setPhone(phone);
         customer.setAddress(address != null ? address.trim() : "");
         customer.setActive(true);
         customer.setBalance(BigDecimal.ZERO);
