@@ -32,6 +32,7 @@ public class ActionExecutorService {
     private final ProductService productService;
     private final SupplierService supplierService;
     private final ReportService reportService;
+    private final PurchaseOrderService purchaseOrderService;
 
     // ─────────────────────────────────────────────
     // EXECUTE ACTIONS FROM AI RESPONSE
@@ -172,6 +173,9 @@ public class ActionExecutorService {
                     break;
                 case "list_suppliers":
                     result = listSuppliers(action);
+                    break;
+                case "draft_purchase_order":
+                    result = draftPurchaseOrder(action);
                     break;
 
                 // ═══════════════════════════════════════
@@ -571,6 +575,87 @@ public class ActionExecutorService {
 
         log.info("Payment recorded for supplier {}: ₹{}",
                 supplier.getName(), amount);
+
+        return result;
+    }
+
+    // ─────────────────────────────────────────────
+    // ACTION: DRAFT PURCHASE ORDER
+    // ─────────────────────────────────────────────
+    private Map<String, Object> draftPurchaseOrder(Map<String, Object> action) {
+        Map<String, Object> result = new HashMap<>();
+
+        String supplierName = (String) action.get("supplier_name");
+        
+        if (supplierName == null || supplierName.trim().isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Supplier name is required to draft a Purchase Order.");
+            return result;
+        }
+
+        // 1. Find Supplier
+        Supplier supplier = supplierRepository.findAll().stream()
+                .filter(s -> s.getName().toLowerCase().contains(supplierName.toLowerCase()))
+                .findFirst()
+                .orElse(null);
+
+        if (supplier == null) {
+            result.put("success", false);
+            result.put("message", "Supplier '" + supplierName + "' not found.");
+            return result;
+        }
+
+        // 2. Find Low Stock Products (assuming < 15 is low)
+        List<Product> lowStockProducts = productRepository.findAll().stream()
+                .filter(p -> p.getActive() != null && p.getActive() && p.getStockQty() != null && p.getStockQty() < 15)
+                .toList();
+
+        if (lowStockProducts.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "No low stock products found! Shop is fully stocked.");
+            return result;
+        }
+
+        // 3. Draft the PO (Save directly without updating stock yet, just a draft!)
+        String poNumber = purchaseOrderService.generatePoNumber();
+        PurchaseOrder draftPo = PurchaseOrder.builder()
+                .poNumber(poNumber)
+                .supplier(supplier)
+                .orderDate(LocalDate.now())
+                .paymentStatus(PurchaseOrder.PaymentStatus.PENDING)
+                .subtotal(BigDecimal.ZERO)
+                .taxAmount(BigDecimal.ZERO)
+                .totalAmount(BigDecimal.ZERO)
+                .amountPaid(BigDecimal.ZERO)
+                .notes("AI Auto-Drafted Purchase Order")
+                .build();
+                
+        // Initialize the items list before adding
+        draftPo.setItems(new ArrayList<>());
+
+        for (Product product : lowStockProducts) {
+            BigDecimal costPrice = product.getCostPrice() != null ? product.getCostPrice() : product.getPrice().multiply(new BigDecimal("0.7")); // Guess cost price if null
+            PurchaseOrderItem item = new PurchaseOrderItem();
+            item.setProduct(product);
+            item.setProductNameSnapshot(product.getNameEn());
+            item.setQuantity(new BigDecimal("50")); // Order 50 items automatically
+            item.setUnitCost(costPrice);
+            item.calculateTotal();
+            draftPo.addItem(item);
+        }
+
+        draftPo.calculateTotals();
+        
+        // Use the saveDirectly method so it doesn't instantly add stock and modify supplier balances
+        PurchaseOrder savedDraft = purchaseOrderService.saveDirectly(draftPo);
+
+        result.put("success", true);
+        result.put("message", "Successfully drafted Purchase Order <a href='/purchases/" + savedDraft.getId() + "' target='_blank'>" + poNumber + "</a> with " + lowStockProducts.size() + " items automatically.");
+        result.put("po_number", poNumber);
+        result.put("supplier_name", supplier.getName());
+        result.put("item_count", lowStockProducts.size());
+        
+        log.info("AI drafted PO {} for {}", poNumber, supplier.getName());
 
         return result;
     }

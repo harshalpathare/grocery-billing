@@ -293,10 +293,12 @@
                                 </span>
                                 <input type="text"
                                        class="form-control"
-                                       name="barcode"
+                                       th:field="*{barcode}"
                                        id="barcode"
-                                       th:value="${product?.barcode}"
                                        placeholder="Scan or enter barcode number">
+                                <button type="button" class="btn btn-outline-secondary" onclick="generateRandomBarcode()">
+                                    <i class="bi bi-magic me-1"></i>Generate
+                                </button>
                             </div>
                             <div class="form-text">
                                 Leave empty to skip. Must be unique per product.
@@ -414,6 +416,14 @@
         } else {
             document.getElementById('previewCard').style.display = 'none';
         }
+    }
+
+    function generateRandomBarcode() {
+        // e.g. 890 + 9 random digits = 12 digits (CODE128 supports this easily)
+        const prefix = "890";
+        const randomDigits = Math.floor(100000000 + Math.random() * 900000000); 
+        document.getElementById('barcode').value = prefix + randomDigits;
+        updatePreview();
     }
 
     // Trigger on page load (for edit mode)

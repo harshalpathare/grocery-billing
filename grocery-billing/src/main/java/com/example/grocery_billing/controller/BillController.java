@@ -10,6 +10,7 @@ import com.example.grocery_billing.service.BillService;
 import com.example.grocery_billing.service.CustomerService;
 import com.example.grocery_billing.service.ProductService;
 import com.example.grocery_billing.service.QrCodeService;
+import com.example.grocery_billing.service.ShiftService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,7 @@ public class BillController {
     private final ProductService        productService;
     private final QrCodeService         qrCodeService;
     private final TransactionRepository transactionRepository;
+    private final ShiftService          shiftService;
 
     @Autowired
     private ActivityLogService activityLogService;
@@ -59,7 +61,12 @@ public class BillController {
     // SHOW CREATE BILL PAGE
     // ─────────────────────────────────────────────────────
     @GetMapping("/new")
-    public String showCreateBill(Model model) {
+    public String showCreateBill(Model model, RedirectAttributes redirectAttributes) {
+        if (!shiftService.isShiftActive()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "You must start a Shift from the Dashboard before creating a new bill.");
+            return "redirect:/";
+        }
+
         model.addAttribute("customers",  customerService.getAllActiveCustomers());
         model.addAttribute("activePage", "billing");
         model.addAttribute("pageTitle",  "New Bill");
@@ -255,6 +262,19 @@ public class BillController {
                 "Created bill " + savedBill.getBillNo()
                     + " for ₹" + savedBill.getTotalAmount(),
                 request);
+
+            // ── STEP 7: Add cash to Active Shift ─────────────
+            BigDecimal actualCash = BigDecimal.ZERO;
+            if ("CASH".equals(paymentMethod)) {
+                actualCash = savedBill.getTotalAmount();
+            } else if ("CASH_UPI".equals(paymentMethod)) {
+                actualCash = cashPaidAmount != null ? cashPaidAmount : BigDecimal.ZERO;
+            }
+            
+            if (actualCash.compareTo(BigDecimal.ZERO) > 0) {
+                shiftService.addCashSale(actualCash);
+                log.info("Added ₹{} cash to active shift for Bill {}", actualCash, savedBill.getBillNo());
+            }
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Bill " + savedBill.getBillNo()

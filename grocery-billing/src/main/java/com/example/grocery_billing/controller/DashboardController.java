@@ -22,6 +22,7 @@ public class DashboardController {
     private final ProductService  productService;
     private final CustomerService customerService;
     private final BillService     billService;
+    private final com.example.grocery_billing.service.ShiftService shiftService;
 
     @GetMapping("/")
     public String dashboard(Model model) {
@@ -33,6 +34,10 @@ public class DashboardController {
         model.addAttribute("totalPending",   customerService.getTotalPendingBalance());
         model.addAttribute("todaySales",     billService.getTodaySales());
         model.addAttribute("todayBills",     billService.getTodayBillCount());
+        
+        // ── Shift Info ────────────────────────────────
+        com.example.grocery_billing.entity.Shift activeShift = shiftService.getActiveShift();
+        model.addAttribute("activeShift", activeShift);
 
         // ── Customers with dues count ─────────────────
         List<Customer> customersWithDues =

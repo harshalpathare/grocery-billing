@@ -93,6 +93,7 @@ public class ClaudeRagService {
                     + "• Low Stock: ```json\n{\"action\": \"get_low_stock\", \"threshold\": 10}\n```\n"
                     + "• List/Top Products: ```json\n{\"action\": \"list_products\"}\n``` / ```json\n{\"action\": \"get_top_products\"}\n```\n\n"
                     + "SUPPLIERS:\n"
+                    + "• Draft PO: ```json\n{\"action\": \"draft_purchase_order\", \"supplier_name\": \"ABC Traders\"}\n```\n"
                     + "• Create Supplier: ```json\n{\"action\": \"create_supplier\", \"name\": \"ABC Traders\", \"phone\": \"9999999999\", \"address\": \"Pune\", \"gst\": \"27AAAAA0000A1Z5\"}\n```\n"
                     + "• Delete Supplier: ```json\n{\"action\": \"delete_supplier\", \"supplier_name\": \"ABC Traders\"}\n```\n"
                     + "• Record Payment: ```json\n{\"action\": \"record_supplier_payment\", \"supplier_name\": \"ABC Traders\", \"amount\": 5000}\n```\n"
