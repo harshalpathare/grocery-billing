@@ -39,18 +39,18 @@ public class PdfInvoiceService {
 
     // ── Colors ────────────────────────────────────────────
     private static final Color C_BLACK      = new Color(15,  15,  20);
-    private static final Color C_DARK_NAVY  = new Color(20,  30,  60);
-    private static final Color C_ACCENT     = new Color(30,  80,  160);
-    private static final Color C_LIGHT_BLUE = new Color(235, 242, 255);
-    private static final Color C_HEADER_BG  = new Color(20,  30,  60);
-    private static final Color C_TABLE_HEAD = new Color(235, 242, 255);
-    private static final Color C_ROW_ALT    = new Color(248, 250, 255);
-    private static final Color C_BORDER     = new Color(180, 200, 230);
+    private static final Color C_DARK_NAVY  = new Color(30,  30,  30);
+    private static final Color C_ACCENT     = new Color(40,  40,  40);
+    private static final Color C_LIGHT_BLUE = new Color(240, 240, 240);
+    private static final Color C_HEADER_BG  = new Color(255, 255, 255);
+    private static final Color C_TABLE_HEAD = new Color(230, 230, 230);
+    private static final Color C_ROW_ALT    = new Color(248, 248, 248);
+    private static final Color C_BORDER     = new Color(180, 180, 180);
     private static final Color C_GST_BG     = new Color(255, 252, 235);
-    private static final Color C_TOTAL_BG   = new Color(20,  30,  60);
+    private static final Color C_TOTAL_BG   = new Color(30,  30,  30);
     private static final Color C_GREEN      = new Color(20,  130, 60);
     private static final Color C_RED        = new Color(190, 30,  40);
-    private static final Color C_MUTED      = new Color(100, 110, 130);
+    private static final Color C_MUTED      = new Color(100, 100, 100);
     private static final Color C_WHITE      = Color.WHITE;
 
     // ── Number-to-words arrays (class level — defined ONCE) ──
@@ -117,7 +117,7 @@ public class PdfInvoiceService {
         instrCell.setBorderColor(C_BORDER);
         instrCell.setBorderWidth(0.8f);
         instrCell.setPadding(10);
-        instrCell.setBackgroundColor(new Color(240, 249, 255));
+        instrCell.setBackgroundColor(new Color(245, 245, 245));
 
         instrCell.addElement(new Paragraph("Pay via UPI", bold(10, C_ACCENT)));
         instrCell.addElement(spacer(4));
@@ -224,7 +224,7 @@ public class PdfInvoiceService {
         cell.setPaddingTop(10);
         cell.setPaddingBottom(10);
 
-        Paragraph taxLabel = new Paragraph("TAX INVOICE", bold(9, C_LIGHT_BLUE));
+        Paragraph taxLabel = new Paragraph("TAX INVOICE", bold(9, C_MUTED));
         taxLabel.setAlignment(Element.ALIGN_CENTER);
         taxLabel.setSpacingAfter(2);
         cell.addElement(taxLabel);
@@ -240,12 +240,12 @@ public class PdfInvoiceService {
             }
         }
 
-        Paragraph shopName = new Paragraph(shopConfig.getName().toUpperCase(), bold(20, C_WHITE));
+        Paragraph shopName = new Paragraph(shopConfig.getName().toUpperCase(), bold(20, C_BLACK));
         shopName.setAlignment(Element.ALIGN_CENTER);
         shopName.setSpacingAfter(3);
         cell.addElement(shopName);
 
-        Font addrFont = regular(8, new Color(200, 210, 230));
+        Font addrFont = regular(8, new Color(80, 80, 80));
 
         Paragraph addr = new Paragraph(shopConfig.getAddress(), addrFont);
         addr.setAlignment(Element.ALIGN_CENTER);
@@ -591,20 +591,20 @@ public class PdfInvoiceService {
         if (discount.compareTo(BigDecimal.ZERO) > 0)
             totalRow(totals, "Discount", "-" + fmt(discount), tlF, regular(8, C_GREEN), C_WHITE);
 
-        // Grand Total dark row
-        PdfPCell gtL = new PdfPCell(new Phrase("Grand Total", bold(9, C_WHITE)));
-        gtL.setBackgroundColor(C_TOTAL_BG);
+        // Grand Total light row
+        PdfPCell gtL = new PdfPCell(new Phrase("Grand Total", bold(9, C_BLACK)));
+        gtL.setBackgroundColor(new Color(240, 240, 240));
         gtL.setBorder(Rectangle.BOX);
         gtL.setBorderColor(C_ACCENT);
-        gtL.setBorderWidth(0.8f);
+        gtL.setBorderWidth(1.2f);
         gtL.setPadding(7);
         gtL.setHorizontalAlignment(Element.ALIGN_LEFT);
 
-        PdfPCell gtR = new PdfPCell(new Phrase(fmt(rounded), bold(10, C_WHITE)));
-        gtR.setBackgroundColor(C_TOTAL_BG);
+        PdfPCell gtR = new PdfPCell(new Phrase(fmt(rounded), bold(10, C_BLACK)));
+        gtR.setBackgroundColor(new Color(240, 240, 240));
         gtR.setBorder(Rectangle.BOX);
         gtR.setBorderColor(C_ACCENT);
-        gtR.setBorderWidth(0.8f);
+        gtR.setBorderWidth(1.2f);
         gtR.setPadding(7);
         gtR.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
@@ -796,7 +796,7 @@ public class PdfInvoiceService {
 
     private void miniTh(PdfPTable t, String text, Font f) {
         PdfPCell c = new PdfPCell(new Phrase(text, f));
-        c.setBackgroundColor(new Color(220, 230, 255));
+        c.setBackgroundColor(new Color(215, 215, 215));
         c.setBorderColor(C_BORDER);
         c.setBorderWidth(0.5f);
         c.setPadding(3);
