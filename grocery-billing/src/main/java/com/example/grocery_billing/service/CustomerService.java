@@ -21,6 +21,7 @@ public class CustomerService {
 
     private final CustomerRepository    customerRepository;
     private final TransactionRepository transactionRepository;
+    private final com.example.grocery_billing.repository.BillRepository billRepository;
 
     // ─────────────────────────────────────────────────────
     // READ OPERATIONS
@@ -288,8 +289,23 @@ public class CustomerService {
                         : "Payment received")
                 .balanceAfter(customer.getBalance())
                 .build();
+        
+        txn = transactionRepository.saveAndFlush(txn);
 
-        return transactionRepository.saveAndFlush(txn);
+        // ✅ NEW: If balance is fully paid, update all CREDIT/PARTIAL bills to PAID
+        if (customer.getBalance().compareTo(BigDecimal.ZERO) <= 0) {
+            List<com.example.grocery_billing.entity.Bill> customerBills = billRepository.findByCustomerIdOrderByBillDateDesc(customerId);
+            for (com.example.grocery_billing.entity.Bill b : customerBills) {
+                if (b.getPaymentStatus() == com.example.grocery_billing.entity.Bill.PaymentStatus.CREDIT || 
+                    b.getPaymentStatus() == com.example.grocery_billing.entity.Bill.PaymentStatus.PARTIAL) {
+                    b.setPaymentStatus(com.example.grocery_billing.entity.Bill.PaymentStatus.PAID);
+                }
+            }
+            billRepository.saveAll(customerBills);
+            log.info("Balance cleared for {}. Updated all related bills to PAID.", customer.getName());
+        }
+
+        return txn;
     }
 
     // ─────────────────────────────────────────────────────
