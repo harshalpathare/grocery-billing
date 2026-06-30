@@ -103,9 +103,11 @@
                 <!-- Add this Preview button next to Download -->
                 <a th:href="@{/bills/pdf/{id}/preview(id=${bill.id})}" class="btn btn-sm btn-outline-danger"
                     target="_blank">
-                    <i class="bi bi-eye me-1"></i>Preview PDF
+                    <i class="bi bi-eye me-1"></i>Preview Invoice
                 </a>
-                <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="printInvoiceBtn"
+                        th:attr="data-print-url=@{/bills/pdf/{id}/print(id=${bill.id})}"
+                        onclick="printInvoicePreview()">
                     <i class="bi bi-printer me-1"></i>Print
                 </button>
                 <a th:href="@{/bills}" class="btn btn-sm btn-outline-secondary">
@@ -171,7 +173,9 @@
                                 <div class="text-muted small" th:if="${bill.customer.address}"
                                     th:text="${bill.customer.address}">Address</div>
                             </div>
-                            <div th:unless="${bill.customer != null}" class="text-muted">Walk-in Customer</div>
+                            <div th:unless="${bill.customer != null}" class="text-muted"
+                                 th:text="${bill.walkInCustomerName != null and !bill.walkInCustomerName.isBlank()} ? bill.walkInCustomerName : 'Walk-in Customer'">
+                                Walk-in Customer</div>
                         </div>
 
                         <div class="col-md-6 text-md-end">
@@ -255,7 +259,9 @@
                                 <div class="fw-semibold" th:text="${item.productNameSnapshot ?: item.product.nameEn}">
                                     Product</div>
                             </td>
-                            <td class="text-center" th:text="${#numbers.formatDecimal(item.quantity,1,3)}">1</td>
+                            <td class="text-center"
+                                th:text="${(item.displayQuantity != null ? item.displayQuantity : item.quantity).stripTrailingZeros().toPlainString()} + ' ' + ${(item.billingUnit != null && !item.billingUnit.isBlank()) ? item.billingUnit : ((item.product != null && item.product.unit != null) ? item.product.unit : 'piece')}">
+                                1 piece</td>
                             <td class="text-end">
                                 ₹<span th:text="${#numbers.formatDecimal(item.unitPrice,1,2)}">0</span>
                             </td>
@@ -404,6 +410,17 @@
             document.getElementById('sidebar').classList.toggle('collapsed');
             document.getElementById('mainContent').classList.toggle('expanded');
         });
+
+        function printInvoicePreview() {
+            const btn = document.getElementById('printInvoiceBtn');
+            const printPageUrl = btn?.dataset.printUrl;
+            if (!printPageUrl) return;
+
+            const win = window.open(printPageUrl, '_blank', 'noopener,noreferrer');
+            if (!win) {
+                alert('Pop-up blocked. Please allow pop-ups for this site to print the invoice.');
+            }
+        }
     </script>
 </body>
 

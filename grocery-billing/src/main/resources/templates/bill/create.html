@@ -8,40 +8,88 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        .item-row { background:#f8f9fa; border-radius:8px; padding:12px; margin-bottom:8px; border:1px solid #e8ecf0; }
-        .item-row:hover { border-color:#4f97ff44; background:#f0f6ff; }
-        .search-results { position:absolute; z-index:1000; width:100%; background:white;
-                          border:1px solid #dee2e6; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);
-                          max-height:220px; overflow-y:auto; }
-        .search-result-item { padding:10px 14px; cursor:pointer; border-bottom:1px solid #f0f0f0; }
-        .search-result-item:hover { background:#f0f6ff; }
-        .search-result-item:last-child { border-bottom:none; }
-        .totals-panel { background:white; border-radius:12px; padding:20px;
-                        box-shadow:0 2px 8px rgba(0,0,0,0.06); position:sticky; top:80px; }
-        .total-row { display:flex; justify-content:space-between; padding:6px 0;
-                     border-bottom:1px solid #f0f0f0; }
-        .total-row:last-child { border-bottom:none; }
-        .grand-total { font-size:1.4rem; font-weight:700; color:#1a1f2e; }
+        .item-row {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border: 1px solid #e8ecf0;
+        }
+        .item-row:hover {
+            border-color: #4f97ff44;
+            background: #f0f6ff;
+        }
+        .search-results {
+            position: absolute;
+            z-index: 1000;
+            width: 100%;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .search-result-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .search-result-item:hover { background: #f0f6ff; }
+        .search-result-item:last-child { border-bottom: none; }
+        .totals-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 80px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .total-row:last-child { border-bottom: none; }
+        .grand-total { font-size: 1.4rem; font-weight: 700; color: #1a1f2e; }
     </style>
 </head>
 <body>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
+    <div class="sidebar-brand">
+        <i class="bi bi-shop"></i><span>Grocery Bill</span>
+    </div>
     <nav class="sidebar-nav">
-        <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
-        <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
+        <a th:href="@{/}" class="nav-link">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        </a>
+        <a th:href="@{/products}" class="nav-link">
+            <i class="bi bi-box-seam"></i><span>Products</span>
+        </a>
         <a th:href="@{/suppliers}" class="nav-link">
             <i class="bi bi-truck"></i><span>Suppliers</span>
         </a>
         <a th:href="@{/purchases}" class="nav-link">
             <i class="bi bi-cart-check"></i><span>Purchases</span>
         </a>
-        <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
-        <a th:href="@{/bills/new}" class="nav-link active"><i class="bi bi-receipt"></i><span>New Bill</span></a>
-        <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
-        <a th:href="@{/credit}" class="nav-link"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
-        <a th:href="@{/reports}" class="nav-link"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
+        <a th:href="@{/customers}" class="nav-link">
+            <i class="bi bi-people"></i><span>Customers</span>
+        </a>
+        <a th:href="@{/bills/new}" class="nav-link active">
+            <i class="bi bi-receipt"></i><span>New Bill</span>
+        </a>
+        <a th:href="@{/bills}" class="nav-link">
+            <i class="bi bi-journal-text"></i><span>All Bills</span>
+        </a>
+        <a th:href="@{/credit}" class="nav-link">
+            <i class="bi bi-credit-card"></i>
+            <span>Credit / Udhari</span>
+        </a>
+        <a th:href="@{/reports}" class="nav-link">
+            <i class="bi bi-bar-chart"></i><span>Reports</span>
+        </a>
     </nav>
     <div class="sidebar-bottom">
         <a th:href="@{/settings}" class="nav-link">
@@ -52,7 +100,8 @@
 
 <div class="main-content" id="mainContent">
     <nav class="top-navbar">
-        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+        <button class="btn btn-sm btn-outline-secondary"
+                id="sidebarToggle">
             <i class="bi bi-list"></i>
         </button>
         <h5 class="mb-0 ms-3">
@@ -62,21 +111,32 @@
         </h5>
         <div class="ms-auto d-flex align-items-center gap-2">
             <div class="d-flex align-items-center gap-1">
-                <span class="small text-muted d-none d-md-inline">Invoice:</span>
-                <select id="langSelector" class="form-select form-select-sm"
+                <span class="small text-muted d-none d-md-inline">
+                    Invoice:
+                </span>
+                <select id="langSelector"
+                        class="form-select form-select-sm"
                         style="width:110px">
                     <option value="en">🇬🇧 English</option>
                     <option value="hi">🇮🇳 Hindi</option>
                     <option value="mr">🟠 Marathi</option>
                 </select>
             </div>
-            <a th:href="@{/bills}" class="btn btn-outline-secondary btn-sm">
+            <a th:href="@{/bills}"
+               class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-arrow-left me-1"></i>All Bills
             </a>
-            <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
-                <input type="hidden" th:name="${_csrf.parameterName}"
+            <!-- Recent Bills button -->
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleRecentBills()" title="Recent Bills">
+                <i class="bi bi-clock-history me-1"></i>Recent Bills
+            </button>
+            <form th:action="@{/logout}" method="post"
+                  class="mb-0 d-inline">
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
                        th:value="${_csrf.token}">
-                <button type="submit" class="btn btn-sm btn-outline-danger">
+                <button type="submit"
+                        class="btn btn-sm btn-outline-danger">
                     <i class="bi bi-box-arrow-right"></i>
                 </button>
             </form>
@@ -89,13 +149,17 @@
              class="alert alert-danger alert-dismissible fade show">
             <i class="bi bi-exclamation-circle me-2"></i>
             <span th:text="${errorMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert"></button>
         </div>
 
-        <form id="billForm" method="post" th:action="@{/bills/new}">
-            <input type="hidden" th:name="${_csrf.parameterName}"
+        <form id="billForm" method="post"
+              th:action="@{/bills/new}">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
                    th:value="${_csrf.token}">
-            <input type="hidden" name="invoiceLang" id="invoiceLang" value="en">
+            <input type="hidden" name="invoiceLang"
+                   id="invoiceLang" value="en">
 
             <div class="row g-4">
 
@@ -105,38 +169,57 @@
                     <!-- BILL HEADER CARD -->
                     <div class="table-card mb-4">
                         <h6 class="fw-bold mb-3">
-                            <i class="bi bi-info-circle me-2 text-primary"></i>
+                            <i class="bi bi-info-circle
+                                      me-2 text-primary"></i>
                             Bill Details
                         </h6>
                         <div class="row g-3">
 
                             <!-- Bill Number -->
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Bill Number</label>
+                                <label class="form-label fw-semibold">
+                                    Bill Number
+                                </label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
-                                    <input type="text" name="customBillNo" id="customBillNo"
+                                    <span class="input-group-text">
+                                        <i class="bi bi-hash"></i>
+                                    </span>
+                                    <input type="text"
+                                           name="customBillNo"
+                                           id="customBillNo"
                                            class="form-control"
                                            th:value="${nextBillNo}"
                                            th:placeholder="${nextBillNo}">
-                                    <button type="button" class="btn btn-outline-secondary"
+                                    <button type="button"
+                                            class="btn btn-outline-secondary"
                                             th:data-default-bill-no="${nextBillNo}"
                                             onclick="resetBillNo(this)">
                                         <i class="bi bi-arrow-counterclockwise"></i>
                                     </button>
                                 </div>
-                                <div class="form-text">Auto-generated. Change only for old bills.</div>
+                                <div class="form-text">
+                                    Auto-generated. Change only for old bills.
+                                </div>
                             </div>
 
                             <!-- Bill Date -->
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Bill Date</label>
+                                <label class="form-label fw-semibold">
+                                    Bill Date
+                                </label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                                    <input type="date" name="billDate" id="billDate"
+                                    <span class="input-group-text">
+                                        <i class="bi bi-calendar3"></i>
+                                    </span>
+                                    <input type="date"
+                                           name="billDate"
+                                           id="billDate"
                                            class="form-control"
-                                           th:value="${#temporals.format(#temporals.createNow(),'yyyy-MM-dd')}">
-                                    <button type="button" class="btn btn-outline-secondary"
+                                           th:value="${#temporals.format(
+                                               #temporals.createNow(),
+                                               'yyyy-MM-dd')}">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary"
                                             id="resetDateBtn">
                                         <i class="bi bi-calendar-check"></i>
                                     </button>
@@ -145,25 +228,46 @@
 
                             <!-- Customer -->
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Customer</label>
-                                <select name="customerId" class="form-select" id="customerSelect">
-                                    <option value="">— Walk-in Customer —</option>
+                                <label class="form-label fw-semibold">
+                                    Customer
+                                </label>
+                                <select name="customerId"
+                                        class="form-select"
+                                        id="customerSelect">
+                                    <option value="">
+                                        — Walk-in Customer —
+                                    </option>
                                     <option th:each="c : ${customers}"
                                             th:value="${c.id}"
-                                            th:text="${c.name} + ' (' + ${c.phone} + ')'">
+                                            th:text="${c.name}
+                                                + ' (' + ${c.phone}
+                                                + ')'">
                                     </option>
                                 </select>
-                                <div class="form-text">Leave blank for walk-in customers</div>
+                                <input type="text"
+                                       name="walkInCustomerName"
+                                       id="walkInCustomerName"
+                                       class="form-control mt-2"
+                                       placeholder="Walk-in customer name (optional)">
+                                <div class="form-text">
+                                    Leave blank for walk-in customers
+                                </div>
                             </div>
 
                             <!-- GST Toggle -->
                             <div class="col-md-3">
-                                <label class="form-label fw-semibold">Bill Type</label>
+                                <label class="form-label fw-semibold">
+                                    Bill Type
+                                </label>
                                 <div class="form-check form-switch mt-2">
-                                    <input class="form-check-input" type="checkbox"
-                                           name="isGst" id="gstToggle" role="switch"
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="isGst"
+                                           id="gstToggle"
+                                           role="switch"
                                            onchange="recalculate()">
-                                    <label class="form-check-label fw-semibold" for="gstToggle">
+                                    <label class="form-check-label fw-semibold"
+                                           for="gstToggle">
                                         Include GST
                                     </label>
                                 </div>
@@ -171,123 +275,192 @@
 
                             <!-- Payment Mode -->
                             <div class="col-md-3">
-                                <label class="form-label fw-semibold">Payment Mode</label>
-                                <select name="paymentMethod" class="form-select"
+                                <label class="form-label fw-semibold">
+                                    Payment Mode
+                                </label>
+                                <select name="paymentMethod"
+                                        class="form-select"
                                         id="paymentMethod"
                                         onchange="handlePaymentMethodChange()">
-                                    <option value="CASH">💵 Cash — Full Payment</option>
-                                    <option value="UPI">📱 UPI — Full Payment</option>
-                                    <option value="CASH_UPI">💵📱 Cash + UPI Split</option>
-                                    <option value="CREDIT_UPI">📋📱 Credit + UPI Split</option>
-                                    <option value="CREDIT">📋 Full Credit (Udhari)</option>
-                                    <option value="CARD">💳 Card</option>
-                                    <option value="NEFT">🏦 Bank Transfer</option>
+                                    <option value="CASH">
+                                        💵 Cash — Full Payment
+                                    </option>
+                                    <option value="UPI">
+                                        📱 UPI — Full Payment
+                                    </option>
+                                    <option value="CASH_UPI">
+                                        💵📱 Cash + UPI Split
+                                    </option>
+                                    <option value="CREDIT_UPI">
+                                        📋📱 Credit + UPI Split
+                                    </option>
+                                    <option value="CREDIT">
+                                        📋 Full Credit (Udhari)
+                                    </option>
+                                    <option value="CARD">
+                                        💳 Card
+                                    </option>
+                                    <option value="NEFT">
+                                        🏦 Bank Transfer
+                                    </option>
                                 </select>
-                                <div id="upiNote" class="form-text text-primary d-none">
-                                    <i class="bi bi-qr-code me-1"></i>QR will appear on bill
+                                <div id="upiNote"
+                                     class="form-text text-primary d-none">
+                                    <i class="bi bi-qr-code me-1"></i>
+                                    QR will appear on bill
                                 </div>
                             </div>
 
-                            <!-- Payment Status — display only, auto-set by mode -->
-                            <!-- Hidden field still submitted for backward compat -->
-                            <input type="hidden" name="paymentStatus"
-                                   id="paymentStatus" value="PAID">
+                            <!-- Payment Status — auto set -->
+                            <input type="hidden"
+                                   name="paymentStatus"
+                                   id="paymentStatus"
+                                   value="PAID">
 
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">
                                     Payment Status
                                 </label>
-                                <div class="p-2 rounded border d-flex align-items-center gap-2"
-                                     id="statusDisplay"
-                                     style="background:#f8f9fa;min-height:38px">
-        <span class="badge bg-success" id="statusBadge">
-            ✅ Paid
-        </span>
-                                    <span class="small text-muted" id="statusHint">
-            Auto-set from payment mode
-        </span>
+                                <div class="p-2 rounded border
+                                            d-flex align-items-center gap-2"
+                                     style="background:#f8f9fa;
+                                            min-height:38px">
+                                    <span class="badge bg-success"
+                                          id="statusBadge">
+                                        ✅ Paid
+                                    </span>
+                                    <span class="small text-muted"
+                                          id="statusHint">
+                                        Auto-set from payment mode
+                                    </span>
                                 </div>
                             </div>
+
                             <!-- Transport Cost -->
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Transport Cost (₹)</label>
+                                <label class="form-label fw-semibold">
+                                    Transport Cost (₹)
+                                </label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" name="transportCost"
-                                           class="form-control" value="0"
-                                           step="0.01" min="0" onchange="recalculate()">
+                                    <input type="number"
+                                           name="transportCost"
+                                           class="form-control"
+                                           value="0"
+                                           step="0.01" min="0"
+                                           onchange="recalculate()">
                                 </div>
                             </div>
 
                             <!-- Extra Cost -->
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Other Charges (₹)</label>
+                                <label class="form-label fw-semibold">
+                                    Other Charges (₹)
+                                </label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" name="extraCost"
-                                           class="form-control" value="0"
-                                           step="0.01" min="0" onchange="recalculate()">
+                                    <input type="number"
+                                           name="extraCost"
+                                           class="form-control"
+                                           value="0"
+                                           step="0.01" min="0"
+                                           onchange="recalculate()">
                                 </div>
                             </div>
 
-                            <!-- ✅ CASH + UPI SPLIT FIELDS -->
-                            <div class="col-12" id="cashUpiFields" style="display:none">
-                                <div class="p-3 rounded border border-primary bg-primary bg-opacity-5">
-                                    <h6 class="fw-semibold text-primary mb-3">
-                                        <i class="bi bi-split me-2"></i>Cash + UPI Split Payment
+                            <!-- CASH + UPI SPLIT FIELDS -->
+                            <div class="col-12" id="cashUpiFields"
+                                 style="display:none">
+                                <div class="p-3 rounded border
+                                            border-primary
+                                            bg-primary bg-opacity-5">
+                                    <h6 class="fw-semibold
+                                               text-primary mb-3">
+                                        <i class="bi bi-split me-2"></i>
+                                        Cash + UPI Split Payment
                                     </h6>
                                     <div class="row g-3">
                                         <div class="col-md-4">
-                                            <label class="form-label fw-semibold">Cash Paid (₹)</label>
+                                            <label class="form-label fw-semibold">
+                                                Cash Paid (₹)
+                                            </label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-secondary text-white">
+                                                <span class="input-group-text
+                                                             bg-secondary text-white">
                                                     <i class="bi bi-cash"></i>
                                                 </span>
-                                                <input type="number" name="cashPaidAmount"
-                                                       id="cashPaidAmount" class="form-control"
-                                                       placeholder="0.00" step="0.01" min="0"
+                                                <input type="number"
+                                                       name="cashPaidAmount"
+                                                       id="cashPaidAmount"
+                                                       class="form-control"
+                                                       placeholder="0.00"
+                                                       step="0.01" min="0"
                                                        oninput="calcUpiAmount()">
                                             </div>
-                                            <div class="form-text">Amount paid in cash</div>
+                                            <div class="form-text">
+                                                Amount paid in cash
+                                            </div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label fw-semibold">
                                                 UPI Amount (₹)
-                                                <span class="badge bg-primary ms-1" style="font-size:10px">QR</span>
+                                                <span class="badge bg-primary ms-1"
+                                                      style="font-size:10px">QR</span>
                                             </label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-primary text-white">
+                                                <span class="input-group-text
+                                                             bg-primary text-white">
                                                     <i class="bi bi-qr-code"></i>
                                                 </span>
-                                                <input type="number" name="upiAmount"
+                                                <input type="number"
+                                                       name="upiAmount"
                                                        id="upiAmountDisplay"
-                                                       class="form-control bg-light fw-bold"
-                                                       placeholder="0.00" readonly>
+                                                       class="form-control
+                                                              bg-light fw-bold"
+                                                       placeholder="0.00"
+                                                       readonly>
                                             </div>
-                                            <div class="form-text text-primary">Auto · QR for this amount</div>
+                                            <div class="form-text text-primary">
+                                                Auto · QR for this amount
+                                            </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label fw-semibold">Bill Total (₹)</label>
+                                            <label class="form-label fw-semibold">
+                                                Bill Total (₹)
+                                            </label>
                                             <div class="input-group">
                                                 <span class="input-group-text">₹</span>
-                                                <input type="number" id="cashUpiTotalDisplay"
-                                                       class="form-control bg-light" readonly>
+                                                <input type="number"
+                                                       id="cashUpiTotalDisplay"
+                                                       class="form-control bg-light"
+                                                       readonly>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mt-3 p-2 bg-white rounded border d-flex gap-3 flex-wrap">
+                                    <div class="mt-3 p-2 bg-white rounded
+                                                border d-flex gap-3 flex-wrap">
                                         <div class="small">
-                                            <i class="bi bi-cash text-secondary me-1"></i>Cash:
-                                            <strong class="text-secondary">₹<span id="splitCashDisplay">0.00</span></strong>
+                                            <i class="bi bi-cash
+                                                      text-secondary me-1"></i>
+                                            Cash:
+                                            <strong class="text-secondary">
+                                                ₹<span id="splitCashDisplay">0.00</span>
+                                            </strong>
                                         </div>
                                         <span class="text-muted small">+</span>
                                         <div class="small">
-                                            <i class="bi bi-qr-code text-primary me-1"></i>UPI:
-                                            <strong class="text-primary">₹<span id="splitUpiDisplay">0.00</span></strong>
+                                            <i class="bi bi-qr-code
+                                                      text-primary me-1"></i>
+                                            UPI:
+                                            <strong class="text-primary">
+                                                ₹<span id="splitUpiDisplay">0.00</span>
+                                            </strong>
                                         </div>
                                         <span class="text-muted small">=</span>
                                         <div class="small">Total:
-                                            <strong class="text-success">₹<span id="splitTotalDisplay">0.00</span></strong>
+                                            <strong class="text-success">
+                                                ₹<span id="splitTotalDisplay">0.00</span>
+                                            </strong>
                                         </div>
                                     </div>
                                     <div class="mt-2 small text-muted">
@@ -297,23 +470,27 @@
                                 </div>
                             </div>
 
-                            <!-- ✅ NEW: CREDIT + UPI SPLIT FIELDS -->
-                            <div class="col-12" id="creditUpiFields" style="display:none">
-                                <div class="p-3 rounded border border-danger bg-danger bg-opacity-5">
-                                    <h6 class="fw-semibold text-danger mb-3">
+                            <!-- CREDIT + UPI SPLIT FIELDS -->
+                            <div class="col-12" id="creditUpiFields"
+                                 style="display:none">
+                                <div class="p-3 rounded border
+                                            border-danger
+                                            bg-danger bg-opacity-5">
+                                    <h6 class="fw-semibold
+                                               text-danger mb-3">
                                         <i class="bi bi-split me-2"></i>
                                         Credit (Udhari) + UPI Split
                                     </h6>
                                     <div class="row g-3">
-
-                                        <!-- UPI Paid Now -->
                                         <div class="col-md-4">
                                             <label class="form-label fw-semibold">
                                                 UPI Paid Now (₹)
-                                                <span class="badge bg-primary ms-1" style="font-size:10px">QR</span>
+                                                <span class="badge bg-primary ms-1"
+                                                      style="font-size:10px">QR</span>
                                             </label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-primary text-white">
+                                                <span class="input-group-text
+                                                             bg-primary text-white">
                                                     <i class="bi bi-qr-code"></i>
                                                 </span>
                                                 <input type="number"
@@ -328,20 +505,20 @@
                                                 Customer pays this via UPI now
                                             </div>
                                         </div>
-
-                                        <!-- Goes to Udhari (auto) -->
                                         <div class="col-md-4">
                                             <label class="form-label fw-semibold">
                                                 Goes to Udhari (₹)
                                             </label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-danger text-white">
+                                                <span class="input-group-text
+                                                             bg-danger text-white">
                                                     <i class="bi bi-credit-card"></i>
                                                 </span>
                                                 <input type="number"
                                                        name="creditAmount"
                                                        id="creditUpiCreditDisplay"
-                                                       class="form-control bg-light fw-bold"
+                                                       class="form-control
+                                                              bg-light fw-bold"
                                                        placeholder="0.00"
                                                        readonly>
                                             </div>
@@ -349,10 +526,10 @@
                                                 Auto · Added to customer udhari
                                             </div>
                                         </div>
-
-                                        <!-- Bill Total (readonly) -->
                                         <div class="col-md-4">
-                                            <label class="form-label fw-semibold">Bill Total (₹)</label>
+                                            <label class="form-label fw-semibold">
+                                                Bill Total (₹)
+                                            </label>
                                             <div class="input-group">
                                                 <span class="input-group-text">₹</span>
                                                 <input type="number"
@@ -361,94 +538,49 @@
                                                        readonly>
                                             </div>
                                         </div>
-
                                     </div>
-
-                                    <!-- Summary bar -->
-                                    <div class="mt-3 p-2 bg-white rounded border d-flex gap-3 flex-wrap align-items-center">
+                                    <div class="mt-3 p-2 bg-white rounded border
+                                                d-flex gap-3 flex-wrap align-items-center">
                                         <div class="small">
-                                            <i class="bi bi-qr-code text-primary me-1"></i>UPI Now:
-                                            <strong class="text-primary">₹<span id="cuUpiDisplay">0.00</span></strong>
+                                            <i class="bi bi-qr-code
+                                                      text-primary me-1"></i>
+                                            UPI Now:
+                                            <strong class="text-primary">
+                                                ₹<span id="cuUpiDisplay">0.00</span>
+                                            </strong>
                                         </div>
                                         <span class="text-muted small">+</span>
                                         <div class="small">
-                                            <i class="bi bi-credit-card text-danger me-1"></i>Udhari:
-                                            <strong class="text-danger">₹<span id="cuCreditDisplay">0.00</span></strong>
+                                            <i class="bi bi-credit-card
+                                                      text-danger me-1"></i>
+                                            Udhari:
+                                            <strong class="text-danger">
+                                                ₹<span id="cuCreditDisplay">0.00</span>
+                                            </strong>
                                         </div>
                                         <span class="text-muted small">=</span>
                                         <div class="small">Total:
-                                            <strong class="text-success">₹<span id="cuTotalDisplay">0.00</span></strong>
+                                            <strong class="text-success">
+                                                ₹<span id="cuTotalDisplay">0.00</span>
+                                            </strong>
                                         </div>
                                     </div>
-
-                                    <!-- Customer required warning -->
-                                    <div class="mt-2 alert alert-warning py-2 mb-0 small">
+                                    <div class="mt-2 alert alert-warning
+                                                py-2 mb-0 small">
                                         <i class="bi bi-exclamation-triangle me-1"></i>
                                         <strong>Customer required</strong> —
-                                        Credit portion will be added to customer's udhari.
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- PARTIAL PAYMENT FIELDS -->
-                            <div class="col-12" id="partialFields" style="display:none">
-                                <div class="p-3 bg-light rounded border border-warning">
-                                    <h6 class="fw-semibold text-warning mb-3">
-                                        <i class="bi bi-split me-2"></i>Partial Payment Details
-                                    </h6>
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">
-                                                Amount Paid Now (₹) <span class="text-danger">*</span>
-                                            </label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-success text-white">
-                                                    <i class="bi bi-cash-coin"></i>
-                                                </span>
-                                                <input type="number" name="paidAmount"
-                                                       id="paidAmountInput" class="form-control"
-                                                       placeholder="0.00" step="0.01" min="0"
-                                                       oninput="calcCreditAmount()">
-                                            </div>
-                                            <div class="form-text text-success">Amount customer pays right now</div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">Amount on Credit (₹)</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-danger text-white">
-                                                    <i class="bi bi-credit-card"></i>
-                                                </span>
-                                                <input type="number" name="creditAmount"
-                                                       id="creditAmountDisplay"
-                                                       class="form-control bg-light"
-                                                       placeholder="0.00" readonly>
-                                            </div>
-                                            <div class="form-text text-danger">Auto: Total − Paid Now</div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3 p-2 bg-white rounded border d-flex gap-4 flex-wrap">
-                                        <div class="small">
-                                            <span class="text-muted">Total:</span>
-                                            <strong class="ms-1">₹<span id="partialTotalDisplay">0.00</span></strong>
-                                        </div>
-                                        <div class="small">
-                                            <span class="text-muted">Paying:</span>
-                                            <strong class="ms-1 text-success">₹<span id="partialPaidDisplay">0.00</span></strong>
-                                        </div>
-                                        <div class="small">
-                                            <span class="text-muted">Udhari:</span>
-                                            <strong class="ms-1 text-danger">₹<span id="partialCreditDisplay">0.00</span></strong>
-                                        </div>
+                                        Credit portion added to customer's udhari.
                                     </div>
                                 </div>
                             </div>
 
                             <!-- CREDIT WARNING -->
                             <div class="col-12">
-                                <div id="creditWarning" class="alert alert-warning mb-0 py-2 d-none">
+                                <div id="creditWarning"
+                                     class="alert alert-warning mb-0 py-2 d-none">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
-                                    <strong>Credit Bill:</strong> Full amount added to customer's udhari.
+                                    <strong>Credit Bill:</strong>
+                                    Full amount added to customer's udhari.
                                 </div>
                             </div>
 
@@ -457,66 +589,287 @@
 
                     <!-- ITEMS CARD -->
                     <div class="table-card">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex justify-content-between
+                                    align-items-center mb-3">
                             <h6 class="fw-bold mb-0">
                                 <i class="bi bi-cart me-2 text-success"></i>
                                 Bill Items
-                                <span class="badge bg-success ms-1" id="itemCount">0</span>
+                                <span class="badge bg-success ms-1"
+                                      id="itemCount">0</span>
                             </h6>
-                            <button type="button" class="btn btn-sm btn-success"
-                                    onclick="addItemRow()">
-                                <i class="bi bi-plus-circle me-1"></i>Add Item
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        onclick="openInlineProductModal()">
+                                    <i class="bi bi-box-seam me-1"></i>
+                                    Add Product
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm btn-success"
+                                        onclick="addItemRow()">
+                                    <i class="bi bi-plus-circle me-1"></i>
+                                    Add Item
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Product Search -->
-                        <div class="mb-3 p-3 bg-light rounded" style="border:1px dashed #ccc">
-                            <label class="form-label small fw-semibold text-muted">
-                                <i class="bi bi-search me-1"></i>Search & Add Product
+                        <div class="mb-3 p-3 bg-light rounded"
+                             style="border:1px dashed #ccc">
+                            <label class="form-label small
+                                          fw-semibold text-muted">
+                                <i class="bi bi-search me-1"></i>
+                                Search & Add Product
                             </label>
                             <div class="position-relative">
-                                <input type="text" id="productSearch" class="form-control"
+                                <input type="text"
+                                       id="productSearch"
+                                       class="form-control"
                                        placeholder="Type product name in English, Hindi or Marathi..."
                                        autocomplete="off"
                                        oninput="searchProducts(this.value)">
-                                <div id="searchResults" class="search-results d-none"></div>
+                                <div id="searchResults"
+                                     class="search-results d-none"></div>
                             </div>
                         </div>
 
                         <div id="itemsContainer"></div>
 
-                        <div id="emptyState" class="text-center py-4 text-muted">
-                            <i class="bi bi-cart-x" style="font-size:40px;opacity:0.3"></i>
-                            <p class="mt-2 mb-0 small">Search above or click "Add Item" to start</p>
+                        <div id="emptyState"
+                             class="text-center py-4 text-muted">
+                            <i class="bi bi-cart-x"
+                               style="font-size:40px;opacity:0.3"></i>
+                            <p class="mt-2 mb-0 small">
+                                Search above or click "Add Item" to start
+                            </p>
                         </div>
                     </div>
 
                     <!-- Notes -->
                     <div class="table-card mt-4">
                         <label class="form-label fw-semibold">
-                            <i class="bi bi-sticky me-2"></i>Notes (optional)
+                            <i class="bi bi-sticky me-2"></i>
+                            Notes (optional)
                         </label>
-                        <textarea name="notes" class="form-control" rows="2"
-                                  placeholder="Any special notes..."></textarea>
+                        <textarea name="notes"
+                                  class="form-control"
+                                  rows="2"
+                                  placeholder="Any special notes...">
+                        </textarea>
                     </div>
 
+                </div>
+
+                <!-- Inline Add Product Modal -->
+                <div class="modal fade" id="inlineProductModal"
+                     tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered
+                                modal-xl modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header border-0 pb-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="stat-icon bg-primary
+                                                bg-opacity-10"
+                                         style="width:40px;height:40px;
+                                                font-size:18px">
+                                        <i class="bi bi-box-seam text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="modal-title mb-0">
+                                            Add New Product
+                                        </h5>
+                                        <p class="text-muted small mb-0">
+                                            Fill all required fields marked with *
+                                        </p>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-close"
+                                        data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body pt-3">
+                                <div class="mb-4">
+                                    <h6 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-translate me-2"></i>
+                                        Product Names (Multi-Language)
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                English Name
+                                            </label>
+                                            <input type="text"
+                                                   id="newProdNameEn"
+                                                   class="form-control"
+                                                   placeholder="e.g. Sugar">
+                                            <div class="form-text">Optional — enter any language name</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Hindi Name
+                                                <span class="badge bg-warning
+                                                             text-dark ms-1"
+                                                      style="font-size:10px">
+                                                    हिंदी
+                                                </span>
+                                            </label>
+                                            <input type="text"
+                                                   id="newProdNameHi"
+                                                   class="form-control"
+                                                   placeholder="e.g. चीनी"
+                                                   style="font-family:'Noto Sans Devanagari',sans-serif">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Marathi Name
+                                                <span class="badge bg-success
+                                                             text-white ms-1"
+                                                      style="font-size:10px">
+                                                    मराठी
+                                                </span>
+                                            </label>
+                                            <input type="text"
+                                                   id="newProdNameMr"
+                                                   class="form-control"
+                                                   placeholder="e.g. साखर"
+                                                   style="font-family:'Noto Sans Devanagari',sans-serif">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">
+                                        HSN Code
+                                        <span class="badge bg-info ms-1"
+                                              style="font-size:10px">For GST</span>
+                                    </label>
+                                    <input type="text"
+                                           id="newProdHsnCode"
+                                           class="form-control"
+                                           placeholder="e.g. 1006, 1507, 0402"
+                                           maxlength="20">
+                                </div>
+                                <hr class="my-4">
+                                <div class="mb-4">
+                                    <h6 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-currency-rupee me-2"></i>
+                                        Pricing & GST
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Price (₹)
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">₹</span>
+                                                <input type="number"
+                                                       id="newProdPrice"
+                                                       class="form-control"
+                                                       step="0.01" min="0"
+                                                       placeholder="0.00">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                GST %
+                                            </label>
+                                            <select id="newProdGst"
+                                                    class="form-select">
+                                                <option value="0">0% (No GST)</option>
+                                                <option value="5">5%</option>
+                                                <option value="12">12%</option>
+                                                <option value="18">18%</option>
+                                                <option value="28">28%</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Unit
+                                            </label>
+                                            <select id="newProdUnit"
+                                                    class="form-select">
+                                                <option value="piece">Piece</option>
+                                                <option value="kg">Kilogram (kg)</option>
+                                                <option value="gram">Gram (g)</option>
+                                                <option value="litre">Litre (L)</option>
+                                                <option value="ml">Millilitre (ml)</option>
+                                                <option value="dozen">Dozen</option>
+                                                <option value="packet">Packet</option>
+                                                <option value="box">Box</option>
+                                                <option value="bottle">Bottle</option>
+                                                <option value="Bag">Bag</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="my-4">
+                                <div class="mb-2">
+                                    <h6 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-archive me-2"></i>
+                                        Inventory & Category
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Stock Quantity
+                                            </label>
+                                            <input type="number"
+                                                   id="newProdStock"
+                                                   class="form-control"
+                                                   value="0" min="0" step="1">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Category
+                                            </label>
+                                            <input type="text"
+                                                   id="newProdCategory"
+                                                   class="form-control"
+                                                   placeholder="e.g. Grains, Dairy"
+                                                   list="newCategoryList">
+                                            <datalist id="newCategoryList">
+                                                <option th:each="cat : ${categories}"
+                                                        th:value="${cat}"></option>
+                                            </datalist>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info mt-3 mb-0 py-2 small">
+                                    Product will be saved and added to this bill immediately.
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button"
+                                        class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                <button type="button"
+                                        class="btn btn-success"
+                                        onclick="saveInlineBillProduct()">
+                                    <i class="bi bi-save me-1"></i>Save & Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- RIGHT COLUMN: Totals Panel -->
                 <div class="col-lg-4">
                     <div class="totals-panel">
-
                         <h6 class="fw-bold mb-3 pb-2 border-bottom">
-                            <i class="bi bi-calculator me-2 text-primary"></i>Bill Summary
+                            <i class="bi bi-calculator me-2 text-primary"></i>
+                            Bill Summary
                         </h6>
-
                         <div class="total-row">
                             <span class="text-muted">Subtotal</span>
-                            <span class="fw-semibold">₹<span id="t-subtotal">0.00</span></span>
+                            <span class="fw-semibold">
+                                ₹<span id="t-subtotal">0.00</span>
+                            </span>
                         </div>
-                        <div class="total-row" id="gstRow" style="display:none">
+                        <div class="total-row" id="gstRow"
+                             style="display:none">
                             <span class="text-muted">GST Amount</span>
-                            <span class="text-warning fw-semibold">+₹<span id="t-gst">0.00</span></span>
+                            <span class="text-warning fw-semibold">
+                                +₹<span id="t-gst">0.00</span>
+                            </span>
                         </div>
                         <div class="total-row">
                             <span class="text-muted">Transport</span>
@@ -528,41 +881,48 @@
                         </div>
                         <div class="total-row">
                             <span class="text-muted">Discount</span>
-                            <span class="text-success">-₹<span id="t-discount">0.00</span></span>
+                            <span class="text-success">
+                                -₹<span id="t-discount">0.00</span>
+                            </span>
                         </div>
-
-                        <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div class="mt-3 pt-3 border-top d-flex
+                                    justify-content-between align-items-center">
                             <span class="fw-bold">TOTAL</span>
-                            <span class="grand-total">₹<span id="t-total">0.00</span></span>
+                            <span class="grand-total">
+                                ₹<span id="t-total">0.00</span>
+                            </span>
                         </div>
-
                         <div class="mt-3 p-2 bg-light rounded text-center">
                             <span class="small text-muted">
                                 <span id="s-items">0</span> item(s) ·
                                 <span id="s-qty">0</span> total qty
                             </span>
                         </div>
-
                         <div class="mt-3">
-                            <label class="form-label small fw-semibold">Discount (₹)</label>
+                            <label class="form-label small fw-semibold">
+                                Discount (₹)
+                            </label>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">₹</span>
-                                <input type="number" name="discount" class="form-control"
-                                       value="0" step="0.01" min="0" onchange="recalculate()">
+                                <input type="number" name="discount"
+                                       class="form-control" value="0"
+                                       step="0.01" min="0"
+                                       onchange="recalculate()">
                             </div>
                         </div>
-
                         <hr>
-
-                        <button type="submit" class="btn btn-primary w-100 py-2"
-                                id="submitBtn" onclick="return validateForm()">
-                            <i class="bi bi-check-circle me-2"></i>Save Bill
+                        <button type="button"
+                                class="btn btn-primary w-100 py-2"
+                                id="submitBtn"
+                                onclick="showNewBillConfirm()">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Save Bill
                         </button>
-                        <button type="button" class="btn btn-outline-secondary w-100 mt-2"
+                        <button type="button"
+                                class="btn btn-outline-secondary w-100 mt-2"
                                 onclick="clearAll()">
                             <i class="bi bi-x-circle me-2"></i>Clear All
                         </button>
-
                     </div>
                 </div>
 
@@ -577,163 +937,337 @@
     let itemIndex = 0;
     let searchTimeout;
 
-    // ── SIDEBAR ──────────────────────────────────────────────
+    // ── SIDEBAR ───────────────────────────────────────
     document.getElementById('sidebarToggle')
-        .addEventListener('click', function () {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-            document.getElementById('mainContent').classList.toggle('expanded');
-        });
+            .addEventListener('click', function () {
+        document.getElementById('sidebar')
+                .classList.toggle('collapsed');
+        document.getElementById('mainContent')
+                .classList.toggle('expanded');
+    });
 
-    // ── RESET DATE ───────────────────────────────────────────
+    // ── RESET DATE ────────────────────────────────────
     document.getElementById('resetDateBtn')
-        .addEventListener('click', function () {
-            document.getElementById('billDate').value =
-                    new Date().toISOString().split('T')[0];
-        });
+            .addEventListener('click', function () {
+        document.getElementById('billDate').value =
+                new Date().toISOString().split('T')[0];
+    });
 
-    // ── LANGUAGE SELECTOR ────────────────────────────────────
+    // ── LANGUAGE SELECTOR ─────────────────────────────
     document.getElementById('langSelector')
-        .addEventListener('change', function () {
-            document.getElementById('invoiceLang').value = this.value;
-            const v = document.getElementById('productSearch').value;
-            if (v.trim()) searchProducts(v);
-        });
+            .addEventListener('change', function () {
+        document.getElementById('invoiceLang').value =
+                this.value;
+        const v = document.getElementById(
+                'productSearch').value;
+        if (v.trim()) searchProducts(v);
+    });
 
-    // ── RESET BILL NUMBER ────────────────────────────────────
+    // ── RESET BILL NUMBER ─────────────────────────────
     function resetBillNo(btn) {
         document.getElementById('customBillNo').value =
                 btn.getAttribute('data-default-bill-no');
     }
 
-    // ── HTML ESCAPE ──────────────────────────────────────────
+    // ── HTML ESCAPE ───────────────────────────────────
     function escHtml(str) {
         return String(str)
-            .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
-            .replace(/'/g,'&#39;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;');
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     }
 
-    // ── PRODUCT SEARCH ───────────────────────────────────────
+    // ── NORMALIZE UNIT ────────────────────────────────
+    function normalizeBillingUnit(unit) {
+        const u = String(unit || '').trim().toLowerCase();
+        if (u === 'kilogram' || u === 'kgs') return 'kg';
+        if (u === 'gram' || u === 'grams' || u === 'g')
+            return 'gram';
+        return u || 'piece';
+    }
+
+    // ── PRODUCT SEARCH ────────────────────────────────
     function searchProducts(query) {
         clearTimeout(searchTimeout);
-        const resultsDiv = document.getElementById('searchResults');
+        const resultsDiv =
+                document.getElementById('searchResults');
         if (query.trim().length < 1) {
-            resultsDiv.classList.add('d-none'); return;
+            resultsDiv.classList.add('d-none');
+            return;
         }
         searchTimeout = setTimeout(() => {
-            const lang = document.getElementById('langSelector').value;
-            fetch(`/products/search?q=${encodeURIComponent(query)}&lang=${lang}`)
+            const lang = document.getElementById(
+                    'langSelector').value;
+            fetch(`/products/search?q=${encodeURIComponent(
+                    query)}&lang=${lang}`)
                 .then(res => res.json())
                 .then(products => {
-                    resultsDiv.innerHTML = products.length === 0
-                        ? `<div class="search-result-item text-muted">No products found</div>`
+                    resultsDiv.innerHTML =
+                        products.length === 0
+                        ? `<div class="search-result-item
+                                      text-muted">
+                               No products found
+                           </div>`
                         : products.map(p => `
                             <div class="search-result-item"
-                                 onclick="addProductRow(${p.id},'${escHtml(p.displayName)}',
-                                          ${p.price},${p.gstPercent||0},'${escHtml(p.unit||'piece')}')">
-                                <div class="fw-semibold">${escHtml(p.displayName)}</div>
+                                 onclick="addProductRow(
+                                     ${p.id},
+                                     '${escHtml(p.displayName)}',
+                                     ${p.price},
+                                     ${p.gstPercent || 0},
+                                     '${escHtml(p.unit || 'piece')}')">
+                                <div class="fw-semibold">
+                                    ${escHtml(p.displayName)}
+                                </div>
                                 <div class="small text-muted">
-                                    ₹${parseFloat(p.price).toFixed(2)} · ${p.unit||'piece'} · GST:${p.gstPercent||0}%
+                                    ₹${parseFloat(p.price)
+                                        .toFixed(2)} ·
+                                    ${p.unit || 'piece'} ·
+                                    GST:${p.gstPercent || 0}%
                                 </div>
                             </div>`).join('');
                     resultsDiv.classList.remove('d-none');
-                }).catch(() => resultsDiv.classList.add('d-none'));
+                }).catch(() =>
+                    resultsDiv.classList.add('d-none'));
         }, 300);
     }
 
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#productSearch') && !e.target.closest('#searchResults'))
-            document.getElementById('searchResults').classList.add('d-none');
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#productSearch')
+                && !e.target.closest('#searchResults')) {
+            document.getElementById('searchResults')
+                    .classList.add('d-none');
+        }
     });
 
     function addProductRow(id, name, price, gst, unit) {
         document.getElementById('productSearch').value = '';
-        document.getElementById('searchResults').classList.add('d-none');
+        document.getElementById('searchResults')
+                .classList.add('d-none');
         addItemRow(id, name, price, gst, unit);
     }
 
-    // ── ADD ITEM ROW ─────────────────────────────────────────
-    function addItemRow(productId='', productName='', price=0, gst=0, unit='piece') {
-        const idx = itemIndex++;
-        const container = document.getElementById('itemsContainer');
-        document.getElementById('emptyState').style.display = 'none';
+    // ── ADD ITEM ROW ──────────────────────────────────
+    function addItemRow(productId = '', productName = '',
+                        price = 0, gst = 0, unit = 'piece') {
+        const idx       = itemIndex++;
+        const container =
+                document.getElementById('itemsContainer');
+        document.getElementById('emptyState')
+                .style.display = 'none';
         const row = document.createElement('div');
-        row.className = 'item-row'; row.id = `row-${idx}`; row.dataset.gst = gst;
+        row.className   = 'item-row';
+        row.id          = `row-${idx}`;
+        row.dataset.gst = gst;
+        const unitNorm   = normalizeBillingUnit(unit);
+        const isWeight   = unitNorm === 'kg' || unitNorm === 'gram';
+        const isGram     = unitNorm === 'gram';
+
         row.innerHTML = `
-            <div class="row g-2 align-items-center">
-                <input type="hidden" name="productIds" value="${productId}" id="pid-${idx}">
-                <input type="hidden" name="unitPrices" id="uprice-${idx}" value="${price}">
-                <div class="col-md-4">
-                    <input type="text" class="form-control form-control-sm fw-semibold"
-                           id="pname-${idx}" value="${escHtml(productName)}"
+            <input type="hidden" name="productIds"   value="${productId}" id="pid-${idx}">
+            <input type="hidden" name="unitPrices"   id="uprice-${idx}"  value="${price}">
+            <input type="hidden" name="gstPercents"  id="gst-${idx}"     value="${gst}">
+            <input type="hidden" name="itemUnits"    id="unit-${idx}"    value="${unitNorm}">
+            <input type="hidden" name="billingUnits" id="billunit-${idx}" value="${unitNorm}">
+            <input type="hidden" name="itemNames"    id="iname-${idx}"   value="${escHtml(productName)}">
+
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">
+
+                <!-- Product Name -->
+                <div class="position-relative" style="flex:1 1 0;min-width:110px;">
+                    <input type="text"
+                           class="form-control form-control-sm fw-semibold"
+                           id="pname-${idx}"
+                           value="${escHtml(productName)}"
                            placeholder="Product name"
-                           oninput="handleManualProductSearch(${idx},this.value)"
+                           oninput="handleManualProductSearch(${idx}, this.value)"
                            autocomplete="off">
                     <div id="inline-results-${idx}" class="search-results d-none"></div>
                 </div>
-                <div class="col-md-1">
-                    <input type="text" class="form-control form-control-sm text-center text-muted"
-                           value="${unit}" readonly tabindex="-1">
+
+                ${isWeight ? `
+                <!-- Qty Unit selector (kg / gram only for weight products) -->
+                <select class="form-select form-select-sm"
+                        id="unitsel-${idx}"
+                        style="flex:0 0 auto;width:78px;"
+                        onchange="setBillingUnit(${idx}, this.value)">
+                    <option value="kg"   ${!isGram ? 'selected' : ''}>kg</option>
+                    <option value="gram" ${isGram  ? 'selected' : ''}>gram</option>
+                </select>` : `
+                <!-- Static unit badge for non-weight products -->
+                <div style="flex:0 0 auto;width:78px;display:flex;justify-content:center;align-items:center;">
+                    <span class="badge bg-secondary px-2 py-1" style="font-size:11px;width:100%;text-align:center;">${escHtml(unitNorm)}</span>
+                </div>`}
+
+                <!-- Quantity −/qty/+ -->
+                <div class="input-group input-group-sm" style="flex:0 0 auto;width:140px;">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeQty(${idx},-1)">−</button>
+                    <input  type="number" name="quantities"
+                            class="form-control text-center fw-bold"
+                            id="qty-${idx}" value="1" min="0.001" step="0.001"
+                            oninput="recalcRow(${idx})">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeQty(${idx},1)">+</button>
                 </div>
-                <div class="col-md-2">
-                    <div class="input-group input-group-sm">
-                        <button type="button" class="btn btn-outline-secondary"
-                                onclick="changeQty(${idx},-1)">−</button>
-                        <input type="number" name="quantities" class="form-control text-center"
-                               id="qty-${idx}" value="1" min="0.001" step="0.001"
-                               oninput="recalcRow(${idx})">
-                        <button type="button" class="btn btn-outline-secondary"
-                                onclick="changeQty(${idx},1)">+</button>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-group-sm">
+
+                ${isWeight ? `
+                <!-- Gram Qty preset (weight products only) -->
+                <div id="grampresetwrap-${idx}" style="flex:0 0 auto;display:${isGram ? 'block' : 'none'};">
+                    <select class="form-select form-select-sm"
+                            id="grampreset-${idx}"
+                            style="width:116px;"
+                            onchange="setGramPreset(${idx}, this.value)">
+                        <option value="">gram qty</option>
+                        <option value="250">250 gm</option>
+                        <option value="500">500 gm</option>
+                        <option value="750">750 gm</option>
+                    </select>
+                </div>` : ``}
+
+                <!-- Price block: editable per-kg input OR read-only per-gram display -->
+                <!-- Per-kg editable input (shown when unit = kg) -->
+                <div id="pricekg-${idx}" style="flex:0 0 auto;display:${unitNorm === 'gram' ? 'none' : 'block'};">
+                    <div class="input-group input-group-sm" style="width:140px;">
                         <span class="input-group-text">₹</span>
-                        <input type="number" class="form-control" id="price-${idx}"
-                               value="${parseFloat(price).toFixed(2)}" step="0.01" min="0"
+                        <input type="number"
+                               class="form-control fw-semibold"
+                               id="price-${idx}"
+                               value="${parseFloat(price).toFixed(2)}"
+                               step="0.01" min="0"
                                oninput="updatePrice(${idx})">
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="form-control form-control-sm bg-success bg-opacity-10
-                                text-success text-end fw-bold border-success"
-                         id="rowtotal-${idx}">
-                        ₹${(parseFloat(price)*1).toFixed(2)}
-                    </div>
+                <!-- Per-gram read-only display (shown when unit = gram) -->
+                <div id="pricegram-${idx}" style="flex:0 0 auto;display:${unitNorm === 'gram' ? 'flex' : 'none'};align-items:center;gap:4px;">
+                    <span style="font-size:13px;font-weight:600;color:#b45309;white-space:nowrap;">
+                        ₹<span id="pergramdisplay-${idx}">${(parseFloat(price) * 0.001).toFixed(4)}</span>
+                    </span>
+                    <span style="font-size:11px;color:#6c757d;white-space:nowrap;">/ gram</span>
                 </div>
-                <div class="col-md-1 text-end">
-                    <button type="button" class="btn btn-sm btn-outline-danger"
-                            onclick="removeRow(${idx})">
-                        <i class="bi bi-trash"></i>
-                    </button>
+
+                <!-- Row Total -->
+                <div class="form-control form-control-sm bg-success bg-opacity-10 text-success text-end fw-bold border-success"
+                     id="rowtotal-${idx}"
+                     style="flex:0 0 auto;width:82px;">
+                    ₹${(parseFloat(price) * getBillingFactor(unitNorm)).toFixed(2)}
                 </div>
+
+                <!-- Delete -->
+                <button type="button" class="btn btn-sm btn-outline-danger px-2" style="flex:0 0 auto;"
+                        onclick="removeRow(${idx})">
+                    <i class="bi bi-trash"></i>
+                </button>
+
             </div>
-            <div class="mt-1 ms-1">
-                <span class="badge bg-warning text-dark small" id="gstbadge-${idx}"
-                      style="display:${gst>0?'inline':'none'}">GST ${gst}%</span>
+            <div class="mt-1">
+                <span class="badge bg-warning text-dark small"
+                      id="gstbadge-${idx}"
+                      style="display:${gst > 0 ? 'inline' : 'none'}">
+                    GST ${gst}%
+                </span>
             </div>`;
         container.appendChild(row);
+        // Auto-scroll to the new item
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         recalculate();
     }
 
-    // ── INLINE SEARCH ────────────────────────────────────────
+    // ── SET QTY ───────────────────────────────────────
+    function setQty(idx, val) {
+        const input = document.getElementById(`qty-${idx}`);
+        if (input) {
+            input.value = val;
+            recalcRow(idx);
+        }
+    }
+
+    // ── SET BILLING UNIT ──────────────────────────────
+    function setBillingUnit(idx, value) {
+        const billUnitInput = document.getElementById(`billunit-${idx}`);
+        const unitInput     = document.getElementById(`unit-${idx}`);
+        const presetWrap    = document.getElementById(`grampresetwrap-${idx}`);
+        const preset        = document.getElementById(`grampreset-${idx}`);
+        const priceKgDiv    = document.getElementById(`pricekg-${idx}`);
+        const priceGramDiv  = document.getElementById(`pricegram-${idx}`);
+        const isGram        = value === 'gram';
+
+        if (billUnitInput) billUnitInput.value = value;
+        if (unitInput)     unitInput.value     = value;
+        if (presetWrap)    presetWrap.style.display = isGram ? 'block' : 'none';
+        if (preset && !isGram) preset.value = '';
+
+        // Toggle price views
+        if (priceKgDiv)   priceKgDiv.style.display   = isGram ? 'none' : 'block';
+        if (priceGramDiv) priceGramDiv.style.display  = isGram ? 'flex' : 'none';
+
+        // Refresh per-gram rate display
+        if (isGram) refreshPerGramDisplay(idx);
+
+        recalcRow(idx);
+    }
+
+    // ── GRAM PRESET DROPDOWN ──────────────────────────
+    function setGramPreset(idx, value) {
+        const grams    = parseFloat(value);
+        const qtyInput = document.getElementById(`qty-${idx}`);
+        if (!qtyInput) return;
+
+        if (!grams) {
+            // "Gram Qty" placeholder selected → reset qty to 1, refresh price
+            qtyInput.value = 1;
+            refreshPerGramDisplay(idx);
+            recalcRow(idx);
+            return;
+        }
+
+        // A preset chosen → set qty, keep dropdown showing selection
+        qtyInput.value = grams;
+        refreshPerGramDisplay(idx);
+        recalcRow(idx);
+    }
+
+    // ── BILLING FACTOR ────────────────────────────────
+    function getBillingFactor(unit) {
+        const u = String(unit || '').trim().toLowerCase();
+        if (u === 'gram' || u === 'g' || u === 'grams') return 0.001;
+        return 1;
+    }
+
+    // ── INLINE SEARCH ─────────────────────────────────
     let inlineSearchTimeout;
     function handleManualProductSearch(idx, query) {
         clearTimeout(inlineSearchTimeout);
-        const rd = document.getElementById(`inline-results-${idx}`);
-        if (query.trim().length < 1) { rd.classList.add('d-none'); return; }
+        const rd = document.getElementById(
+                `inline-results-${idx}`);
+        if (query.trim().length < 1) {
+            rd.classList.add('d-none');
+            return;
+        }
         inlineSearchTimeout = setTimeout(() => {
-            const lang = document.getElementById('langSelector').value;
-            fetch(`/products/search?q=${encodeURIComponent(query)}&lang=${lang}`)
+            const lang = document.getElementById(
+                    'langSelector').value;
+            fetch(`/products/search?q=${encodeURIComponent(
+                    query)}&lang=${lang}`)
                 .then(r => r.json())
                 .then(products => {
-                    rd.innerHTML = products.slice(0,5).map(p => `
-                        <div class="search-result-item"
-                             onclick="fillRow(${idx},${p.id},'${escHtml(p.displayName)}',
-                                      ${p.price},${p.gstPercent||0},'${p.unit||'piece'}')">
-                            <span class="fw-semibold">${escHtml(p.displayName)}</span>
-                            <span class="text-muted ms-2 small">₹${parseFloat(p.price).toFixed(2)}</span>
-                        </div>`).join('')
+                    rd.innerHTML = products.slice(0, 5)
+                        .map(p => `
+                            <div class="search-result-item"
+                                 onclick="fillRow(
+                                     ${idx}, ${p.id},
+                                     '${escHtml(p.displayName)}',
+                                     ${p.price},
+                                     ${p.gstPercent || 0},
+                                     '${p.unit || 'piece'}')">
+                                <span class="fw-semibold">
+                                    ${escHtml(p.displayName)}
+                                </span>
+                                <span class="text-muted ms-2 small">
+                                    ₹${parseFloat(p.price)
+                                        .toFixed(2)}
+                                </span>
+                            </div>`).join('')
                         || '<div class="search-result-item text-muted">No results</div>';
                     rd.classList.remove('d-none');
                 });
@@ -741,37 +1275,96 @@
     }
 
     function fillRow(idx, id, name, price, gst, unit) {
-        document.getElementById(`pid-${idx}`).value   = id;
-        document.getElementById(`pname-${idx}`).value = name;
-        document.getElementById(`price-${idx}`).value = parseFloat(price).toFixed(2);
+        const unitNorm = normalizeBillingUnit(unit);
+        const isGram   = unitNorm === 'gram';
+
+        document.getElementById(`pid-${idx}`).value    = id;
+        document.getElementById(`pname-${idx}`).value  = name;
+        document.getElementById(`iname-${idx}`).value  = name;
         document.getElementById(`uprice-${idx}`).value = price;
+
+        const gstInput = document.getElementById(`gst-${idx}`);
+        if (gstInput) gstInput.value = gst;
+
+        const unitInput = document.getElementById(`unit-${idx}`);
+        if (unitInput) unitInput.value = unitNorm;
+        const billUnitInput = document.getElementById(`billunit-${idx}`);
+        if (billUnitInput) billUnitInput.value = unitNorm;
+
+        // Sync unit selector
+        const unitSel = document.getElementById(`unitsel-${idx}`);
+        if (unitSel) unitSel.value = isGram ? 'gram' : 'kg';
+
+        // Gram preset visibility
+        const presetWrap = document.getElementById(`grampresetwrap-${idx}`);
+        if (presetWrap) presetWrap.style.display = isGram ? 'block' : 'none';
+        const preset = document.getElementById(`grampreset-${idx}`);
+        if (preset && !isGram) preset.value = '';
+
+        // Toggle price views
+        const priceKgDiv   = document.getElementById(`pricekg-${idx}`);
+        const priceGramDiv = document.getElementById(`pricegram-${idx}`);
+        if (priceKgDiv)   priceKgDiv.style.display  = isGram ? 'none' : 'block';
+        if (priceGramDiv) priceGramDiv.style.display = isGram ? 'flex' : 'none';
+
+        // Always keep per-kg input in sync (used for billing math)
+        const priceInput = document.getElementById(`price-${idx}`);
+        if (priceInput) priceInput.value = parseFloat(price).toFixed(2);
+
+        // Refresh per-gram rate display
+        refreshPerGramDisplay(idx);
+
         document.getElementById(`inline-results-${idx}`).classList.add('d-none');
+
         const row = document.getElementById(`row-${idx}`);
         row.dataset.gst = gst;
         const badge = document.getElementById(`gstbadge-${idx}`);
-        if (badge) { badge.textContent = `GST ${gst}%`; badge.style.display = gst>0?'inline':'none'; }
+        if (badge) {
+            badge.textContent = `GST ${gst}%`;
+            badge.style.display = gst > 0 ? 'inline' : 'none';
+        }
         recalcRow(idx);
     }
 
-    // ── QTY / PRICE ──────────────────────────────────────────
+    // ── QTY CHANGE ────────────────────────────────────
     function changeQty(idx, delta) {
         const input = document.getElementById(`qty-${idx}`);
-        let val = Math.max(0.001, (parseFloat(input.value)||0) + delta);
-        input.value = val%1===0 ? val : val.toFixed(3);
+        let val = Math.max(0.001,
+                (parseFloat(input.value) || 0) + delta);
+        input.value = val % 1 === 0
+                ? val : val.toFixed(3);
+        const preset = document.getElementById(`grampreset-${idx}`);
+        if (preset) preset.value = '';
         recalcRow(idx);
     }
 
     function updatePrice(idx) {
-        const price = parseFloat(document.getElementById(`price-${idx}`).value)||0;
+        const price = parseFloat(document.getElementById(
+                `price-${idx}`).value) || 0;
         document.getElementById(`uprice-${idx}`).value = price;
+        refreshPerGramDisplay(idx);
         recalcRow(idx);
     }
 
+    // ── REFRESH PER-GRAM DISPLAY ──────────────────────
+    function refreshPerGramDisplay(idx) {
+        const perKgPrice = parseFloat(document.getElementById(
+                `uprice-${idx}`)?.value) || 0;
+        const el = document.getElementById(`pergramdisplay-${idx}`);
+        if (el) el.textContent = (perKgPrice * 0.001).toFixed(4);
+    }
+
+    // ── RECALC ROW ────────────────────────────────────
     function recalcRow(idx) {
-        const qty   = parseFloat(document.getElementById(`qty-${idx}`)?.value)||0;
-        const price = parseFloat(document.getElementById(`price-${idx}`)?.value)||0;
-        const el    = document.getElementById(`rowtotal-${idx}`);
-        if (el) el.textContent = '₹' + (qty*price).toFixed(2);
+        const qty        = parseFloat(document.getElementById(
+                `qty-${idx}`)?.value) || 0;
+        const price      = parseFloat(document.getElementById(
+                `price-${idx}`)?.value) || 0;
+        const billUnit   = document.getElementById(
+                `billunit-${idx}`)?.value || 'piece';
+        const total      = qty * price * getBillingFactor(billUnit);
+        const el         = document.getElementById(`rowtotal-${idx}`);
+        if (el) el.textContent = '₹' + total.toFixed(2);
         recalculate();
     }
 
@@ -779,213 +1372,589 @@
         const row = document.getElementById(`row-${idx}`);
         if (row) row.remove();
         if (document.querySelectorAll('.item-row').length === 0)
-            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('emptyState')
+                    .style.display = 'block';
         recalculate();
     }
 
-    // ── MAIN RECALCULATE ─────────────────────────────────────
+    // ── MAIN RECALCULATE ──────────────────────────────
     function recalculate() {
-        const isGst     = document.getElementById('gstToggle').checked;
-        const transport = parseFloat(document.querySelector('[name=transportCost]')?.value)||0;
-        const extra     = parseFloat(document.querySelector('[name=extraCost]')?.value)||0;
-        const discount  = parseFloat(document.querySelector('[name=discount]')?.value)||0;
+        const isGst     = document.getElementById(
+                'gstToggle').checked;
+        const transport = parseFloat(document.querySelector(
+                '[name=transportCost]')?.value) || 0;
+        const extra     = parseFloat(document.querySelector(
+                '[name=extraCost]')?.value) || 0;
+        const discount  = parseFloat(document.querySelector(
+                '[name=discount]')?.value) || 0;
 
-        let subtotal=0, gstTotal=0, totalQty=0, itemCount=0;
-        document.querySelectorAll('.item-row').forEach(row => {
-            const idx   = row.id.replace('row-','');
-            const qty   = parseFloat(document.getElementById(`qty-${idx}`)?.value)||0;
-            const price = parseFloat(document.getElementById(`price-${idx}`)?.value)||0;
-            const gstPct= parseFloat(row.dataset.gst)||0;
-            const rt    = qty*price;
-            subtotal+=rt; totalQty+=qty; itemCount++;
-            if (isGst && gstPct>0) gstTotal += rt*gstPct/100;
+        let subtotal = 0, gstTotal = 0,
+            totalQty = 0, itemCount = 0;
+
+        document.querySelectorAll('.item-row')
+                .forEach(row => {
+            const idx      = row.id.replace('row-', '');
+            const qty      = parseFloat(document.getElementById(
+                    `qty-${idx}`)?.value) || 0;
+            const price    = parseFloat(document.getElementById(
+                    `price-${idx}`)?.value) || 0;
+            const billUnit = document.getElementById(
+                    `billunit-${idx}`)?.value || 'piece';
+            const gstPct   = parseFloat(row.dataset.gst) || 0;
+            const rt       = qty * price * getBillingFactor(billUnit);
+            subtotal  += rt;
+            totalQty  += qty;
+            itemCount++;
+            if (isGst && gstPct > 0)
+                gstTotal += rt * gstPct / 100;
         });
 
-        const grandTotal = subtotal+gstTotal+transport+extra-discount;
+        const grandTotal = subtotal + gstTotal
+                + transport + extra - discount;
 
-        document.getElementById('t-subtotal').textContent  = subtotal.toFixed(2);
-        document.getElementById('t-gst').textContent       = gstTotal.toFixed(2);
-        document.getElementById('t-transport').textContent = transport.toFixed(2);
-        document.getElementById('t-extra').textContent     = extra.toFixed(2);
-        document.getElementById('t-discount').textContent  = discount.toFixed(2);
-        document.getElementById('t-total').textContent     = Math.max(0,grandTotal).toFixed(2);
-        document.getElementById('s-items').textContent     = itemCount;
-        document.getElementById('s-qty').textContent       = totalQty.toFixed(2);
-        document.getElementById('itemCount').textContent   = itemCount;
-        document.getElementById('gstRow').style.display    = isGst ? 'flex' : 'none';
+        document.getElementById('t-subtotal')
+                .textContent = subtotal.toFixed(2);
+        document.getElementById('t-gst')
+                .textContent = gstTotal.toFixed(2);
+        document.getElementById('t-transport')
+                .textContent = transport.toFixed(2);
+        document.getElementById('t-extra')
+                .textContent = extra.toFixed(2);
+        document.getElementById('t-discount')
+                .textContent = discount.toFixed(2);
+        document.getElementById('t-total')
+                .textContent = Math.max(0, grandTotal)
+                .toFixed(2);
+        document.getElementById('s-items')
+                .textContent = itemCount;
+        document.getElementById('s-qty')
+                .textContent = totalQty.toFixed(3);
+        document.getElementById('itemCount')
+                .textContent = itemCount;
+        document.getElementById('gstRow').style.display =
+                isGst ? 'flex' : 'none';
 
-        const method = document.getElementById('paymentMethod').value;
-        const status = document.getElementById('paymentStatus').value;
+        const method = document.getElementById(
+                'paymentMethod').value;
+        const status = document.getElementById(
+                'paymentStatus').value;
 
-        if (status === 'PARTIAL')       calcCreditAmount();
-        if (method === 'CASH_UPI')      calcUpiAmount();
-        if (method === 'CREDIT_UPI')    calcCreditUpiSplit();
+        if (status === 'PARTIAL')    calcCreditAmount();
+        if (method === 'CASH_UPI')   calcUpiAmount();
+        if (method === 'CREDIT_UPI') calcCreditUpiSplit();
     }
 
-    // ── PAYMENT METHOD CHANGE ────────────────────────────────
-  // ── PAYMENT METHOD → AUTO SET STATUS ─────────────────
-// Golden rules:
-//   Cash/UPI/Card/NEFT → PAID (money received)
-//   CREDIT             → CREDIT (no money)
-//   CASH_UPI           → PAID (both portions paid)
-//   CREDIT_UPI         → PARTIAL (part paid, part udhari)
-// ─────────────────────────────────────────────────────
-function handlePaymentMethodChange() {
-    const method          = document.getElementById('paymentMethod').value;
-    const statusInput     = document.getElementById('paymentStatus');
-    const statusBadge     = document.getElementById('statusBadge');
-    const statusHint      = document.getElementById('statusHint');
-    const cashUpiFields   = document.getElementById('cashUpiFields');
-    const creditUpiFields = document.getElementById('creditUpiFields');
-    const partialFields   = document.getElementById('partialFields');
-    const upiNote         = document.getElementById('upiNote');
-    const creditWarning   = document.getElementById('creditWarning');
+    // ── PAYMENT METHOD CHANGE ─────────────────────────
+    function handlePaymentMethodChange() {
+        const method          = document.getElementById(
+                'paymentMethod').value;
+        const statusInput     = document.getElementById(
+                'paymentStatus');
+        const statusBadge     = document.getElementById(
+                'statusBadge');
+        const statusHint      = document.getElementById(
+                'statusHint');
+        const cashUpiFields   = document.getElementById(
+                'cashUpiFields');
+        const creditUpiFields = document.getElementById(
+                'creditUpiFields');
+        const upiNote         = document.getElementById(
+                'upiNote');
+        const creditWarning   = document.getElementById(
+                'creditWarning');
 
-    // Reset all panels
-    cashUpiFields.style.display   = 'none';
-    creditUpiFields.style.display = 'none';
-    partialFields.style.display   = 'none';
-    upiNote.classList.add('d-none');
-    creditWarning.classList.add('d-none');
+        // Reset panels
+        cashUpiFields.style.display   = 'none';
+        creditUpiFields.style.display = 'none';
+        upiNote.classList.add('d-none');
+        creditWarning.classList.add('d-none');
 
-    // ── Auto-set status based on mode ─────────────────
-    if (method === 'CASH' || method === 'UPI'
-            || method === 'CARD' || method === 'NEFT'
-            || method === 'CASH_UPI') {
-        statusInput.value = 'PAID';
-        statusBadge.className = 'badge bg-success';
-        statusBadge.textContent = '✅ Paid';
-        statusHint.textContent = 'Full payment received';
+        if (method === 'CASH' || method === 'UPI'
+                || method === 'CARD' || method === 'NEFT'
+                || method === 'CASH_UPI') {
+            statusInput.value         = 'PAID';
+            statusBadge.className     = 'badge bg-success';
+            statusBadge.textContent   = '✅ Paid';
+            statusHint.textContent    = 'Full payment received';
 
-    } else if (method === 'CREDIT') {
-        statusInput.value = 'CREDIT';
-        statusBadge.className = 'badge bg-danger';
-        statusBadge.textContent = '📋 Credit (Udhari)';
-        statusHint.textContent = 'Full amount goes to udhari';
-        creditWarning.classList.remove('d-none');
+        } else if (method === 'CREDIT') {
+            statusInput.value         = 'CREDIT';
+            statusBadge.className     = 'badge bg-danger';
+            statusBadge.textContent   = '📋 Credit (Udhari)';
+            statusHint.textContent    = 'Full amount goes to udhari';
+            creditWarning.classList.remove('d-none');
 
-    } else if (method === 'CREDIT_UPI') {
-        statusInput.value = 'PARTIAL';
-        statusBadge.className = 'badge bg-warning text-dark';
-        statusBadge.textContent = '⚡ Partial';
-        statusHint.textContent = 'UPI paid now + rest to udhari';
-    }
-
-    // Show relevant fields
-    if (method === 'UPI') {
-        upiNote.classList.remove('d-none');
-    } else if (method === 'CASH_UPI') {
-        cashUpiFields.style.display = 'block';
-        calcUpiAmount();
-    } else if (method === 'CREDIT_UPI') {
-        creditUpiFields.style.display = 'block';
-        calcCreditUpiSplit();
-    }
-}
-
-    // ── CASH+UPI SPLIT CALCULATION ───────────────────────────
-    function calcUpiAmount() {
-        const total    = parseFloat(document.getElementById('t-total').textContent)||0;
-        const cashPaid = parseFloat(document.getElementById('cashPaidAmount').value)||0;
-        const upiAmt   = Math.max(0, total - cashPaid);
-
-        document.getElementById('upiAmountDisplay').value       = upiAmt.toFixed(2);
-        document.getElementById('cashUpiTotalDisplay').value    = total.toFixed(2);
-        document.getElementById('splitCashDisplay').textContent = cashPaid.toFixed(2);
-        document.getElementById('splitUpiDisplay').textContent  = upiAmt.toFixed(2);
-        document.getElementById('splitTotalDisplay').textContent= total.toFixed(2);
-        document.getElementById('splitUpiHint').textContent     = upiAmt.toFixed(2);
-    }
-
-    // ── ✅ NEW: CREDIT+UPI SPLIT CALCULATION ─────────────────
-    function calcCreditUpiSplit() {
-        const total    = parseFloat(document.getElementById('t-total').textContent)||0;
-        const upiPaid  = parseFloat(document.getElementById('creditUpiPaidInput').value)||0;
-        const onCredit = Math.max(0, total - upiPaid);
-
-        // Update display fields
-        document.getElementById('creditUpiCreditDisplay').value    = onCredit.toFixed(2);
-        document.getElementById('creditUpiTotalDisplay').value     = total.toFixed(2);
-        document.getElementById('cuUpiDisplay').textContent        = upiPaid.toFixed(2);
-        document.getElementById('cuCreditDisplay').textContent     = onCredit.toFixed(2);
-        document.getElementById('cuTotalDisplay').textContent      = total.toFixed(2);
-
-        // ✅ Also sync partial payment summary display
-        document.getElementById('partialTotalDisplay').textContent  = total.toFixed(2);
-        document.getElementById('partialPaidDisplay').textContent   = upiPaid.toFixed(2);
-        document.getElementById('partialCreditDisplay').textContent = onCredit.toFixed(2);
-    }
-
-    // ── PAYMENT STATUS TOGGLE ────────────────────────────────
-    function togglePaymentFields() {
-        const status   = document.getElementById('paymentStatus').value;
-        const method   = document.getElementById('paymentMethod').value;
-        const partial  = document.getElementById('partialFields');
-        const warning  = document.getElementById('creditWarning');
-
-        // Don't show default partial fields when CREDIT_UPI is selected
-        // (it has its own dedicated UI)
-        if (method === 'CREDIT_UPI') {
-            partial.style.display = 'none';
-            warning.classList.add('d-none');
-            return;
+        } else if (method === 'CREDIT_UPI') {
+            statusInput.value         = 'PARTIAL';
+            statusBadge.className     = 'badge bg-warning text-dark';
+            statusBadge.textContent   = '⚡ Partial';
+            statusHint.textContent    = 'UPI paid now + rest to udhari';
         }
 
-        partial.style.display = (status === 'PARTIAL') ? 'block' : 'none';
-        warning.classList.toggle('d-none', status !== 'CREDIT');
-        if (status === 'PARTIAL') calcCreditAmount();
+        if (method === 'UPI') {
+            upiNote.classList.remove('d-none');
+        } else if (method === 'CASH_UPI') {
+            cashUpiFields.style.display = 'block';
+            calcUpiAmount();
+        } else if (method === 'CREDIT_UPI') {
+            creditUpiFields.style.display = 'block';
+            calcCreditUpiSplit();
+        }
     }
 
-    // ── PARTIAL CREDIT CALCULATION ───────────────────────────
+    // ── CASH+UPI SPLIT ────────────────────────────────
+    function calcUpiAmount() {
+        const total    = parseFloat(document.getElementById(
+                't-total').textContent) || 0;
+        const cashPaid = parseFloat(document.getElementById(
+                'cashPaidAmount').value) || 0;
+        const upiAmt   = Math.max(0, total - cashPaid);
+
+        document.getElementById('upiAmountDisplay').value =
+                upiAmt.toFixed(2);
+        document.getElementById('cashUpiTotalDisplay').value =
+                total.toFixed(2);
+        document.getElementById('splitCashDisplay')
+                .textContent = cashPaid.toFixed(2);
+        document.getElementById('splitUpiDisplay')
+                .textContent = upiAmt.toFixed(2);
+        document.getElementById('splitTotalDisplay')
+                .textContent = total.toFixed(2);
+        document.getElementById('splitUpiHint')
+                .textContent = upiAmt.toFixed(2);
+    }
+
+    // ── CREDIT+UPI SPLIT ──────────────────────────────
+    function calcCreditUpiSplit() {
+        const total    = parseFloat(document.getElementById(
+                't-total').textContent) || 0;
+        const upiPaid  = parseFloat(document.getElementById(
+                'creditUpiPaidInput').value) || 0;
+        const onCredit = Math.max(0, total - upiPaid);
+
+        document.getElementById('creditUpiCreditDisplay')
+                .value = onCredit.toFixed(2);
+        document.getElementById('creditUpiTotalDisplay')
+                .value = total.toFixed(2);
+        document.getElementById('cuUpiDisplay')
+                .textContent = upiPaid.toFixed(2);
+        document.getElementById('cuCreditDisplay')
+                .textContent = onCredit.toFixed(2);
+        document.getElementById('cuTotalDisplay')
+                .textContent = total.toFixed(2);
+        document.getElementById('partialTotalDisplay')
+                .textContent = total.toFixed(2);
+        document.getElementById('partialPaidDisplay')
+                .textContent = upiPaid.toFixed(2);
+        document.getElementById('partialCreditDisplay')
+                .textContent = onCredit.toFixed(2);
+    }
+
+    // ── PARTIAL CREDIT ────────────────────────────────
     function calcCreditAmount() {
-        const total   = parseFloat(document.getElementById('t-total').textContent)||0;
-        const paidNow = parseFloat(document.getElementById('paidAmountInput').value)||0;
+        const total   = parseFloat(document.getElementById(
+                't-total').textContent) || 0;
+        const paidNow = parseFloat(document.getElementById(
+                'paidAmountInput')?.value) || 0;
         const credit  = Math.max(0, total - paidNow);
 
-        document.getElementById('creditAmountDisplay').value        = credit.toFixed(2);
-        document.getElementById('partialTotalDisplay').textContent  = total.toFixed(2);
-        document.getElementById('partialPaidDisplay').textContent   = paidNow.toFixed(2);
-        document.getElementById('partialCreditDisplay').textContent = credit.toFixed(2);
+        const cd = document.getElementById(
+                'creditAmountDisplay');
+        if (cd) cd.value = credit.toFixed(2);
+        const pt = document.getElementById(
+                'partialTotalDisplay');
+        if (pt) pt.textContent = total.toFixed(2);
+        const pp = document.getElementById(
+                'partialPaidDisplay');
+        if (pp) pp.textContent = paidNow.toFixed(2);
+        const pc = document.getElementById(
+                'partialCreditDisplay');
+        if (pc) pc.textContent = credit.toFixed(2);
     }
 
-    // ── VALIDATE FORM ────────────────────────────────────────
+    // ── VALIDATE FORM ─────────────────────────────────
     function validateForm() {
         const rows = document.querySelectorAll('.item-row');
         if (rows.length === 0) {
-            alert('Please add at least one product to the bill.');
+            alert('Please add at least one product.');
             return false;
         }
         let valid = true;
         rows.forEach(row => {
-            const idx = row.id.replace('row-','');
-            if (!document.getElementById(`pid-${idx}`)?.value) {
+            const idx   = row.id.replace('row-', '');
+            const pid   = document.getElementById(
+                    `pid-${idx}`)?.value;
+            const pname = document.getElementById(
+                    `pname-${idx}`)?.value?.trim();
+            const price = parseFloat(document.getElementById(
+                    `price-${idx}`)?.value) || 0;
+            if (!pid && (!pname || price <= 0)) {
                 valid = false;
-                document.getElementById(`pname-${idx}`).classList.add('is-invalid');
+                document.getElementById(`pname-${idx}`)
+                        .classList.add('is-invalid');
             }
         });
-        if (!valid) { alert('Some items missing product selection.'); return false; }
-
-        const status = document.getElementById('paymentStatus').value;
-        const method = document.getElementById('paymentMethod').value;
-        const custId = document.getElementById('customerSelect').value;
-
-        // Customer required for credit/partial/credit+upi
-        if ((status !== 'PAID' || method === 'CREDIT_UPI') && !custId) {
+        if (!valid) {
+            alert('Some items need a name and price, or product selection.');
+            return false;
+        }
+        const status = document.getElementById(
+                'paymentStatus').value;
+        const method = document.getElementById(
+                'paymentMethod').value;
+        const custId = document.getElementById(
+                'customerSelect').value;
+        if ((status !== 'PAID' || method === 'CREDIT_UPI')
+                && !custId) {
             alert('Please select a customer for credit or partial bills.');
             return false;
         }
         return true;
     }
 
-    // ── CLEAR ALL ────────────────────────────────────────────
+    // ── CLEAR ALL ─────────────────────────────────────
     function clearAll() {
         if (!confirm('Clear all items?')) return;
-        document.getElementById('itemsContainer').innerHTML = '';
-        document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('itemsContainer')
+                .innerHTML = '';
+        document.getElementById('emptyState')
+                .style.display = 'block';
         itemIndex = 0;
         recalculate();
     }
 
+    // ── INLINE ADD PRODUCT ────────────────────────────
+    function openInlineProductModal() {
+        const modal = bootstrap.Modal.getOrCreateInstance(
+                document.getElementById(
+                        'inlineProductModal'));
+        modal.show();
+        document.getElementById('newProdNameEn').focus();
+    }
+
+    async function saveInlineBillProduct() {
+        const nameEn    = document.getElementById(
+                'newProdNameEn').value.trim();
+        const nameHi    = document.getElementById(
+                'newProdNameHi').value.trim();
+        const nameMr    = document.getElementById(
+                'newProdNameMr').value.trim();
+        const hsnCode   = document.getElementById(
+                'newProdHsnCode').value.trim();
+        const price     = parseFloat(document.getElementById(
+                'newProdPrice').value || '0');
+        const gstPercent = document.getElementById(
+                'newProdGst').value;
+        const unit      = document.getElementById(
+                'newProdUnit').value.trim() || 'piece';
+        const category  = document.getElementById(
+                'newProdCategory').value.trim();
+        const stockQty  = document.getElementById(
+                'newProdStock').value || '0';
+
+        if (!nameEn) {
+            const nameHi = document.getElementById('newProdNameHi').value.trim();
+            const nameMr = document.getElementById('newProdNameMr').value.trim();
+            if (!nameHi && !nameMr) {
+                alert('Please enter a product name in at least one language.');
+                document.getElementById('newProdNameEn').focus();
+                return;
+            }
+        }
+        if (!price || price <= 0) {
+            alert('Please enter a valid price.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('_csrf', document.querySelector(
+                'input[name="_csrf"]').value);
+        formData.append('nameEn',      nameEn);
+        formData.append('nameHi',      nameHi);
+        formData.append('nameMr',      nameMr);
+        formData.append('hsnCode',     hsnCode);
+        formData.append('price',       price);
+        formData.append('gstPercent',  gstPercent);
+        formData.append('unit',        unit);
+        formData.append('category',    category);
+        formData.append('stockQty',    stockQty);
+
+        try {
+            const response = await fetch('/products/api', {
+                method: 'POST',
+                body:   formData
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message
+                        || 'Unable to save product');
+            }
+            bootstrap.Modal.getOrCreateInstance(
+                    document.getElementById(
+                            'inlineProductModal')).hide();
+
+            // Reset form
+            ['newProdNameEn','newProdNameHi','newProdNameMr',
+             'newProdHsnCode','newProdPrice','newProdCategory']
+                .forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+            document.getElementById('newProdGst').value  = '0';
+            document.getElementById('newProdUnit').value = 'piece';
+            document.getElementById('newProdStock').value = '0';
+
+            addProductRow(data.id, data.displayName,
+                    data.price, data.gstPercent, data.unit);
+
+        } catch (error) {
+            alert(error.message || 'Failed to create product.');
+        }
+    }
+
+    // ── New Bill Confirm Modal ────────────────────────────
+    function showNewBillConfirm() {
+        if (!validateForm()) return;
+
+        const method   = document.getElementById('paymentMethod').value;
+        const methodLabels = {
+            'CASH':'💵 Cash', 'UPI':'📱 UPI', 'CREDIT':'🔴 Credit (Udhari)',
+            'CASH_UPI':'💵+📱 Cash+UPI', 'CREDIT_UPI':'📱+🔴 UPI+Credit', 'CARD':'💳 Card'
+        };
+        const badgeColors = {
+            'CASH':'#28d17c','UPI':'#4f97ff','CREDIT':'#ff5a5a',
+            'CASH_UPI':'#f59e0b','CREDIT_UPI':'#8b5cf6','CARD':'#06b6d4'
+        };
+        const color = badgeColors[method] || '#888';
+
+        // Badge
+        const badge = document.getElementById('nbConfirmBadge');
+        badge.textContent = methodLabels[method] || method;
+        badge.style.background = color + '22';
+        badge.style.color = color;
+        badge.style.border = '1px solid ' + color;
+
+        // Build items table
+        renderNbConfirmItems();
+
+        bootstrap.Modal.getOrCreateInstance(
+            document.getElementById('newBillConfirmModal')).show();
+    }
+
+    function renderNbConfirmItems() {
+        const tbody = document.getElementById('nbConfirmItemsBody');
+        const rows  = document.querySelectorAll('.item-row');
+        tbody.innerHTML = '';
+        rows.forEach(row => {
+            const idx      = row.id.replace('row-', '');
+            const name     = document.getElementById(`pname-${idx}`)?.value || '';
+            const qty      = parseFloat(document.getElementById(`qty-${idx}`)?.value) || 0;
+            const price    = parseFloat(document.getElementById(`price-${idx}`)?.value) || 0;
+            const billUnit = document.getElementById(`billunit-${idx}`)?.value || 'piece';
+            const factor   = getBillingFactor(billUnit);
+            const lineTotal = (qty * price * factor).toFixed(2);
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #f0f0f0';
+            tr.dataset.rowId = idx;
+            tr.innerHTML = `
+                <td style="padding:6px 0;font-weight:600;">${escHtml(name)}</td>
+                <td style="padding:6px 0;text-align:center;color:#6b7280;">${qty} ${billUnit}</td>
+                <td style="padding:6px 0;text-align:right;color:#6b7280;">₹${price.toFixed(2)}</td>
+                <td style="padding:6px 0;text-align:right;font-weight:700;color:#1f2937;">₹${lineTotal}</td>
+                <td style="padding:6px 0;text-align:right;">
+                    <button onclick="removeNbConfirmItem('${idx}')"
+                            style="background:none;border:1px solid #ff5a5a;color:#ff5a5a;
+                                   width:24px;height:24px;border-radius:6px;cursor:pointer;
+                                   font-size:14px;line-height:1;display:inline-flex;
+                                   align-items:center;justify-content:center;"
+                            title="Remove">×</button>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+        recalcNbConfirmTotals();
+    }
+
+    function removeNbConfirmItem(idx) {
+        // Remove from the actual form DOM
+        const domRow = document.getElementById(`row-${idx}`);
+        if (domRow) domRow.remove();
+        recalculate(); // keep main form totals in sync
+
+        // If no items left, close modal
+        if (document.querySelectorAll('.item-row').length === 0) {
+            bootstrap.Modal.getInstance(
+                document.getElementById('newBillConfirmModal'))?.hide();
+            document.getElementById('emptyState').style.display = 'block';
+            return;
+        }
+        renderNbConfirmItems();
+    }
+
+    function recalcNbConfirmTotals() {
+        document.getElementById('nbConfirmSubtotal').textContent = document.getElementById('t-subtotal').textContent;
+        document.getElementById('nbConfirmGst').textContent      = document.getElementById('t-gst').textContent;
+        document.getElementById('nbConfirmDisc').textContent     = document.getElementById('t-discount').textContent;
+        document.getElementById('nbConfirmTotal').textContent    = document.getElementById('t-total').textContent;
+        const gstVal  = parseFloat(document.getElementById('t-gst').textContent) || 0;
+        const discVal = parseFloat(document.getElementById('t-discount').textContent) || 0;
+        document.getElementById('nbConfirmGstRow').style.display  = gstVal  > 0 ? 'flex' : 'none';
+        document.getElementById('nbConfirmDiscRow').style.display = discVal > 0 ? 'flex' : 'none';
+    }
+
+    function nbConfirmAndSave() {
+        const modalEl = document.getElementById('newBillConfirmModal');
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+        document.getElementById('billForm').submit();
+    }
+
+    // ── Recent Bills Drawer ───────────────────────────────
+    function toggleRecentBills() {
+        const drawer = document.getElementById('recentBillsDrawer');
+        if (drawer.style.display === 'none') {
+            drawer.style.display = 'block';
+        } else {
+            drawer.style.display = 'none';
+        }
+    }
+    document.addEventListener('click', function(e) {
+        const drawer = document.getElementById('recentBillsDrawer');
+        if (drawer && drawer.style.display !== 'none') {
+            if (!drawer.contains(e.target) && !e.target.closest('[onclick="toggleRecentBills()"]')) {
+                drawer.style.display = 'none';
+            }
+        }
+    });
+
 </script>
+
+<!-- ── NEW BILL CONFIRM MODAL ── -->
+<div class="modal fade" id="newBillConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:560px;">
+        <div class="modal-content" style="border-radius:14px;overflow:hidden;">
+
+            <!-- Header -->
+            <div class="modal-header" style="background:#1a1f2e;color:white;border:none;padding:14px 20px;">
+                <div>
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Confirm Bill</h6>
+                    <div style="font-size:11px;opacity:0.7;margin-top:2px;">Review before saving</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span id="nbConfirmBadge" style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;"></span>
+                    <button type="button" data-bs-dismiss="modal"
+                            style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);
+                                   color:white;width:30px;height:30px;border-radius:8px;
+                                   display:flex;align-items:center;justify-content:center;
+                                   cursor:pointer;font-size:16px;line-height:1;">
+                        &times;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Items list -->
+            <div class="modal-body" style="padding:14px 20px;max-height:460px;overflow-y:auto;">
+                <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid #e9ecef;color:#6b7280;">
+                            <th style="padding:4px 0;font-weight:600;">Item</th>
+                            <th style="padding:4px 0;text-align:center;font-weight:600;">Qty</th>
+                            <th style="padding:4px 0;text-align:right;font-weight:600;">Price</th>
+                            <th style="padding:4px 0;text-align:right;font-weight:600;">Total</th>
+                            <th style="padding:4px 0;width:32px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="nbConfirmItemsBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div style="background:#f8fbff;padding:12px 20px;border-top:1px solid #e9ecef;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;color:#6b7280;margin-bottom:4px;">
+                    <span>Subtotal</span><span>₹<span id="nbConfirmSubtotal">0.00</span></span>
+                </div>
+                <div id="nbConfirmGstRow" style="display:none;justify-content:space-between;font-size:13px;color:#f59e0b;margin-bottom:4px;">
+                    <span>GST</span><span>+₹<span id="nbConfirmGst">0.00</span></span>
+                </div>
+                <div id="nbConfirmDiscRow" style="display:none;justify-content:space-between;font-size:13px;color:#10b981;margin-bottom:4px;">
+                    <span>Discount</span><span>-₹<span id="nbConfirmDisc">0.00</span></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:#28d17c;border-top:1px dashed #dee2e6;margin-top:6px;padding-top:8px;">
+                    <span>TOTAL</span><span>₹<span id="nbConfirmTotal">0.00</span></span>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="modal-footer" style="border:none;padding:12px 20px;gap:10px;display:flex;">
+                <button type="button" class="btn btn-outline-secondary" style="flex:1;font-size:14px;font-weight:600;"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-plus-circle me-1"></i>Add More Items
+                </button>
+                <button type="button" class="btn btn-success" style="flex:1;font-size:14px;font-weight:700;"
+                        onclick="nbConfirmAndSave()">
+                    <i class="bi bi-check-circle me-1"></i>Confirm & Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── RECENT BILLS DRAWER ── -->
+<div id="recentBillsDrawer" style="
+    display:none;
+    position:fixed;
+    top:60px; right:0;
+    width:360px;
+    height:calc(100vh - 60px);
+    background:#fff;
+    border-left:1px solid #dde5ef;
+    box-shadow:-4px 0 16px rgba(15,23,42,0.10);
+    z-index:1100;
+    overflow-y:auto;
+    padding:16px;
+">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <span style="font-weight:700;font-size:15px;"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Bills</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleRecentBills()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div th:if="${recentBills != null and !recentBills.isEmpty()}">
+        <a th:each="b : ${recentBills}"
+           th:href="@{/bills/{id}(id=${b.id})}"
+           target="_blank"
+           style="display:flex;justify-content:space-between;align-items:center;
+                  padding:10px 12px;margin-bottom:8px;border-radius:10px;
+                  border:1px solid #dde5ef;background:#f8fbff;
+                  text-decoration:none;color:#1f2937;
+                  transition:background 0.15s;"
+           onmouseover="this.style.background='#eef5ff'" onmouseout="this.style.background='#f8fbff'">
+            <div>
+                <div style="font-weight:600;font-size:13px;" th:text="${b.billNo}">BILL</div>
+                <div style="font-size:11px;color:#6b7280;">
+                    <span th:text="${b.customer != null ? b.customer.name : (b.walkInCustomerName != null and !b.walkInCustomerName.isBlank() ? b.walkInCustomerName : 'Walk-in')}">Customer</span>
+                    &nbsp;·&nbsp;
+                    <span th:text="${#temporals.format(b.billDate,'dd MMM yyyy')}">Date</span>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-weight:700;font-size:14px;color:#28d17c;">
+                    ₹<span th:text="${#numbers.formatDecimal(b.totalAmount,1,2)}">0</span>
+                </div>
+                <span style="font-size:10px;padding:2px 7px;border-radius:6px;font-weight:600;"
+                      th:classappend="${b.paymentStatus.name() == 'PAID'} ? 'background:#d1fae5;color:#065f46'
+                                    : (${b.paymentStatus.name() == 'CREDIT'} ? 'background:#fee2e2;color:#991b1b'
+                                    : 'background:#fef9c3;color:#713f12')"
+                      th:text="${b.paymentStatus.name()}">PAID</span>
+            </div>
+        </a>
+    </div>
+    <div th:if="${recentBills == null or recentBills.isEmpty()}" style="text-align:center;color:#6b7280;padding:40px 0;">
+        <i class="bi bi-receipt" style="font-size:32px;opacity:0.3;"></i>
+        <p style="margin-top:10px;font-size:13px;">No bills yet</p>
+    </div>
+    <div style="margin-top:12px;text-align:center;">
+        <a th:href="@{/bills}" class="btn btn-sm btn-outline-primary" style="width:100%;">
+            <i class="bi bi-journal-text me-1"></i>View All Bills
+        </a>
+    </div>
+</div>
+
 </body>
 </html>

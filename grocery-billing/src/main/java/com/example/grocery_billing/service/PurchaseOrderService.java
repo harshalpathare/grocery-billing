@@ -18,10 +18,9 @@ import java.util.Optional;
 @Slf4j
 public class PurchaseOrderService {
 
-    private final PurchaseOrderRepository     poRepository;
-    private final PurchaseOrderItemRepository poItemRepository;
-    private final ProductRepository           productRepository;
-    private final SupplierRepository          supplierRepository;
+        private final PurchaseOrderRepository     poRepository;
+        private final ProductRepository           productRepository;
+        private final SupplierRepository          supplierRepository;
 
     // ── READ ─────────────────────────────────────────────
     public List<PurchaseOrder> getAll() {
@@ -82,11 +81,10 @@ public class PurchaseOrderService {
         for (PurchaseOrderItem item : po.getItems()) {
             Product product = item.getProduct();
             if (product != null && item.getQuantity() != null) {
-                int current = product.getStockQty() != null
-                        ? product.getStockQty() : 0;
-                int removeQty = item.getQuantity().intValue();
-                product.setStockQty(
-                        Math.max(0, current - removeQty));
+                BigDecimal current = product.getStockQty() != null
+                        ? product.getStockQty() : BigDecimal.ZERO;
+                BigDecimal updated = current.subtract(item.getQuantity());
+                product.setStockQty(updated.max(BigDecimal.ZERO));
                 productRepository.save(product);
             }
         }
@@ -183,10 +181,10 @@ public class PurchaseOrderService {
             po.addItem(item);
 
             // ✅ Update product stock
-            int currentStock = product.getStockQty() != null
-                    ? product.getStockQty() : 0;
-            int addQty = req.quantity().intValue();
-            product.setStockQty(currentStock + addQty);
+            BigDecimal currentStock = product.getStockQty() != null
+                    ? product.getStockQty() : BigDecimal.ZERO;
+            BigDecimal addQty = req.quantity();
+            product.setStockQty(currentStock.add(addQty));
 
             // ✅ Update product cost price
             // Uses the latest purchase price
@@ -194,8 +192,8 @@ public class PurchaseOrderService {
             productRepository.save(product);
 
             log.info("Stock updated: {} +{} = {}",
-                    product.getNameEn(), addQty,
-                    product.getStockQty());
+                    product.getNameEn(), addQty.stripTrailingZeros().toPlainString(),
+                    product.getStockQty().stripTrailingZeros().toPlainString());
         }
 
         // Calculate totals

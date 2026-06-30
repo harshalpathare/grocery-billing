@@ -47,6 +47,11 @@ public class Bill {
     @ToString.Exclude
     private Customer customer;
 
+    // ── Optional walk-in customer name ───────────────────
+    // Used when no registered customer is selected.
+    @Column(name = "walk_in_customer_name", length = 100)
+    private String walkInCustomerName;
+
     // ── GST flag ─────────────────────────────────────────
     // true  = GST bill (with GST breakdown)
     // false = simple bill (no GST)

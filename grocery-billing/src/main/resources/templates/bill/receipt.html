@@ -30,6 +30,25 @@
 .scan-hint {
     animation: pulse 1.5s ease-in-out infinite;
 }
+
+/* 58mm mode overrides */
+body.mode-58mm .receipt {
+    width: 58mm;
+    max-width: 58mm;
+}
+body.mode-58mm .item-name {
+    max-width: 22mm;
+}
+@media print {
+    body.mode-58mm {
+        size: 58mm auto !important;
+    }
+    @page {
+        size: var(--paper-size, 80mm) auto;
+        margin: 0;
+    }
+}
+
     * {
         margin: 0;
         padding: 0;
@@ -41,8 +60,11 @@
         font-size: 12px;
         background: #f0f0f0;
         display: flex;
-        justify-content: center;
-        padding: 20px;
+      flex-direction: column;
+      align-items: center;
+        justify-content: flex-start;
+      padding: 20px;
+      gap: 14px;
     }
 
     .receipt {
@@ -210,29 +232,30 @@
         display: flex;
         gap: 8px;
         justify-content: center;
-        margin-bottom: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid #d9d9d9;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     }
 
     .btn-print {
         background: #1a1f2e;
         color: white;
         border: none;
-        padding: 8px 20px;
+      min-height: 40px;
+      padding: 8px 16px;
         border-radius: 6px;
         cursor: pointer;
         font-size: 13px;
-    }
-
-    .btn-back {
-        background: white;
-        color: #1a1f2e;
-        border: 1px solid #1a1f2e;
-        padding: 8px 20px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
-        text-decoration: none;
-        display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
     }
 
     /* ── PRINT MEDIA ── */
@@ -240,6 +263,7 @@
         body {
             background: white;
             padding: 0;
+          gap: 0;
         }
 
         .actions {
@@ -262,14 +286,35 @@
 <body>
 
 <!-- Action buttons (hidden on print) -->
-<div style="position:fixed;top:10px;right:10px;display:flex;gap:8px;z-index:100"
-     class="actions">
+<div class="actions">
+  <!-- Print -->
   <button class="btn-print" onclick="window.print()">
     🖨️ Print Receipt
   </button>
-  <a th:href="@{/bills/{id}(id=${bill.id})}" class="btn-back">
-    ← Back to Bill
+
+  <!-- Save PDF (named download) -->
+  <a id="savePdfBtn" th:href="@{/bills/pdf/{id}(id=${bill.id})}" class="btn-print"
+     style="background:#28a745;text-decoration:none;display:inline-block;">
+    💾 Save PDF
   </a>
+
+  <!-- Preview Invoice -->
+  <a th:href="@{/bills/pdf/{id}/preview(id=${bill.id})}" class="btn-print"
+     style="background:#6f42c1;text-decoration:none;display:inline-block;" target="_blank">
+    👁️ Preview Invoice
+  </a>
+
+  <!-- 58mm / 80mm toggle -->
+  <button id="toggle58" class="btn-print" onclick="togglePaperSize()"
+          style="background:#6c757d;">
+    📄 Switch to 58mm
+  </button>
+
+  <button class="btn-print" onclick="window.close()"
+          style="background:#dc3545;">
+    ✖ Close
+  </button>
+
 </div>
 
 <!-- RECEIPT CONTENT -->
@@ -312,14 +357,14 @@
   </div>
 
   <!-- ── CUSTOMER ── -->
-  <div th:if="${bill.customer != null}">
+  <div th:if="${bill.customer != null or (bill.walkInCustomerName != null and !bill.walkInCustomerName.isBlank())}">
     <hr class="divider">
     <div class="customer-section">
       <div>
         <strong>Customer:</strong>
-        <span th:text="${bill.customer.name}">Name</span>
+        <span th:text="${bill.customer != null ? bill.customer.name : bill.walkInCustomerName}">Name</span>
       </div>
-      <div th:if="${bill.customer.phone}">
+      <div th:if="${bill.customer != null and bill.customer.phone != null}">
         Ph: <span th:text="${bill.customer.phone}">Phone</span>
       </div>
     </div>
@@ -346,9 +391,8 @@
         Item
       </td>
       <td class="center"
-          th:text="${#numbers.formatDecimal(
-                        item.quantity, 1, 2)}">
-        1
+          th:text="${(item.displayQuantity != null ? item.displayQuantity : item.quantity).stripTrailingZeros().toPlainString()} + ' ' + ${(item.billingUnit != null && !item.billingUnit.isBlank()) ? item.billingUnit.toUpperCase() : ((item.product != null && item.product.unit != null) ? item.product.unit.toUpperCase() : 'PIECE')}">
+        1 PIECE
       </td>
       <td class="right"
           th:text="${#numbers.formatDecimal(
@@ -373,6 +417,16 @@
       <span>Subtotal:</span>
       <span th:text="'Rs.' + ${#numbers.formatDecimal(
                 bill.subtotal, 1, 2)}">0.00</span>
+    </div>
+
+    <div class="total-row" th:if="${showGstDetails}">
+      <span>GST Amount:</span>
+      <span th:text="${'Rs.' + #numbers.formatDecimal(gstAmount, 1, 2)}">0.00</span>
+    </div>
+
+    <div class="total-row" th:if="${showGstDetails}">
+      <span>CGST / SGST:</span>
+      <span th:text="${'Rs.' + #numbers.formatDecimal(gstHalf, 1, 2) + ' / Rs.' + #numbers.formatDecimal(gstHalf, 1, 2)}">0.00 / 0.00</span>
     </div>
 
     <div class="total-row"
@@ -499,10 +553,18 @@
 </div>
 
 <script>
-  // Auto-trigger print dialog when page loads
-  // Remove this line if you don't want auto-print
-  // window.onload = () => window.print();
+  // 58mm / 80mm paper toggle
+  let is58mm = false;
+  function togglePaperSize() {
+      is58mm = !is58mm;
+      document.body.classList.toggle('mode-58mm', is58mm);
+      document.documentElement.style.setProperty('--paper-size', is58mm ? '58mm' : '80mm');
+      const btn = document.getElementById('toggle58');
+      btn.textContent = is58mm ? '📄 Switch to 80mm' : '📄 Switch to 58mm';
+      btn.style.background = is58mm ? '#17a2b8' : '#6c757d';
+  }
 </script>
 
 </body>
+
 </html>

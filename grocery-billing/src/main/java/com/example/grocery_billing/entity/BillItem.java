@@ -52,19 +52,38 @@ public class BillItem {
     @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal quantity;
 
+    // ── Quantity shown to the customer ──────────────────
+    // For gram sales, this remains the entered gram amount.
+    @Column(name = "display_quantity", precision = 10, scale = 3)
+    private BigDecimal displayQuantity;
+
     // ── Price at time of billing ──────────────────────────
     // Snapshot again — price might change, bill stays correct
     @NotNull
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
+    // ── Billing unit used for display/conversion ─────────
+    // Examples: piece, kg, gram, litre, ml
+    @Builder.Default
+    @Column(name = "billing_unit", length = 20)
+    private String billingUnit = "piece";
+
+    // ── How many stock units this line consumes ───────────
+    // For kg-priced items sold as grams, this is the converted kg value.
+    @Builder.Default
+    @Column(name = "stock_quantity", precision = 12, scale = 3)
+    private BigDecimal stockQuantity = BigDecimal.ZERO;
+
     // ── GST % applied to this item ────────────────────────
+    @Builder.Default
     @Column(name = "gst_percent", precision = 5, scale = 2)
     private BigDecimal gstPercent = BigDecimal.ZERO;
 
     // ── Calculated total for this line ────────────────────
     // item_total = quantity × unit_price
     // (GST is calculated separately on the Bill level)
+    @Builder.Default
     @Column(name = "item_total", precision = 12, scale = 2)
     private BigDecimal itemTotal = BigDecimal.ZERO;
 

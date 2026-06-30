@@ -1,8 +1,8 @@
 package com.example.grocery_billing.controller;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.example.grocery_billing.config.ShopConfig;
 import com.example.grocery_billing.entity.Bill;
 import com.example.grocery_billing.entity.Customer;
+import com.example.grocery_billing.entity.Product;
 import com.example.grocery_billing.repository.TransactionRepository;
 import com.example.grocery_billing.service.BillService;
 import com.example.grocery_billing.service.CustomerService;
@@ -17,7 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,12 +53,44 @@ public class BillController {
     // ─────────────────────────────────────────────────────
     @GetMapping("/new")
     public String showCreateBill(Model model) {
-        model.addAttribute("customers",  customerService.getAllActiveCustomers());
-        model.addAttribute("activePage", "billing");
-        model.addAttribute("pageTitle",  "New Bill");
-        model.addAttribute("nextBillNo", billService.generateBillNumber());
+        model.addAttribute("customers",   customerService.getAllActiveCustomers());
+        model.addAttribute("activePage",  "billing");
+        model.addAttribute("pageTitle",   "New Bill");
+        model.addAttribute("nextBillNo",  billService.generateBillNumber());
+        model.addAttribute("recentBills", billService.getRecentBills(10));
         return "bill/create";
     }
+
+    // ─────────────────────────────────────────────────────
+    // QUICK BILL (POS MODE) PAGE
+    // ─────────────────────────────────────────────────────
+    @GetMapping("/quick")
+    public String showQuickBill(Model model) {
+        model.addAttribute("customers",   customerService.getAllActiveCustomers());
+        model.addAttribute("categories",  productService.getAllCategories());
+        model.addAttribute("quickProducts",
+                productService.getAllActiveProducts().stream()
+                        .map(this::toQuickBillProduct)
+                        .toList());
+        model.addAttribute("nextBillNo",  billService.generateBillNumber());
+        model.addAttribute("recentBills", billService.getRecentBills(10));
+        return "bill/quick";
+    }
+
+    private Map<String, Object> toQuickBillProduct(Product product) {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("id", product.getId());
+        item.put("nameEn", product.getNameEn());
+        item.put("nameHi", product.getNameHi());
+        item.put("nameMr", product.getNameMr());
+        item.put("price", product.getPrice());
+        item.put("gstPercent", product.getGstPercent());
+        item.put("unit", product.getUnit());
+        item.put("category", product.getCategory());
+        item.put("stockQty", product.getStockQty());
+        return item;
+    }
+
 
     // ─────────────────────────────────────────────────────
     // RECEIPT PRINT PAGE
@@ -69,6 +101,12 @@ public class BillController {
 
         BigDecimal total = bill.getTotalAmount() != null
                 ? bill.getTotalAmount() : BigDecimal.ZERO;
+        BigDecimal gstAmount = bill.getGstAmount() != null
+            ? bill.getGstAmount() : BigDecimal.ZERO;
+        BigDecimal gstHalf = gstAmount.divide(BigDecimal.valueOf(2), 2,
+            java.math.RoundingMode.HALF_UP);
+        boolean showGstDetails = Boolean.TRUE.equals(bill.getIsGst())
+            && gstAmount.compareTo(BigDecimal.ZERO) > 0;
         long rupees = total.longValue();
         int  paise  = total.remainder(BigDecimal.ONE)
                 .multiply(BigDecimal.valueOf(100))
@@ -94,6 +132,9 @@ public class BillController {
         model.addAttribute("bill",        bill);
         model.addAttribute("rupees",      rupees);
         model.addAttribute("paise",       paise);
+        model.addAttribute("gstAmount",   gstAmount);
+        model.addAttribute("gstHalf",     gstHalf);
+        model.addAttribute("showGstDetails", showGstDetails);
         model.addAttribute("upiQrBase64", upiQrBase64);
         model.addAttribute("upiId",
                 qrCodeService.isUpiConfigured()
@@ -108,6 +149,7 @@ public class BillController {
     @PostMapping("/new")
     public String saveBill(
             @RequestParam(required = false)        Long       customerId,
+            @RequestParam(required = false)        String     walkInCustomerName,
             @RequestParam(required = false)        String     customBillNo,
             @RequestParam(required = false)        String     billDate,
             @RequestParam(defaultValue = "false")  boolean    isGst,
@@ -121,12 +163,17 @@ public class BillController {
             @RequestParam(defaultValue = "en")     String     invoiceLang,
             @RequestParam(required = false)        BigDecimal paidAmount,
             @RequestParam(required = false)        BigDecimal creditAmount,
-            @RequestParam("productIds")            List<Long>       productIds,
+            @RequestParam(value = "productIds", required = false) List<String> productIds,
+            @RequestParam(value = "itemNames", required = false)  List<String> itemNames,
+            @RequestParam(value = "itemUnits", required = false)  List<String> itemUnits,
+            @RequestParam(value = "gstPercents", required = false) List<BigDecimal> gstPercents,
             @RequestParam("quantities")            List<BigDecimal> quantities,
             @RequestParam("unitPrices")            List<BigDecimal> unitPrices,
+            @RequestParam(defaultValue = "false")  boolean    isQuickBill,
             RedirectAttributes redirectAttributes) {
 
-        if (productIds == null || productIds.isEmpty()) {
+        if ((productIds == null || productIds.isEmpty())
+                && (itemNames == null || itemNames.isEmpty())) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Please add at least one product.");
             return "redirect:/bills/new";
@@ -205,20 +252,70 @@ public class BillController {
                         customerService.getCustomerById(customerId);
                 bill.setCustomer(customer);
             }
+            if (customerId == null && walkInCustomerName != null
+                    && !walkInCustomerName.trim().isEmpty()) {
+                bill.setWalkInCustomerName(walkInCustomerName.trim());
+            }
 
             // ── STEP 5: Build items ───────────────────────────
-            List<BillService.BillItemRequest> items =
-                    new ArrayList<>();
-            for (int i = 0; i < productIds.size(); i++) {
-                if (productIds.get(i) != null
-                        && quantities.get(i) != null
-                        && quantities.get(i).compareTo(
-                        BigDecimal.ZERO) > 0) {
+            List<BillService.BillItemRequest> items = new ArrayList<>();
+            int rowCount = Math.max(
+                    Math.max(productIds != null ? productIds.size() : 0,
+                             itemNames != null ? itemNames.size() : 0),
+                    Math.max(quantities != null ? quantities.size() : 0,
+                             unitPrices != null ? unitPrices.size() : 0));
+
+            for (int i = 0; i < rowCount; i++) {
+                BigDecimal quantity = (quantities != null && i < quantities.size())
+                        ? quantities.get(i) : BigDecimal.ZERO;
+                BigDecimal unitPrice = (unitPrices != null && i < unitPrices.size())
+                        ? unitPrices.get(i) : BigDecimal.ZERO;
+                String rowUnit = (itemUnits != null && i < itemUnits.size()
+                    && itemUnits.get(i) != null && !itemUnits.get(i).isBlank())
+                    ? itemUnits.get(i).trim() : "piece";
+                if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+                    continue;
+                }
+
+                String rawProductId = (productIds != null && i < productIds.size())
+                        ? productIds.get(i) : null;
+                Long productId = null;
+                if (rawProductId != null && !rawProductId.trim().isEmpty()) {
+                    try {
+                        productId = Long.parseLong(rawProductId.trim());
+                    } catch (NumberFormatException ignored) {
+                        productId = null;
+                    }
+                } else {
+                    String manualName = (itemNames != null && i < itemNames.size())
+                            ? itemNames.get(i) : null;
+                    if (manualName == null || manualName.trim().isEmpty()) {
+                        continue;
+                    }
+
+                    BigDecimal manualGst = (gstPercents != null && i < gstPercents.size()
+                            && gstPercents.get(i) != null)
+                            ? gstPercents.get(i) : BigDecimal.ZERO;
+
+                    Product customProduct = new Product();
+                    customProduct.setNameEn(manualName.trim());
+                    customProduct.setPrice(unitPrice);
+                    customProduct.setGstPercent(manualGst);
+                    customProduct.setUnit(rowUnit);
+                    customProduct.setCategory("General");
+                    customProduct.setStockQty(BigDecimal.ZERO);
+                    customProduct.setActive(true);
+                    productService.saveProduct(customProduct);
+                    productId = customProduct.getId();
+                }
+
+                if (productId != null) {
                     items.add(new BillService.BillItemRequest(
-                            productIds.get(i),
-                            quantities.get(i),
-                            unitPrices.get(i),
-                            invoiceLang));
+                            productId,
+                            quantity,
+                            unitPrice,
+                            invoiceLang,
+                            rowUnit));
                 }
             }
 
@@ -244,12 +341,20 @@ public class BillController {
             redirectAttributes.addFlashAttribute("successMessage",
                     "Bill " + savedBill.getBillNo()
                             + " created successfully!");
+
+            if (isQuickBill) {
+                return "redirect:/bills/quick?savedId=" + savedBill.getId();
+            }
             return "redirect:/bills/" + savedBill.getId();
 
         } catch (Exception e) {
             log.error("Error creating bill: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Error: " + e.getMessage());
+            
+            if (isQuickBill) {
+                return "redirect:/bills/quick";
+            }
             return "redirect:/bills/new";
         }
     }

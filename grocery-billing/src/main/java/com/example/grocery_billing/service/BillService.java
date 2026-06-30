@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -123,21 +124,46 @@ public class BillService {
                     .orElseThrow(() -> new RuntimeException(
                             "Product not found: " + req.productId()));
 
+                BigDecimal displayQuantity = req.quantity() != null
+                    ? req.quantity() : BigDecimal.ZERO;
+                BigDecimal billedQuantity = displayQuantity;
+            String billingUnit = req.unit() != null && !req.unit().isBlank()
+                ? req.unit().trim().toLowerCase() : "piece";
+
+            if ("g".equals(billingUnit)
+                || "gram".equals(billingUnit)
+                || "grams".equals(billingUnit)) {
+                billedQuantity = displayQuantity
+                .divide(BigDecimal.valueOf(1000), 3, RoundingMode.HALF_UP);
+            }
+
+            if ("ml".equals(billingUnit)
+                || "millilitre".equals(billingUnit)
+                || "milliliter".equals(billingUnit)) {
+                billedQuantity = displayQuantity
+                .divide(BigDecimal.valueOf(1000), 3, RoundingMode.HALF_UP);
+            }
+
             BillItem item = new BillItem();
             item.setProduct(product);
             item.setProductNameSnapshot(
                     product.getNameByLanguage(
                             req.lang() != null ? req.lang() : "en"));
-            item.setQuantity(req.quantity());
+                item.setQuantity(billedQuantity);
+                item.setDisplayQuantity(displayQuantity);
             item.setUnitPrice(req.unitPrice());
             item.setGstPercent(product.getGstPercent());
+            item.setBillingUnit(billingUnit);
+                item.setStockQuantity(billedQuantity);
             item.calculateItemTotal();
             bill.addBillItem(item);
 
             // Reduce stock
-            if (product.getStockQty() != null && product.getStockQty() > 0) {
-                int newStock = product.getStockQty() - req.quantity().intValue();
-                product.setStockQty(Math.max(0, newStock));
+            if (product.getStockQty() != null
+                    && product.getStockQty().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal currentStock = product.getStockQty();
+                BigDecimal newStock = currentStock.subtract(billedQuantity);
+                product.setStockQty(newStock.max(BigDecimal.ZERO));
                 productRepository.save(product);
             }
         }
@@ -329,13 +355,21 @@ public class BillService {
             Long       productId,
             BigDecimal quantity,
             BigDecimal unitPrice,
-            String     lang
+            String     lang,
+            String     unit
     ) {
         // Backward compatible constructor
         public BillItemRequest(Long productId,
                                BigDecimal quantity,
                                BigDecimal unitPrice) {
-            this(productId, quantity, unitPrice, "en");
+            this(productId, quantity, unitPrice, "en", "piece");
+        }
+
+        public BillItemRequest(Long productId,
+                               BigDecimal quantity,
+                               BigDecimal unitPrice,
+                               String lang) {
+            this(productId, quantity, unitPrice, lang, "piece");
         }
     }
 }

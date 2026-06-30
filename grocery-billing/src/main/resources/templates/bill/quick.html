@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Bill | POS Mode</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --pos-bg: #f4f7fb;
+            --pos-card: #ffffff;
+            --pos-border: #dde5ef;
+            --pos-accent: #4f97ff;
+            --pos-green: #28d17c;
+            --pos-red: #ff5a5a;
+            --pos-text: #1f2937;
+            --pos-muted: #6b7280;
+        }
+        * { box-sizing: border-box; }
+        /* Prevent 300ms tap delay on touch devices */
+        button, a, input, select, .pos-chip { touch-action: manipulation; }
+        html {
+            height: 100%;
+            background: var(--pos-bg);
+        }
+        body {
+            background: var(--pos-bg);
+            color: var(--pos-text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            overflow: auto;
+            overflow-x: hidden;
+        }
+        /* ── TOP BAR ── */
+        .pos-topbar {
+            background: var(--pos-card);
+            border-bottom: 1px solid var(--pos-border);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 16px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+        }
+        .pos-topbar .brand {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--pos-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pos-badge {
+            background: var(--pos-accent);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+        }
+        /* ── LAYOUT ── */
+        .pos-layout {
+            display: flex;
+            height: calc(100vh - 56px);
+            /* leave space for the fixed topbar */
+            margin-top: 56px;
+            width: 100%;
+            overflow-x: visible;
+        }
+
+        /* allow inner panels to scroll when content overflows */
+        .pos-left {
+            overflow-y: auto;
+            min-width: 0;
+        }
+        .pos-right {
+            /* keep the summary visible while left column scrolls */
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+            height: 100%;
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* nicer thin scrollbars for panels */
+        .pos-left::-webkit-scrollbar, .pos-right-body::-webkit-scrollbar { width: 8px; height: 8px; }
+        .pos-left::-webkit-scrollbar-thumb, .pos-right-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
+        /* ── LEFT: Product search + items ── */
+        .pos-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            /* allow dropdown/panel to escape — avoid clipping category panel */
+            overflow: visible;
+        }
+        .pos-quick-section {
+            background: var(--pos-card);
+            border: 1px solid var(--pos-border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        /* Shelves layout: categories / favorites / recent */
+        .pos-shelves {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .pos-shelf { padding: 10px; }
+        /* ensure category shelf can position an absolute panel */
+        #categoryChips { position: relative; }
+
+        .category-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 380px;
+            max-height: 420px;
+            overflow-y: auto;
+            background: var(--pos-card);
+            border: 1px solid var(--pos-border);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+            z-index: 500;
+            padding: 8px;
+        }
+        .category-panel .panel-head { display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px dashed var(--pos-border);margin-bottom:6px; }
+        .category-panel .panel-close { background:none;border:none;font-size:16px;cursor:pointer;color:var(--pos-muted); }
+        .category-panel .panel-item { padding:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer }
+        .category-panel .panel-item:hover { background:#f1f6ff; }
+        .category-panel .panel-item .meta { font-size:12px;color:var(--pos-muted); }
+        .pos-shelf .pos-quick-title { font-size: 13px; }
+        .pos-shelf .pos-quick-subtitle { font-size: 11px; }
+        /* compact chips in shelves */
+        .pos-shelf .pos-chip {
+            padding: 8px 10px;
+            font-size: 12px;
+            min-height: 36px;
+        }
+        .pos-shelf .pos-chip .bi { font-size: 14px; }
+        .pos-shelf .pos-chip-row { flex-wrap: wrap; gap: 8px; }
+        .pos-shelf .pos-chip-group { align-items: center; }
+        /* make favorites/recent show as small tiles when many */
+        .shelf-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap:8px; }
+        .pos-quick-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .pos-quick-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--pos-text);
+        }
+        .pos-quick-subtitle {
+            font-size: 11px;
+            color: var(--pos-muted);
+        }
+        .pos-chip-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            overflow: visible;
+            padding: 4px 4px 10px;
+        }
+        .pos-chip-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex: 0 0 auto;
+        }
+        .pos-chip {
+            border: 1px solid var(--pos-border);
+            background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+            color: var(--pos-text);
+            border-radius: 999px;
+            padding: 9px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+        }
+        .pos-chip.active {
+            background: linear-gradient(180deg, #5fa0ff 0%, #4f97ff 100%);
+            color: #ffffff;
+            border-color: #4f97ff;
+            box-shadow: 0 8px 16px rgba(79,151,255,0.22);
+        }
+        .pos-chip:hover:not(.active) {
+            border-color: #4f97ff;
+            background: #eef5ff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(79,151,255,0.12);
+        }
+        .pos-chip.active:hover {
+            border-color: #3f87f7;
+            background: linear-gradient(180deg, #5aa0ff 0%, #3f87f7 100%);
+            transform: translateY(0);
+            box-shadow: 0 10px 18px rgba(79,151,255,0.26);
+        }
+        .pos-chip:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(15,23,42,0.08);
+        }
+        .pos-chip:focus-visible {
+            outline: none;
+            border-color: #4f97ff;
+            box-shadow: 0 0 0 3px rgba(79,151,255,0.18);
+        }
+        .chip-star {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--pos-border);
+            background: #fff;
+            color: #b78100;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+        }
+        .chip-star.active {
+            background: #fff4d6;
+            border-color: #f1d28b;
+        }
+        .customer-search-input {
+            background: #ffffff;
+            border: 1px solid var(--pos-border);
+            color: var(--pos-text);
+            border-radius: 8px;
+            padding: 8px 10px;
+            width: 100%;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .customer-search-wrap {
+            position: relative;
+        }
+        .customer-results {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--pos-card);
+            border: 1px solid var(--pos-border);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+            z-index: 250;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .customer-result-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--pos-border);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+        }
+        .customer-result-item:last-child { border-bottom: none; }
+        .customer-result-item:hover { background: #f1f6ff; }
+        .customer-result-meta { font-size: 12px; color: var(--pos-muted); }
+        /* ── RIGHT: Summary panel ── */
+        .pos-right {
+            width: clamp(300px, 24vw, 340px);
+            flex: 0 0 clamp(300px, 24vw, 340px);
+            background: var(--pos-card);
+            border-left: 1px solid var(--pos-border);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+        .pos-right-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 2px;
+        }
+        .pos-right-pay {
+            flex: 0 0 auto;
+            border-top: 1px solid var(--pos-border);
+            padding-top: 16px;
+            margin-top: 12px;
+            background: var(--pos-card);
+        }
+        /* ── SEARCH BOX ── */
+        .pos-search {
+            background: var(--pos-card);
+            border: 1px solid var(--pos-border);
+            border-radius: 12px;
+            color: var(--pos-text);
+            font-size: 18px;
+            padding: 14px 18px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .pos-search::placeholder { color: var(--pos-muted); font-size: 15px; }
+        .pos-search:focus { border-color: var(--pos-accent); box-shadow: 0 0 0 3px rgba(79,151,255,0.14); }
+        /* ── SEARCH RESULTS ── */
+        .pos-results {
+            position: absolute;
+            background: var(--pos-card);
+            border: 1px solid var(--pos-border);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+            z-index: 200;
+            max-height: 300px;
+            overflow-y: auto;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 8px;
+        }
+        .pos-result-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--pos-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+        }
+        .pos-result-item:hover, .pos-result-item.highlighted { background: rgba(79,151,255,0.08); }
+        .pos-result-item:last-child { border-bottom: none; }
+        /* ── ITEMS LIST ── */
+        .pos-items {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 12px;
+            padding-right: 4px;
+        }
+        .pos-items::-webkit-scrollbar { width: 4px; }
+        .pos-items::-webkit-scrollbar-thumb { background: var(--pos-border); border-radius: 2px; }
+        .pos-item-row {
+            background: var(--pos-card);
+            border: 1px solid var(--pos-border);
+            border-radius: 8px;
+            padding: 6px 12px 6px 12px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;
+            animation: slideIn 0.15s ease;
+        }
+        .pos-item-name-wrap {
+            flex: 1 1 280px;
+            min-width: 220px;
+            max-width: 360px;
+            padding-left: 20px;
+            padding-right: 14px;
+        }
+        .pos-item-price-wrap {
+            min-width: 108px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-left: 12px;
+        }
+        .pos-price-input {
+            background: #ffffff;
+            border: 1px solid var(--pos-border);
+            color: var(--pos-text);
+            width: 100%;
+            border-radius: 6px;
+            padding: 3px 6px;
+            font-size: 13px;
+            height: 30px;
+        }
+        .pos-price-label {
+            font-size: 11px;
+            color: var(--pos-muted);
+            margin-bottom: 2px;
+            line-height: 1;
+        }
+        .pos-price-wrap {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-left: 12px;
+        }
+
+        /* Responsive: collapse shelves on narrow screens */
+        @media (max-width: 1100px) {
+            .pos-layout {
+                flex-direction: column;
+                height: auto;
+                min-height: calc(100vh - 56px);
+            }
+            .pos-left {
+                width: 100%;
+            }
+            .pos-right {
+                width: 100%;
+                flex: 0 0 auto;
+                height: auto;
+                border-left: none;
+                border-top: 1px solid var(--pos-border);
+            }
+            .pos-shelves { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 900px) {
+            .pos-shelves { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 700px) {
+            .pos-layout { flex-direction: column; }
+            .pos-left { padding: 12px; }
+            /* Bigger tap targets on mobile */
+            .pos-chip { min-height: 44px; padding: 10px 14px; }
+            .pos-qty-btn { width: 36px; height: 36px; }
+            .pos-qty-input { height: 36px; font-size: 15px; }
+            .pos-remove-btn { width: 36px; height: 36px; }
+            .pos-pay-btn { min-height: 56px; font-size: 17px; }
+            /* Keep right panel visible without scrolling too far */
+            .pos-right { position: relative; top: auto; height: auto; }
+            /* Prevent double-tap zoom on buttons */
+            button, a, input, select { touch-action: manipulation; }
+        }
+        @media (max-width: 900px) and (min-width: 701px) {
+            button, a, input, select { touch-action: manipulation; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .pos-item-name { flex: 1; min-width: 150px; font-weight: 600; font-size: 13px; line-height: 1.15; }
+        .pos-item-unit { color: var(--pos-muted); font-size: 11px; line-height: 1.1; margin-top: 1px; }
+        .pos-qty-ctrl { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; margin-left: 6px; }
+        .pos-qty-btn {
+            background: #eef3f9;
+            border: none;
+            color: var(--pos-text);
+            width: 30px; height: 30px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s;
+        }
+        .pos-qty-btn:hover { background: var(--pos-accent); }
+        .pos-qty-input {
+            background: #ffffff;
+            border: 1px solid var(--pos-border);
+            color: var(--pos-text);
+            width: 84px;
+            text-align: center;
+            border-radius: 6px;
+            padding: 2px 4px;
+            font-size: 13px;
+            height: 30px;
+        }
+        .pos-gram-preset {
+            background: #ffffff;
+            border: 1px solid var(--pos-border);
+            color: var(--pos-text);
+            width: 104px;
+            min-width: 104px;
+            text-align: center;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 13px;
+            height: 30px;
+        }
+        .pos-gram-preset-wrap {
+            display: none;
+            flex: 0 0 auto;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .pos-gram-preset-label {
+            font-size: 11px;
+            color: var(--pos-muted);
+            line-height: 1;
+        }
+        .pos-price-display {
+            font-weight: 700;
+            color: var(--pos-green);
+            min-width: 72px;
+            text-align: right;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-left: 12px;
+        }
+        .pos-remove-btn {
+            background: none;
+            border: 1px solid var(--pos-red);
+            color: var(--pos-red);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+        }
+        /* ── EMPTY STATE ── */
+        .pos-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--pos-muted);
+            gap: 12px;
+        }
+        .pos-empty i { font-size: 64px; opacity: 0.2; }
+        /* ── RIGHT PANEL ── */
+        .pos-total-label { color: var(--pos-muted); font-size: 13px; }
+        .pos-total-value { font-size: 13px; text-align: right; }
+        .pos-summary-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid var(--pos-border);
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 6px 16px rgba(15,23,42,0.05);
+        }
+        .pos-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .pos-grand-total {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--pos-green);
+            margin: 10px 0 2px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--pos-border);
+            line-height: 1.2;
+        }
+        .pos-payable-label {
+            font-size: 12px;
+            color: var(--pos-muted);
+            line-height: 1.4;
+            padding-bottom: 4px;
+        }
+        /* Payment buttons */
+        .pos-pay-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s, opacity 0.2s;
+            width: 100%;
+            min-height: 52px;
+            margin-bottom: 10px;
+        }
+        .pos-pay-btn:hover { transform: scale(1.02); }
+        .pos-pay-btn:active { transform: scale(0.98); }
+        .pos-pay-cash {
+            position: relative;
+            justify-content: center;
+        }
+        .pos-pay-cash .cash-label {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pos-pay-cash .shortcut-hint {
+            margin-left: auto;
+            position: relative;
+            z-index: 1;
+        }
+        .pos-pay-cash   { background: var(--pos-green); color: #000; }
+        .pos-pay-upi    { background: var(--pos-accent); color: white; }
+        .pos-pay-credit { background: var(--pos-red);   color: white; }
+        .pos-customer-select {
+            background: #ffffff;
+            border: 1px solid var(--pos-border);
+            color: var(--pos-text);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+            width: 100%;
+        }
+        .pos-customer-select option { background: #ffffff; }
+        /* Keyboard shortcut hints */
+        .shortcut-hint {
+            font-size: 10px;
+            color: var(--pos-muted);
+            background: var(--pos-border);
+            border-radius: 4px;
+            padding: 1px 5px;
+        }
+        .pos-discount-input {
+            background: #ffffff;
+            border: 1px solid var(--pos-border);
+            color: var(--pos-text);
+            border-radius: 8px;
+            padding: 6px 10px;
+            width: 100%;
+            font-size: 13px;
+        }
+        .pos-lang-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 170px;
+        }
+        .pos-lang-label {
+            font-size: 12px;
+            color: var(--pos-muted);
+            white-space: nowrap;
+        }
+        .pos-lang-select {
+            width: 120px;
+            background: #ffffff;
+            border: 1px solid var(--pos-border);
+            border-radius: 8px;
+            color: var(--pos-text);
+            font-size: 12px;
+            padding: 6px 8px;
+        }
+        /* Loading overlay */
+        #savingOverlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(244,247,251,0.78);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 4px solid rgba(79,151,255,0.14);
+            border-top-color: var(--pos-accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<script th:if="${param.savedId != null}">
+    // Auto-open receipt in a new popup window when returning from a successful save
+    window.open('/bills/' + '[[${param.savedId}]]' + '/receipt', 'receiptWindow', 'width=400,height=600');
+    // Remove the query parameter from the URL to avoid reopening on refresh
+    window.history.replaceState({}, document.title, window.location.pathname);
+</script>
+
+<!-- Saving Overlay -->
+<div id="savingOverlay" style="display:none;position:fixed;inset:0;background:rgba(244,247,251,0.78);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+    <div class="spinner"></div>
+    <div style="color:var(--pos-text);font-size:18px;font-weight:600;">Saving bill...</div>
+</div>
+
+<!-- Hidden form that gets submitted -->
+<form id="quickBillForm" method="post" th:action="@{/bills/new}" style="display:none">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <input type="hidden" name="invoiceLang" value="en">
+    <input type="hidden" name="isGst" id="hIsGst" value="false">
+    <input type="hidden" name="transportCost" value="0">
+    <input type="hidden" name="extraCost" value="0">
+    <input type="hidden" name="customerId" id="hCustomerId" value="">
+    <input type="hidden" name="walkInCustomerName" id="hWalkInCustomerName" value="">
+    <input type="hidden" name="paymentMethod" id="hPaymentMethod" value="CASH">
+    <input type="hidden" name="discount" id="hDiscount" value="0">
+    <input type="hidden" name="isQuickBill" value="true">
+    <div id="hiddenItems"></div>
+</form>
+
+<!-- ── TOP BAR ── -->
+<div class="pos-topbar">
+    <div class="brand">
+        <i class="bi bi-lightning-charge-fill"></i>
+        Quick Bill
+        <span class="pos-badge">POS MODE</span>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+        <span style="color:var(--pos-muted);font-size:13px;" id="posTime"></span>
+        <div class="pos-lang-wrap">
+            <span class="pos-lang-label">Item Name</span>
+            <select id="langSelector" class="pos-lang-select" aria-label="Item name language">
+                <option value="en" selected>English</option>
+                <option value="hi">Hindi</option>
+                <option value="mr">Marathi</option>
+            </select>
+        </div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="GST mode">
+            <button type="button" class="btn btn-outline-secondary" id="gstModeBtn" onclick="setQuickBillGst(true)">
+                GST
+            </button>
+            <button type="button" class="btn btn-primary" id="nonGstModeBtn" onclick="setQuickBillGst(false)">
+                Non-GST
+            </button>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openQuickManualItemModal()">
+            <i class="bi bi-plus-circle me-1"></i>Add Item
+        </button>
+        <button type="button" class="btn btn-sm btn-success" onclick="openInlineProductModal()">
+            <i class="bi bi-plus-circle me-1"></i>Add Product
+        </button>
+        <span class="shortcut-hint">F2 = Search</span>
+        <span class="shortcut-hint">F10 = Save</span>
+        <span class="shortcut-hint">Esc = Clear</span>
+        <a th:href="@{/bills/new}" style="color:var(--pos-muted);font-size:13px;text-decoration:none;">
+            <i class="bi bi-arrow-left me-1"></i>Full Mode
+        </a>
+        <a th:href="@{/}" style="color:var(--pos-muted);font-size:13px;text-decoration:none;">
+            <i class="bi bi-house me-1"></i>Dashboard
+        </a>
+        <!-- Recent Bills button -->
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleRecentBills()" title="Recent Bills">
+            <i class="bi bi-clock-history me-1"></i>Recent Bills
+        </button>
+    </div>
+</div>
+
+<!-- ── RECENT BILLS DRAWER ── -->
+<div id="recentBillsDrawer" style="
+    display:none;
+    position:fixed;
+    top:56px; right:0;
+    width:360px;
+    height:calc(100vh - 56px);
+    background:#fff;
+    border-left:1px solid var(--pos-border);
+    box-shadow:-4px 0 16px rgba(15,23,42,0.10);
+    z-index:300;
+    overflow-y:auto;
+    padding:16px;
+">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <span style="font-weight:700;font-size:15px;"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Bills</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleRecentBills()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div th:if="${recentBills != null and !recentBills.isEmpty()}">
+        <a th:each="b : ${recentBills}"
+           th:href="@{/bills/{id}(id=${b.id})}"
+           target="_blank"
+           style="display:flex;justify-content:space-between;align-items:center;
+                  padding:10px 12px;margin-bottom:8px;border-radius:10px;
+                  border:1px solid var(--pos-border);background:#f8fbff;
+                  text-decoration:none;color:var(--pos-text);
+                  transition:background 0.15s;"
+           onmouseover="this.style.background='#eef5ff'" onmouseout="this.style.background='#f8fbff'">
+            <div>
+                <div style="font-weight:600;font-size:13px;" th:text="${b.billNo}">BILL</div>
+                <div style="font-size:11px;color:var(--pos-muted);">
+                    <span th:text="${b.customer != null ? b.customer.name : (b.walkInCustomerName != null and !b.walkInCustomerName.isBlank() ? b.walkInCustomerName : 'Walk-in')}">Customer</span>
+                    &nbsp;·&nbsp;
+                    <span th:text="${#temporals.format(b.billDate,'dd MMM yyyy')}">Date</span>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-weight:700;font-size:14px;color:var(--pos-green);">
+                    ₹<span th:text="${#numbers.formatDecimal(b.totalAmount,1,2)}">0</span>
+                </div>
+                <span style="font-size:10px;padding:2px 7px;border-radius:6px;font-weight:600;"
+                      th:classappend="${b.paymentStatus.name() == 'PAID'} ? 'background:#d1fae5;color:#065f46'
+                                    : (${b.paymentStatus.name() == 'CREDIT'} ? 'background:#fee2e2;color:#991b1b'
+                                    : 'background:#fef9c3;color:#713f12')"
+                      th:text="${b.paymentStatus.name()}">PAID</span>
+            </div>
+        </a>
+    </div>
+    <div th:if="${recentBills == null or recentBills.isEmpty()}" style="text-align:center;color:var(--pos-muted);padding:40px 0;">
+        <i class="bi bi-receipt" style="font-size:32px;opacity:0.3;"></i>
+        <p style="margin-top:10px;font-size:13px;">No bills yet</p>
+    </div>
+    <div style="margin-top:12px;text-align:center;">
+        <a th:href="@{/bills}" class="btn btn-sm btn-outline-primary" style="width:100%;">
+            <i class="bi bi-journal-text me-1"></i>View All Bills
+        </a>
+    </div>
+</div>
+
+<!-- ── MAIN LAYOUT ── -->
+<div class="pos-layout">
+
+    <!-- Flash Messages -->
+    <div style="position: absolute; top: 70px; right: 20px; z-index: 1000; width: 300px;">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" style="font-size:14px; padding: 10px 15px;">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 12px;"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" style="font-size:14px; padding: 10px 15px;">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 12px;"></button>
+        </div>
+    </div>
+
+    <!-- ── LEFT: Search + Items ── -->
+    <div class="pos-left">
+
+        <!-- Search bar -->
+        <div style="position:relative">
+            <input type="text" id="posSearch" class="pos-search"
+                   placeholder="🔍  Type product name in English, Hindi or Marathi..."
+                   autocomplete="off">
+            <div id="posResults" class="pos-results" style="display:none"></div>
+        </div>
+
+        <div class="pos-shelves">
+            <div class="pos-quick-section pos-shelf">
+                <div class="pos-quick-head">
+                    <div>
+                        <div class="pos-quick-title">Categories</div>
+                        <div class="pos-quick-subtitle">Tap to browse products by category</div>
+                    </div>
+                    <button type="button" class="pos-chip active" id="allCategoryBtn" onclick="showAllItems()">
+                        <i class="bi bi-grid-3x3-gap"></i> All
+                    </button>
+                </div>
+                <div class="pos-chip-row" id="categoryChips">
+                    <button type="button" class="pos-chip active" data-category="ALL" onclick="showAllItems()">
+                        <i class="bi bi-grid-3x3-gap"></i> All
+                    </button>
+                    <button th:each="category : ${categories}"
+                            type="button"
+                            class="pos-chip"
+                            th:attr="data-category=${category}"
+                        onclick="showCategory(this.dataset.category)"
+                            th:text="${category}">
+                    </button>
+                </div>
+                <!-- Compact category results panel (appears below chips) -->
+                <div id="categoryPanel" class="category-panel" style="display:none"></div>
+            </div>
+
+            <div class="pos-quick-section pos-shelf">
+                <div class="pos-quick-head">
+                    <div>
+                        <div class="pos-quick-title">Favorites</div>
+                        <div class="pos-quick-subtitle">Saved items for one-tap billing</div>
+                    </div>
+                </div>
+                <div class="pos-chip-row shelf-grid" id="favoriteItemsRow"></div>
+            </div>
+
+            <div class="pos-quick-section pos-shelf">
+                <div class="pos-quick-head">
+                    <div>
+                        <div class="pos-quick-title">Recent Items</div>
+                        <div class="pos-quick-subtitle">Last items used on this device</div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearRecentItems()">Clear</button>
+                </div>
+                <div class="pos-chip-row shelf-grid" id="recentItemsRow"></div>
+            </div>
+        </div>
+
+        <!-- Items list OR empty state -->
+        <div id="posEmpty" class="pos-empty">
+            <i class="bi bi-cart-x"></i>
+            <p style="margin:0;font-size:15px">Search a product above to start billing</p>
+            <p style="margin:0;font-size:13px;color:var(--pos-muted)">Press <kbd style="background:var(--pos-border);padding:2px 6px;border-radius:4px">F2</kbd> to focus search</p>
+        </div>
+
+        <div class="pos-items" id="posItems" style="display:none"></div>
+
+        <!-- Item count bar -->
+        <div id="itemBar" style="display:none;padding-top:8px;border-top:1px solid var(--pos-border);color:var(--pos-muted);font-size:13px;display:flex;justify-content:space-between;">
+            <span><span id="itemCountDisplay">0</span> item(s) · <span id="qtyDisplay">0</span> total qty</span>
+            <button onclick="clearAll()" style="background:none;border:none;color:var(--pos-red);font-size:13px;cursor:pointer;">
+                <i class="bi bi-x-circle me-1"></i>Clear All
+            </button>
+        </div>
+    </div>
+
+    <!-- ── RIGHT: Summary Panel ── -->
+    <div class="pos-right">
+        <div class="pos-right-body">
+
+            <!-- Bill number -->
+            <div style="color:var(--pos-muted);font-size:12px;margin-bottom:12px;">
+                Bill: <span style="color:var(--pos-text);font-weight:600;" th:text="${nextBillNo}">BILL-2024-0001</span>
+            </div>
+
+            <!-- Customer selector -->
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px;color:var(--pos-muted);margin-bottom:4px;display:block;">Customer</label>
+                <div class="customer-search-wrap">
+                    <input type="text" id="customerSearch" class="customer-search-input"
+                           placeholder="Search customer or leave blank for walk-in..."
+                           autocomplete="off"
+                           oninput="filterCustomers()"
+                           onfocus="filterCustomers()"
+                           onkeydown="handleCustomerSearchKeydown(event)">
+                    <div id="customerResults" class="customer-results" style="display:none"></div>
+                </div>
+                <select id="posCustomer" class="pos-customer-select visually-hidden" onchange="updateCustomerFromSelect()" tabindex="-1" aria-hidden="true">
+                    <option value="">— Walk-in —</option>
+                    <option th:each="c : ${customers}"
+                            th:value="${c.id}"
+                            th:text="${c.name} + ' (' + ${c.phone} + ')'"></option>
+                </select>
+                <input type="text" id="walkInCustomerName" class="pos-discount-input mt-2"
+                       placeholder="Walk-in customer name (optional)"
+                       oninput="updateCustomer()">
+            </div>
+
+            <!-- Discount -->
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px;color:var(--pos-muted);margin-bottom:4px;display:block;">Discount (₹)</label>
+                <input type="number" id="posDiscount" class="pos-discount-input"
+                       placeholder="0.00" value="0" min="0" step="0.01"
+                       oninput="recalcTotal(); saveDraft();">
+            </div>
+
+            <!-- Totals -->
+            <div class="pos-summary-card">
+                <div class="pos-summary-row">
+                    <span class="pos-total-label">Subtotal</span>
+                    <span class="pos-total-value">₹<span id="rSubtotal">0.00</span></span>
+                </div>
+                <div class="pos-summary-row" style="display:none;" id="gstRow">
+                    <span class="pos-total-label">GST</span>
+                    <span class="pos-total-value" style="color:var(--pos-green)">+₹<span id="rGst">0.00</span></span>
+                </div>
+                <div class="pos-summary-row" style="display:none;" id="discRow">
+                    <span class="pos-total-label">Discount</span>
+                    <span class="pos-total-value" style="color:var(--pos-green)">-₹<span id="rDiscount">0.00</span></span>
+                </div>
+                <div class="pos-grand-total">
+                    ₹<span id="rTotal">0.00</span>
+                </div>
+                <div class="pos-payable-label">Final payable amount</div>
+            </div>
+
+        </div>
+
+        <!-- Payment Buttons -->
+        <div class="pos-right-pay">
+            <p style="font-size:12px;color:var(--pos-muted);margin-bottom:10px;">
+                <i class="bi bi-keyboard me-1"></i>Choose payment method:
+            </p>
+            <button type="button" class="pos-pay-btn pos-pay-cash" onclick="showConfirmModal('CASH')" id="btnCash">
+                <span class="cash-label"><i class="bi bi-cash-coin"></i> Cash</span>
+                <span class="shortcut-hint">F10</span>
+            </button>
+            <button type="button" class="pos-pay-btn pos-pay-upi" onclick="showConfirmModal('UPI')" id="btnUpi">
+                <i class="bi bi-qr-code"></i> UPI
+            </button>
+            <button type="button" class="pos-pay-btn pos-pay-credit" onclick="showConfirmModal('CREDIT')" id="btnCredit">
+                <i class="bi bi-credit-card"></i> Credit (Udhari)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── BILL CONFIRM MODAL ── -->
+<div class="modal fade" id="billConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:560px;">
+        <div class="modal-content" style="border-radius:14px;overflow:hidden;">
+
+            <!-- Header -->
+            <div class="modal-header" style="background:#1a1f2e;color:white;border:none;padding:14px 20px;">
+                <div>
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Confirm Bill</h6>
+                    <div style="font-size:11px;opacity:0.7;margin-top:2px;">Review before saving</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span id="confirmMethodBadge" style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.15);">CASH</span>
+                    <button type="button" data-bs-dismiss="modal"
+                            style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);
+                                   color:white;width:30px;height:30px;border-radius:8px;
+                                   display:flex;align-items:center;justify-content:center;
+                                   cursor:pointer;font-size:16px;line-height:1;">
+                        &times;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Items list -->
+            <div class="modal-body" style="padding:14px 20px;max-height:460px;overflow-y:auto;">
+                <table style="width:100%;font-size:13px;border-collapse:collapse;" id="confirmItemsTable">
+                    <thead>
+                        <tr style="border-bottom:1px solid #e9ecef;color:#6b7280;">
+                            <th style="padding:4px 0;font-weight:600;">Item</th>
+                            <th style="padding:4px 0;text-align:center;font-weight:600;">Qty</th>
+                            <th style="padding:4px 0;text-align:right;font-weight:600;">Price</th>
+                            <th style="padding:4px 0;text-align:right;font-weight:600;">Total</th>
+                            <th style="padding:4px 0;width:32px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="confirmItemsBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div style="background:#f8fbff;padding:12px 20px;border-top:1px solid #e9ecef;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;color:#6b7280;margin-bottom:4px;">
+                    <span>Subtotal</span><span>₹<span id="confirmSubtotal">0.00</span></span>
+                </div>
+                <div id="confirmGstRow" style="display:none;justify-content:space-between;font-size:13px;color:#f59e0b;margin-bottom:4px;">
+                    <span>GST</span><span>+₹<span id="confirmGst">0.00</span></span>
+                </div>
+                <div id="confirmDiscRow" style="display:none;justify-content:space-between;font-size:13px;color:#10b981;margin-bottom:4px;">
+                    <span>Discount</span><span>-₹<span id="confirmDisc">0.00</span></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:#28d17c;border-top:1px dashed #dee2e6;margin-top:6px;padding-top:8px;">
+                    <span>TOTAL</span><span>₹<span id="confirmTotal">0.00</span></span>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="modal-footer" style="border:none;padding:12px 20px;gap:10px;display:flex;">
+                <!-- Add More Items — closes modal, returns to POS -->
+                <button type="button" class="btn btn-outline-secondary" style="flex:1;font-size:14px;font-weight:600;"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-plus-circle me-1"></i>Add More Items
+                </button>
+                <!-- Confirm & Save -->
+                <button type="button" class="btn btn-success" style="flex:1;font-size:14px;font-weight:700;"
+                        id="confirmSaveBtn" onclick="confirmAndSave()">
+                    <i class="bi bi-check-circle me-1"></i>Confirm & Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Inline product modal -->
+<div class="modal fade" id="inlineProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="stat-icon bg-primary bg-opacity-10" style="width:40px;height:40px;font-size:18px">
+                        <i class="bi bi-box-seam text-primary"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title mb-0">Add New Product</h5>
+                        <p class="text-muted small mb-0">Fill all required fields marked with *</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-3">
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-translate me-2"></i>Product Names (Multi-Language)
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">English Name</label>
+                            <input type="text" id="quickProdNameEn" class="form-control" placeholder="e.g. Sugar">
+                            <div class="form-text">Optional — enter any language name</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Hindi Name <span class="badge bg-warning text-dark ms-1" style="font-size:10px">हिंदी</span></label>
+                            <input type="text" id="quickProdNameHi" class="form-control" placeholder="e.g. चीनी" style="font-family:'Noto Sans Devanagari', sans-serif;">
+                            <div class="form-text">Optional Hindi name</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Marathi Name <span class="badge bg-success text-white ms-1" style="font-size:10px">मराठी</span></label>
+                            <input type="text" id="quickProdNameMr" class="form-control" placeholder="e.g. साखर" style="font-family:'Noto Sans Devanagari', sans-serif;">
+                            <div class="form-text">Optional Marathi name</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">HSN Code <span class="badge bg-info ms-1" style="font-size:10px">For GST</span></label>
+                    <input type="text" id="quickProdHsnCode" class="form-control" placeholder="e.g. 1006, 1507, 0402" maxlength="20">
+                    <div class="form-text">Required for GSTR-1 filing. <a href="https://www.gstn.org.in" target="_blank">Find HSN code →</a></div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-currency-rupee me-2"></i>Pricing & GST
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Price (₹) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input type="number" id="quickProdPrice" class="form-control" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">GST %</label>
+                            <select id="quickProdGst" class="form-select">
+                                <option value="0">0% (No GST)</option>
+                                <option value="5">5%</option>
+                                <option value="12">12%</option>
+                                <option value="18">18%</option>
+                                <option value="28">28%</option>
+                            </select>
+                            <div class="form-text">Select applicable GST rate</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Unit</label>
+                            <select id="quickProdUnit" class="form-select">
+                                <option value="piece" selected>Piece</option>
+                                <option value="Bag">Bag</option>
+                                <option value="kg">Kilogram (kg)</option>
+                                <option value="gram">Gram (g)</option>
+                                <option value="litre">Litre (L)</option>
+                                <option value="ml">Millilitre (ml)</option>
+                                <option value="dozen">Dozen</option>
+                                <option value="packet">Packet</option>
+                                <option value="box">Box</option>
+                                <option value="bottle">Bottle</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="mb-2">
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-archive me-2"></i>Inventory & Category
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Stock Quantity</label>
+                            <input type="number" id="quickProdStock" class="form-control" value="0" min="0" step="1">
+                            <div class="form-text">Leave 0 if not tracking stock</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Category</label>
+                            <input type="text" id="quickProdCategory" class="form-control" placeholder="e.g. Grains, Dairy, Oil" list="quickCategoryList">
+                            <datalist id="quickCategoryList">
+                                <option th:each="cat : ${categories}" th:value="${cat}"></option>
+                            </datalist>
+                            <div class="form-text">Type or pick existing category</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3 mb-0 py-2 small">
+                    The product will be saved to inventory and added to this bill immediately.
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveInlineQuickProduct()">
+                    <i class="bi bi-save me-1"></i>Save & Add
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick manual item modal -->
+<div class="modal fade" id="quickManualItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="stat-icon bg-success bg-opacity-10" style="width:40px;height:40px;font-size:18px">
+                        <i class="bi bi-tag text-success"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title mb-0">Add Item</h5>
+                        <p class="text-muted small mb-0">Add a bill-only item directly to the current bill</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-3">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Item Name <span class="text-danger">*</span></label>
+                        <input type="text" id="quickManualName" class="form-control" placeholder="e.g. Loose Tomato">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Unit</label>
+                        <input type="text" id="quickManualUnit" class="form-control" placeholder="piece" value="piece" list="quickUnitList">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Quantity</label>
+                        <input type="number" id="quickManualQty" class="form-control" value="1" min="0.001" step="0.001">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Price (₹) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" id="quickManualPrice" class="form-control" placeholder="0.00" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">GST %</label>
+                        <select id="quickManualGst" class="form-select">
+                            <option value="0">0% (No GST)</option>
+                            <option value="5">5%</option>
+                            <option value="12">12%</option>
+                            <option value="18">18%</option>
+                            <option value="28">28%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveQuickManualItem()">
+                    <i class="bi bi-plus-circle me-1"></i>Add to Bill
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<datalist id="quickUnitList">
+    <option value="piece"></option>
+    <option value="Bag"></option>
+    <option value="kg"></option>
+    <option value="gram"></option>
+    <option value="litre"></option>
+    <option value="ml"></option>
+    <option value="dozen"></option>
+    <option value="packet"></option>
+    <option value="box"></option>
+    <option value="bottle"></option>
+</datalist>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    // ── State ─────────────────────────────────────────────
+    let items = [];       // [{id, name, unit, price, gst, qty}]
+    let highlightIdx = -1;
+    let searchTimeout;
+    let selectedCategory = 'ALL';
+    let quickBillHasGst = false;
+    const quickProducts = /*[[${quickProducts}]]*/ [];
+
+    const RECENT_KEY   = 'quickPosRecentItems';
+    const FAVORITE_KEY = 'quickPosFavoriteItems';
+    const DRAFT_KEY    = 'quickPosBillDraft';
+
+    // ── Draft Save / Restore ──────────────────────────────
+    function saveDraft() {
+        try {
+            const draft = {
+                items:          items,
+                discount:       document.getElementById('posDiscount').value || '0',
+                customerId:     document.getElementById('posCustomer').value || '',
+                walkInName:     document.getElementById('walkInCustomerName').value || '',
+                isGst:          quickBillHasGst,
+                savedAt:        Date.now()
+            };
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch(e) {}
+    }
+
+    function clearDraft() {
+        localStorage.removeItem(DRAFT_KEY);
+    }
+
+    function restoreDraft() {
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            const draft = JSON.parse(raw);
+            if (!draft || !draft.items || draft.items.length === 0) return;
+
+            items = draft.items;
+            renderItems();
+
+            if (draft.discount && draft.discount !== '0') {
+                document.getElementById('posDiscount').value = draft.discount;
+            }
+            if (draft.customerId) {
+                document.getElementById('posCustomer').value = draft.customerId;
+                updateCustomer();
+            }
+            if (draft.walkInName) {
+                document.getElementById('walkInCustomerName').value = draft.walkInName;
+            }
+            // Restore GST mode
+            setQuickBillGst(draft.isGst);
+
+            // Show a small toast so user knows draft was restored
+            showDraftToast(draft.items.length);
+        } catch(e) {
+            clearDraft();
+        }
+    }
+
+    function showDraftToast(count) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+            background:#1a1f2e;color:white;padding:10px 20px;border-radius:10px;
+            font-size:13px;font-weight:600;z-index:9999;
+            box-shadow:0 4px 16px rgba(0,0,0,0.2);
+            display:flex;align-items:center;gap:8px;`;
+        toast.innerHTML = `<i class="bi bi-arrow-counterclockwise" style="color:#28d17c"></i>
+            Draft restored — ${count} item${count > 1 ? 's' : ''} recovered`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ── Clock ─────────────────────────────────────────────
+    function updateClock() {
+        document.getElementById('posTime').textContent =
+            new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ── Focus search on F2 ────────────────────────────────
+    document.addEventListener('keydown', e => {
+        if (e.key === 'F2') { e.preventDefault(); document.getElementById('posSearch').focus(); }
+        if (e.key === 'F10') { e.preventDefault(); showConfirmModal('CASH'); }
+        if (e.key === 'Escape') clearAll();
+        if (e.altKey && e.key === '1') { e.preventDefault(); document.getElementById('posSearch').focus(); }
+        if (e.altKey && e.key === '2') { e.preventDefault(); document.getElementById('customerSearch').focus(); }
+        // Arrow keys for result navigation
+        if (e.key === 'ArrowDown') navigateResults(1);
+        if (e.key === 'ArrowUp')   navigateResults(-1);
+        if (e.key === 'Enter' && highlightIdx >= 0) selectHighlighted();
+    });
+
+    // ── Device detection ──────────────────────────────────
+    // Detects real touch devices (mobile/tablet) regardless of screen size or rotation.
+    // Landscape iPad is ~1024px wide but is still a touch device — width alone is unreliable.
+    function isTouchDevice() {
+        return ('ontouchstart' in window)
+            || (navigator.maxTouchPoints > 0)
+            || (navigator.msMaxTouchPoints > 0);
+    }
+
+    // Auto-focus on load — desktop only (mobile would pop keyboard)
+    window.addEventListener('load', () => {
+        if (!isTouchDevice()) {
+            document.getElementById('posSearch').focus();
+        }
+    });
+
+    document.getElementById('langSelector').addEventListener('change', function () {
+        document.querySelector('input[name="invoiceLang"]').value = this.value;
+        const currentQuery = document.getElementById('posSearch').value.trim();
+        if (currentQuery.length > 0) {
+            searchProducts(currentQuery);
+        } else if (selectedCategory !== 'ALL') {
+            fetchProductsByCategory(selectedCategory);
+        }
+    });
+
+    function getSelectedLang() {
+        return document.getElementById('langSelector').value || 'en';
+    }
+
+    function openInlineProductModal() {
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('inlineProductModal'));
+        modal.show();
+        document.getElementById('quickProdNameEn').focus();
+    }
+
+    function openQuickManualItemModal() {
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('quickManualItemModal'));
+        modal.show();
+        document.getElementById('quickManualName').focus();
+    }
+
+    function saveQuickManualItem() {
+        const name = document.getElementById('quickManualName').value.trim();
+        const unit = document.getElementById('quickManualUnit').value.trim() || 'piece';
+        const qty = parseFloat(document.getElementById('quickManualQty').value || '0');
+        const price = parseFloat(document.getElementById('quickManualPrice').value || '0');
+        const gst = parseFloat(document.getElementById('quickManualGst').value || '0');
+
+        if (!name) {
+            alert('Please enter an item name.');
+            document.getElementById('quickManualName').focus();
+            return;
+        }
+        if (!(price > 0)) {
+            alert('Please enter a valid price.');
+            document.getElementById('quickManualPrice').focus();
+            return;
+        }
+        if (!(qty > 0)) {
+            alert('Please enter a valid quantity.');
+            document.getElementById('quickManualQty').focus();
+            return;
+        }
+
+        addItem('', name, unit, price, gst, 'General', qty);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('quickManualItemModal')).hide();
+        document.getElementById('quickManualName').value = '';
+        document.getElementById('quickManualUnit').value = 'piece';
+        document.getElementById('quickManualQty').value = '1';
+        document.getElementById('quickManualPrice').value = '';
+        document.getElementById('quickManualGst').value = '0';
+    }
+
+    async function saveInlineQuickProduct() {
+        const nameEn = document.getElementById('quickProdNameEn').value.trim();
+        const nameHi = document.getElementById('quickProdNameHi').value.trim();
+        const nameMr = document.getElementById('quickProdNameMr').value.trim();
+        const hsnCode = document.getElementById('quickProdHsnCode').value.trim();
+        const price = parseFloat(document.getElementById('quickProdPrice').value || '0');
+        const gstPercent = document.getElementById('quickProdGst').value;
+        const unit = document.getElementById('quickProdUnit').value.trim() || 'piece';
+        const category = document.getElementById('quickProdCategory').value.trim();
+        const stockQty = document.getElementById('quickProdStock').value || '0';
+
+        if (!nameEn) {
+            const nameHi = document.getElementById('quickProdNameHi').value.trim();
+            const nameHiCheck = nameHi;
+            const nameMrCheck = document.getElementById('quickProdNameMr').value.trim();
+            if (!nameHiCheck && !nameMrCheck) {
+                alert('Please enter a product name in at least one language.');
+                document.getElementById('quickProdNameEn').focus();
+                return;
+            }
+        }
+        if (!price || price <= 0) {
+            alert('Please enter a valid price.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('_csrf', document.querySelector('input[name="_csrf"]').value);
+        formData.append('nameEn', nameEn);
+        formData.append('nameHi', nameHi);
+        formData.append('nameMr', nameMr);
+        formData.append('hsnCode', hsnCode);
+        formData.append('price', price);
+        formData.append('gstPercent', gstPercent);
+        formData.append('unit', unit);
+        formData.append('category', category);
+        formData.append('stockQty', stockQty);
+
+        try {
+            const response = await fetch('/products/api', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Unable to save product');
+            }
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('inlineProductModal')).hide();
+            document.getElementById('quickProdNameEn').value = '';
+            document.getElementById('quickProdNameHi').value = '';
+            document.getElementById('quickProdNameMr').value = '';
+            document.getElementById('quickProdHsnCode').value = '';
+            document.getElementById('quickProdPrice').value = '';
+            document.getElementById('quickProdGst').value = '0';
+            document.getElementById('quickProdUnit').value = 'piece';
+            document.getElementById('quickProdCategory').value = '';
+            document.getElementById('quickProdStock').value = '0';
+
+            addItem(data.id, data.displayName, data.unit, data.price, data.gstPercent, data.category);
+        } catch (error) {
+            alert(error.message || 'Failed to create product.');
+        }
+    }
+
+    function setQuickBillGst(enabled) {
+        quickBillHasGst = !!enabled;
+        document.getElementById('hIsGst').value = quickBillHasGst ? 'true' : 'false';
+
+        // Persist preference so it survives page reloads after bill save
+        localStorage.setItem('quickBillGstMode', quickBillHasGst ? 'true' : 'false');
+
+        const gstBtn = document.getElementById('gstModeBtn');
+        const nonGstBtn = document.getElementById('nonGstModeBtn');
+
+        if (quickBillHasGst) {
+            gstBtn.className = 'btn btn-primary';
+            nonGstBtn.className = 'btn btn-outline-secondary';
+        } else {
+            gstBtn.className = 'btn btn-outline-secondary';
+            nonGstBtn.className = 'btn btn-primary';
+        }
+
+        recalcTotal();
+    }
+
+    // Restore last used GST mode from localStorage (defaults to Non-GST on first ever load)
+    const savedGstMode = localStorage.getItem('quickBillGstMode');
+    setQuickBillGst(savedGstMode === 'true');
+
+    // Restore any in-progress bill draft
+    restoreDraft();
+
+    function getStoredItems(key) {
+        try {
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function storeItems(key, list) {
+        localStorage.setItem(key, JSON.stringify(list));
+    }
+
+    function normalizeQuickItem(item) {
+        return {
+            id: item.id,
+            name: item.name,
+            unit: item.unit,
+            price: parseFloat(item.price),
+            gst: parseFloat(item.gst || 0),
+            category: item.category || 'General'
+        };
+    }
+
+    function isFavorite(id) {
+        return getStoredItems(FAVORITE_KEY).some(item => String(item.id) === String(id));
+    }
+
+    function renderQuickShelf() {
+        const recentRow = document.getElementById('recentItemsRow');
+        const favoriteRow = document.getElementById('favoriteItemsRow');
+        const recent = getStoredItems(RECENT_KEY).slice(0, 8);
+        const favorites = getStoredItems(FAVORITE_KEY).slice(0, 8);
+
+        // Always resolve fresh price/gst from quickProducts (server data)
+        // Falls back to localStorage values only for manual/custom items (no id match)
+        function freshItem(stored) {
+            const live = quickProducts.find(p => String(p.id) === String(stored.id));
+            if (live) {
+                return {
+                    id:       stored.id,
+                    name:     stored.name,
+                    unit:     live.unit     || stored.unit,
+                    price:    parseFloat(live.price)      || stored.price,
+                    gst:      parseFloat(live.gstPercent) || stored.gst,
+                    category: live.category || stored.category
+                };
+            }
+            return stored; // custom/manual item — no live data available
+        }
+
+        recentRow.innerHTML = recent.length
+            ? recent.map(stored => { const item = freshItem(stored); return `
+                <div class="pos-chip-group">
+                    <button type="button" class="pos-chip"
+                            onclick="addItem(${item.id}, '${escHtml(item.name)}', '${escHtml(item.unit)}', ${item.price}, ${item.gst}, '${escHtml(item.category)}')">
+                        ${escHtml(item.name)}
+                    </button>
+                    <button type="button" class="chip-star ${isFavorite(item.id) ? 'active' : ''}"
+                            title="Toggle favorite"
+                            onclick="event.stopPropagation(); toggleFavorite(${item.id}, '${escHtml(item.name)}', '${escHtml(item.unit)}', ${item.price}, ${item.gst}, '${escHtml(item.category)}')">
+                        <i class="bi bi-star${isFavorite(item.id) ? '-fill' : ''}"></i>
+                    </button>
+                </div>`;}).join('')
+            : '<span class="small text-muted">No recent items yet</span>';
+
+        favoriteRow.innerHTML = favorites.length
+            ? favorites.map(stored => { const item = freshItem(stored); return `
+                <div class="pos-chip-group">
+                    <button type="button" class="pos-chip"
+                            onclick="addItem(${item.id}, '${escHtml(item.name)}', '${escHtml(item.unit)}', ${item.price}, ${item.gst}, '${escHtml(item.category)}')">
+                        <i class="bi bi-star-fill"></i> ${escHtml(item.name)}
+                    </button>
+                    <button type="button" class="chip-star active"
+                            title="Remove favorite"
+                            onclick="event.stopPropagation(); toggleFavorite(${item.id}, '${escHtml(item.name)}', '${escHtml(item.unit)}', ${item.price}, ${item.gst}, '${escHtml(item.category)}')">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>`;}).join('')
+            : '<span class="small text-muted">Tap the star on an item to save it here</span>';
+    }
+
+    function rememberRecentItem(item) {
+        const list = getStoredItems(RECENT_KEY).filter(saved => String(saved.id) !== String(item.id));
+        list.unshift(normalizeQuickItem(item));
+        storeItems(RECENT_KEY, list.slice(0, 10));
+        renderQuickShelf();
+    }
+
+    function toggleFavorite(id, name, unit, price, gst, category) {
+        const list = getStoredItems(FAVORITE_KEY);
+        const index = list.findIndex(saved => String(saved.id) === String(id));
+        const item = normalizeQuickItem({ id, name, unit, price, gst, category });
+        if (index >= 0) list.splice(index, 1);
+        else list.unshift(item);
+        storeItems(FAVORITE_KEY, list.slice(0, 10));
+        renderQuickShelf();
+    }
+
+    function clearRecentItems() {
+        localStorage.removeItem(RECENT_KEY);
+        renderQuickShelf();
+    }
+
+    function filterCustomers() {
+        const query = document.getElementById('customerSearch').value.toLowerCase().trim();
+        const select = document.getElementById('posCustomer');
+        const results = document.getElementById('customerResults');
+        if (!query) {
+            results.style.display = 'none';
+            results.innerHTML = '';
+            return;
+        }
+
+        const matches = Array.from(select.options)
+            .slice(1)
+            .filter(option => option.textContent.toLowerCase().includes(query));
+
+        results.innerHTML = matches.length
+            ? matches.slice(0, 8).map(option => {
+                const matchText = option.textContent;
+                const openParen = matchText.lastIndexOf('(');
+                const closeParen = matchText.lastIndexOf(')');
+                const name = openParen > 0 ? matchText.slice(0, openParen).trim() : matchText;
+                const phone = openParen > 0 && closeParen > openParen
+                    ? matchText.slice(openParen + 1, closeParen).trim()
+                    : '';
+                return `
+                    <div class="customer-result-item" data-value="${escHtml(option.value)}" data-label="${escHtml(matchText)}" onclick="selectCustomerFromSearch(this.dataset.value, this.dataset.label)">
+                        <div>
+                            <div style="font-weight:600">${escHtml(name)}</div>
+                            <div class="customer-result-meta">${escHtml(phone || 'Walk-in')}</div>
+                        </div>
+                        <div class="customer-result-meta">Select</div>
+                    </div>
+                `;
+            }).join('')
+            : '<div class="customer-result-item" style="cursor:default;color:var(--pos-muted)">No customers found</div>';
+        results.style.display = 'block';
+    }
+
+    function selectCustomerFromSearch(value, label) {
+        const search = document.getElementById('customerSearch');
+        const select = document.getElementById('posCustomer');
+        select.value = value;
+        search.value = value ? label : '';
+        updateCustomer();
+        closeCustomerResults();
+    }
+
+    function updateCustomerFromSelect() {
+        const search = document.getElementById('customerSearch');
+        const select = document.getElementById('posCustomer');
+        search.value = select.value ? select.options[select.selectedIndex].textContent : '';
+        updateCustomer();
+        closeCustomerResults();
+    }
+
+    function handleCustomerSearchKeydown(e) {
+        if (e.key === 'Escape') {
+            closeCustomerResults();
+            e.target.blur();
+        }
+        if (e.key === 'Enter') {
+            const first = document.querySelector('#customerResults .customer-result-item[data-value]');
+            if (first) {
+                e.preventDefault();
+                first.click();
+            }
+        }
+    }
+
+    function closeCustomerResults() {
+        const results = document.getElementById('customerResults');
+        results.style.display = 'none';
+        results.innerHTML = '';
+    }
+
+    function searchProducts(query) {
+        clearTimeout(searchTimeout);
+        const q = query.trim();
+        setCategoryActive('ALL');
+        if (q.length < 1) { closeResults(); return; }
+        searchTimeout = setTimeout(() => {
+            const lang = getSelectedLang();
+            const needle = q.toLowerCase();
+            const results = quickProducts
+                .filter(p => {
+                    const haystack = [p.nameEn, p.nameHi, p.nameMr, p.category]
+                        .filter(Boolean)
+                        .join(' ')
+                        .toLowerCase();
+                    return haystack.includes(needle);
+                })
+                .slice(0, 8)
+                .map(p => ({
+                    id: p.id,
+                    displayName: getQuickBillName(p, lang),
+                    nameEn: p.nameEn,
+                    nameHi: p.nameHi,
+                    nameMr: p.nameMr,
+                    price: p.price,
+                    gstPercent: p.gstPercent,
+                    unit: p.unit,
+                    category: p.category,
+                    stockQty: p.stockQty
+                }));
+            showResults(results);
+        }, 200);
+    }
+
+    function setCategoryActive(category) {
+        selectedCategory = category;
+        document.querySelectorAll('[data-category]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.category === category);
+        });
+    }
+
+    function showAllItems() {
+        setCategoryActive('ALL');
+        document.getElementById('posSearch').value = '';
+        closeResults();
+    }
+
+    function showCategory(category) {
+        setCategoryActive(category);
+        document.getElementById('posSearch').value = '';
+        renderCategoryProducts(category);
+    }
+
+    function renderCategoryProducts(category) {
+        clearTimeout(searchTimeout);
+        const lang = getSelectedLang();
+        const matchedProducts = quickProducts
+            .filter(p => String(p.category || 'General') === String(category))
+            .map(p => ({
+                id: p.id,
+                displayName: getQuickBillName(p, lang),
+                price: p.price,
+                gstPercent: p.gstPercent,
+                unit: p.unit,
+                category: p.category || 'General'
+            }));
+
+        showCategoryPanel(matchedProducts, category);
+    }
+
+    function showCategoryPanel(products, category) {
+        let panel = document.getElementById('categoryPanelFixed');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'categoryPanelFixed';
+            panel.className = 'category-panel';
+            panel.style.position = 'fixed';
+            panel.style.zIndex = 1500;
+            document.body.appendChild(panel);
+        }
+        if (!products || !products.length) {
+            panel.innerHTML = `<div class="panel-head"><strong>${escHtml(category)}</strong><button class="panel-close" onclick="closeCategoryPanel()">✕</button></div><div style="padding:8px;color:var(--pos-muted)">No products found</div>`;
+            panel.style.display = 'block';
+            positionFixedPanel(panel);
+            return;
+        }
+        panel.innerHTML = `
+            <div class="panel-head">
+                <strong>${escHtml(category)}</strong>
+                <button class="panel-close" onclick="closeCategoryPanel()">✕</button>
+            </div>
+            ${products.slice(0,12).map(p => {
+                const name = escHtml(getProductName(p));
+                const unit = escHtml(p.unit || 'piece');
+                const catEsc = escHtml(p.category || 'General');
+                const price = parseFloat(p.price).toFixed(2);
+                return `
+                <div class="panel-item" id="panelitem-${p.id}"
+                     onclick="addItem(${p.id},'${name}','${unit}',${p.price},${p.gstPercent||0},'${catEsc}'); keepCategoryPanelOpen(); flashPanelItem(${p.id});">
+                    <div>
+                        <div style="font-weight:600">${name}</div>
+                        <div class="meta">${unit} · GST ${p.gstPercent||0}%</div>
+                    </div>
+                    <div style="font-weight:700;color:var(--pos-green)">₹${price}</div>
+                </div>
+            `}).join('')}
+        `;
+        panel.style.display = 'block';
+        positionFixedPanel(panel);
+    }
+
+    function closeCategoryPanel() {
+        const panel = document.getElementById('categoryPanelFixed') || document.getElementById('categoryPanel');
+        if (panel) panel.style.display = 'none';
+    }
+
+    // Prevents the outside-click listener from closing the panel
+    // when an item inside it was just tapped
+    let _keepCatPanel = false;
+    function keepCategoryPanelOpen() {
+        _keepCatPanel = true;
+        setTimeout(() => { _keepCatPanel = false; }, 300);
+    }
+
+    // Flash green on the panel item to confirm it was added
+    function flashPanelItem(id) {
+        const el = document.getElementById(`panelitem-${id}`);
+        if (!el) return;
+        const orig = el.style.background;
+        el.style.background = '#d1fae5';
+        el.style.transition = 'background 0.3s';
+        setTimeout(() => {
+            el.style.background = orig || '';
+        }, 500);
+    }
+
+    function positionFixedPanel(panel) {
+        try {
+            const btn = window._lastCategoryButton;
+            if (!btn) return;
+            const rect = btn.getBoundingClientRect();
+            const panelWidth = 380;
+            const panelHeight = Math.min(420, panel.scrollHeight || 260);
+            let left = rect.left;
+            if (left + panelWidth > window.innerWidth - 8) left = window.innerWidth - panelWidth - 8;
+            if (left < 8) left = 8;
+            let top = rect.bottom + 8;
+            if (top + panelHeight > window.innerHeight - 8) top = Math.max(8, rect.top - panelHeight - 8);
+            panel.style.left = left + 'px';
+            panel.style.top = top + 'px';
+            panel.style.width = panelWidth + 'px';
+        } catch (e) {
+            console.debug('positionFixedPanel failed', e);
+        }
+    }
+
+    // ── Product Search ────────────────────────────────────
+    document.getElementById('posSearch').addEventListener('input', function() {
+        searchProducts(this.value);
+    });
+
+    document.getElementById('posSearch').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && highlightIdx < 0) {
+            // If only one result, add it directly
+            const items = document.querySelectorAll('.pos-result-item');
+            if (items.length === 1) items[0].click();
+        }
+    });
+
+    function showResults(products) {
+        const el = document.getElementById('posResults');
+        if (!products || !products.length) {
+            el.innerHTML = '<div class="pos-result-item" style="color:var(--pos-muted)">No products found</div>';
+            el.style.display = 'block';
+            return;
+        }
+        highlightIdx = -1;
+        el.innerHTML = products.slice(0, 8).map((p, i) => {
+            const name = escHtml(getProductName(p));
+            const unit = escHtml(p.unit || 'piece');
+            const category = escHtml(p.category || 'General');
+            const price = parseFloat(p.price).toFixed(2);
+            const favClass = isFavorite(p.id) ? 'active' : '';
+            const starIcon = isFavorite(p.id) ? '-fill' : '';
+            return `
+            <div class="pos-result-item" data-idx="${i}"
+                 onclick="addItem(${p.id},'${name}','${unit}',${p.price},${p.gstPercent||0},'${category}')">
+                <div>
+                    <div style="font-weight:600;font-size:14px">${name}</div>
+                    <div style="font-size:12px;color:var(--pos-muted)">${unit} · GST ${p.gstPercent||0}% · ${category}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button type="button" class="fav-btn ${favClass}"
+                            title="Toggle favorite"
+                            onclick="event.stopPropagation(); toggleFavorite(${p.id}, '${name}', '${unit}', ${p.price}, ${p.gstPercent||0}, '${category}')">
+                        <i class="bi bi-star${starIcon}"></i>
+                    </button>
+                    <div style="font-weight:700;color:var(--pos-green);font-size:15px">₹${price}</div>
+                </div>
+            </div>`;
+        }).join('');
+        el.style.display = 'block';
+    }
+
+    function navigateResults(dir) {
+        const resultEls = document.querySelectorAll('.pos-result-item');
+        if (!resultEls.length) return;
+        resultEls[Math.max(0, highlightIdx)].classList.remove('highlighted');
+        highlightIdx = Math.max(0, Math.min(resultEls.length - 1, highlightIdx + dir));
+        resultEls[highlightIdx].classList.add('highlighted');
+        resultEls[highlightIdx].scrollIntoView({block:'nearest'});
+    }
+
+    function selectHighlighted() {
+        const el = document.querySelectorAll('.pos-result-item')[highlightIdx];
+        if (el) el.click();
+    }
+
+    function closeResults() {
+        document.getElementById('posResults').style.display = 'none';
+        highlightIdx = -1;
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#posSearch') && !e.target.closest('#posResults')) closeResults();
+        if (!e.target.closest('#customerSearch') && !e.target.closest('#customerResults')) closeCustomerResults();
+        if (!e.target.closest('#categoryChips') && !e.target.closest('#categoryPanel') && !e.target.closest('#categoryPanelFixed') && !_keepCatPanel) closeCategoryPanel();
+    });
+
+    function normalizeBillingUnit(unit) {
+        const normalized = String(unit || '').trim().toLowerCase();
+        if (normalized === 'gram' || normalized === 'grams' || normalized === 'g') return 'g';
+        if (normalized === 'kilogram' || normalized === 'kgs' || normalized === 'kg') return 'kg';
+        return normalized || 'piece';
+    }
+
+    function getDisplayUnit(unit) {
+        const normalized = normalizeBillingUnit(unit);
+        if (normalized === 'g') return 'gram';
+        if (normalized === 'kg') return 'kg';
+        return normalized || 'piece';
+    }
+
+    function getBillingFactor(unit) {
+        const normalized = normalizeBillingUnit(unit);
+        if (normalized === 'g') return 0.001;
+        return 1;
+    }
+
+    // ── Add Item ──────────────────────────────────────────
+    function addItem(id, name, unit, price, gst, category, qty = 1) {
+        closeResults();
+        document.getElementById('posSearch').value = '';
+        // Only refocus search on desktop — on mobile/tablet this pops the keyboard annoyingly
+        if (!isTouchDevice()) {
+            document.getElementById('posSearch').focus();
+        }
+
+        // If same product exists, just increase qty
+        const shouldMerge = id !== null && id !== undefined && id !== '';
+        const existing = shouldMerge ? items.find(i => i.id === id) : null;
+        if (existing) {
+            existing.qty += qty || 1;
+            renderItems();
+            rememberRecentItem({ id, name, unit, price, gst, category });
+            return;
+        }
+
+        items.push({
+            id,
+            name,
+            unit,
+            price: parseFloat(price),
+            originalPrice: parseFloat(price),
+            gst: parseFloat(gst),
+            category: category || 'General',
+            qty: parseFloat(qty) || 1,
+            billingUnit: normalizeBillingUnit(unit)
+        });
+        renderItems();
+        // Scroll to the newly added item at the bottom
+        const container = document.getElementById('posItems');
+        if (container) container.scrollTop = container.scrollHeight;
+        if (shouldMerge) {
+            rememberRecentItem({ id, name, unit, price, gst, category });
+        }
+    }
+
+    function renderItems() {
+        const container = document.getElementById('posItems');
+        const emptyEl   = document.getElementById('posEmpty');
+        const itemBar   = document.getElementById('itemBar');
+
+        if (items.length === 0) {
+            emptyEl.style.display = 'flex';
+            container.style.display = 'none';
+            itemBar.style.display = 'none';
+            recalcTotal();
+            return;
+        }
+
+        emptyEl.style.display = 'none';
+        container.style.display = 'block';
+        itemBar.style.display = 'flex';
+
+        container.innerHTML = items.map((item, i) => {
+            const bu = normalizeBillingUnit(item.billingUnit || item.unit);
+            const isWeight = bu === 'kg' || bu === 'g';
+            const isGram   = bu === 'g';
+            const displayUnit = getDisplayUnit(bu);
+            const qtyVal = parseFloat(item.qty) || 0;
+            const presetVal = isGram && [250,500,750].includes(Math.round(qtyVal)) ? String(Math.round(qtyVal)) : '';
+            return `
+            <div class="pos-item-row" id="itemrow-${i}" style="display:flex;align-items:center;gap:8px;padding:6px 12px;">
+
+                <!-- col 1: name -->
+                <div style="flex:0 0 140px;min-width:140px;overflow:hidden;display:flex;align-items:center;">
+                    <div class="pos-item-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(item.name)}</div>
+                </div>
+
+                <!-- col 2: price input · fills empty space -->
+                <div style="flex:1 1 0;display:flex;align-items:center;gap:4px;">
+                    <span style="font-size:13px;color:var(--pos-muted);font-weight:500;">₹</span>
+                    <input type="number"
+                           id="priceinput-${i}"
+                           value="${isGram ? Number((item.price * 0.001).toFixed(4)).toString() : item.price.toFixed(2)}"
+                           min="0" step="0.0001"
+                           style="flex:1 1 0;width:100%;height:30px;border:1.5px solid var(--pos-border);border-radius:7px;padding:4px 10px;font-size:14px;font-weight:700;color:var(--pos-accent);background:#f0f6ff;outline:none;text-align:center;"
+                           oninput="updatePrice(${i}, this.value, false)"
+                           onblur="updatePrice(${i}, this.value, true)">
+                </div>
+
+                <!-- slash for per unit -->
+                <div style="flex:0 0 auto;color:var(--pos-muted);font-size:20px;font-weight:400;line-height:1;display:flex;align-items:center;margin-top:-2px;">/</div>
+
+                <!-- col 2: unit selector or badge · fixed 88px -->
+                <div style="flex:0 0 88px;">
+                    ${isWeight
+                        ? `<select class="form-select form-select-sm" style="width:100%;" onchange="setBillingUnit(${i}, this.value)">
+                               <option value="kg" ${bu==='kg'?'selected':''}>kg</option>
+                               <option value="g"  ${bu==='g' ?'selected':''}>gram</option>
+                           </select>`
+                        : `<span style="display:block;width:100%;text-align:center;font-size:12px;font-weight:600;color:var(--pos-muted);padding:5px 4px;border:1px solid var(--pos-border);border-radius:6px;background:#f9fafb;">${escHtml(displayUnit)}</span>`}
+                </div>
+
+                <!-- col 3: qty −/n/+ -->
+                <div class="pos-qty-ctrl" style="flex:0 0 auto;gap:6px;">
+                    <button class="pos-qty-btn" onclick="changeQty(${i},-1)">−</button>
+                    <input class="pos-qty-input" type="number"
+                           value="${item.qty}" min="0.001" step="0.001"
+                           style="width:90px;min-width:90px;font-size:14px;font-weight:700;text-align:center;"
+                           onchange="setQty(${i}, this.value)">
+                    <button class="pos-qty-btn" onclick="changeQty(${i},1)">+</button>
+                </div>
+
+                <!-- col 4: gram preset · fixed 106px slot, empty for non-gram -->
+                <div style="flex:0 0 106px;">
+                    ${isGram
+                        ? `<select class="pos-gram-preset" id="grampreset-${i}"
+                                   style="width:100%;"
+                                   onchange="setGramPreset(${i}, this.value)">
+                               <option value="">gram qty</option>
+                               <option value="250" ${presetVal==='250'?'selected':''}>250 gm</option>
+                               <option value="500" ${presetVal==='500'?'selected':''}>500 gm</option>
+                               <option value="750" ${presetVal==='750'?'selected':''}>750 gm</option>
+                           </select>`
+                        : ''}
+                </div>
+
+                <!-- col 5: line total · fixed 90px -->
+                <div class="pos-price-display" id="itemtotal-${i}" style="flex:0 0 90px;text-align:right;">
+                    ₹${(item.price * item.qty * getBillingFactor(item.billingUnit || item.unit)).toFixed(2)}
+                </div>
+
+                <!-- col 6: remove -->
+                <button class="pos-remove-btn" onclick="removeItem(${i})" title="Remove" style="flex:0 0 auto;">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+
+            </div>`;
+        }).join('');
+
+        recalcTotal();
+        saveDraft();
+    }
+
+    function changeQty(idx, delta) {
+        items[idx].qty = Math.max(0.001, parseFloat((items[idx].qty + delta).toFixed(3)));
+        const preset = document.getElementById(`grampreset-${idx}`);
+        if (preset) preset.value = '';
+        renderItems();
+    }
+
+    function setQty(idx, val) {
+        const q = parseFloat(val);
+        if (q > 0) items[idx].qty = q;
+        else removeItem(idx);
+        const preset = document.getElementById(`grampreset-${idx}`);
+        if (preset) preset.value = '';
+        renderItems();
+    }
+
+    function updatePrice(idx, val, formatInput) {
+        const entered  = Math.max(0, parseFloat(val) || 0);
+        const bu       = normalizeBillingUnit(items[idx].billingUnit || items[idx].unit);
+        const isGram   = bu === 'g';
+
+        // Always store price as per-kg internally
+        const perKgPrice = isGram ? entered * 1000 : entered;
+        items[idx].price = perKgPrice;
+
+        // Update unit subtitle
+        const unitEl = document.getElementById(`itemunit-${idx}`);
+        if (unitEl) unitEl.textContent = ``;
+
+        // Update line total
+        const totalEl = document.getElementById(`itemtotal-${idx}`);
+        if (totalEl) {
+            totalEl.textContent = `₹${(perKgPrice * items[idx].qty * getBillingFactor(bu)).toFixed(2)}`;
+        }
+
+        // On blur — format the input to the right precision
+        const inputEl = document.getElementById(`priceinput-${idx}`);
+        if (formatInput && inputEl) {
+            inputEl.value = isGram ? Number(entered.toFixed(4)).toString() : entered.toFixed(2);
+        }
+
+        recalcTotal();
+    }
+
+    function setBillingUnit(idx, value) {
+        items[idx].billingUnit = normalizeBillingUnit(value);
+        // Reset qty to 1 on every unit switch
+        items[idx].qty = 1;
+        // Restore original price when switching units
+        if (items[idx].originalPrice !== undefined) {
+             items[idx].price = items[idx].originalPrice;
+        }
+        // Clear gram preset
+        const preset = document.getElementById(`grampreset-${idx}`);
+        if (preset) preset.value = '';
+        renderItems();
+    }
+
+    function setGramPreset(idx, value) {
+        const grams = parseFloat(value);
+
+        if (!grams) {
+            // placeholder "gram qty" selected — reset qty to 1 and re-render
+            items[idx].qty = 1;
+            renderItems();
+            return;
+        }
+
+        // preset chosen — stay showing selection, apply qty
+        items[idx].billingUnit = 'g';
+        items[idx].qty = grams;
+        renderItems();
+    }
+
+    function removeItem(idx) {
+        items.splice(idx, 1);
+        renderItems();
+    }
+
+    function clearAll() {
+        items = [];
+        document.getElementById('posDiscount').value = 0;
+        clearDraft();
+        renderItems();
+        if (!isTouchDevice()) {
+            document.getElementById('posSearch').focus();
+        }
+    }
+
+    // ── Recalc total ──────────────────────────────────────
+    function recalcTotal() {
+        const subtotal  = items.reduce((s, i) => s + (i.price * i.qty * getBillingFactor(i.billingUnit || i.unit)), 0);
+        const gstTotal  = quickBillHasGst ? items.reduce((s, i) => {
+            const gstPct = parseFloat(i.gst) || 0;
+            const lineTotal = i.price * i.qty * getBillingFactor(i.billingUnit || i.unit);
+            return s + (lineTotal * gstPct / 100);
+        }, 0) : 0;
+        const discount  = parseFloat(document.getElementById('posDiscount').value) || 0;
+        const total     = Math.max(0, subtotal + gstTotal - discount);
+        const totalQty  = items.reduce((s, i) => s + i.qty, 0);
+
+        document.getElementById('rSubtotal').textContent = subtotal.toFixed(2);
+        document.getElementById('rGst').textContent = gstTotal.toFixed(2);
+        document.getElementById('rDiscount').textContent = discount.toFixed(2);
+        document.getElementById('rTotal').textContent    = total.toFixed(2);
+        document.getElementById('itemCountDisplay').textContent = items.length;
+        document.getElementById('qtyDisplay').textContent = totalQty.toFixed(2);
+        
+        document.getElementById('gstRow').style.display = quickBillHasGst && gstTotal > 0 ? 'flex' : 'none';
+        document.getElementById('discRow').style.display = discount > 0 ? 'flex' : 'none';
+    }
+
+    function updateCustomer() {
+        const selectedCustomerId = document.getElementById('posCustomer').value;
+        const walkInField = document.getElementById('walkInCustomerName');
+        const isWalkIn = !selectedCustomerId;
+
+        document.getElementById('hCustomerId').value = selectedCustomerId;
+        walkInField.style.display = isWalkIn ? 'block' : 'none';
+        walkInField.disabled = !isWalkIn;
+        document.getElementById('hWalkInCustomerName').value = isWalkIn ? walkInField.value.trim() : '';
+        saveDraft();
+    }
+
+    // ── SAVE BILL ─────────────────────────────────────────
+    function saveBill(method) {
+        if (items.length === 0) {
+            alert('Please add at least one product.');
+            if (!isTouchDevice()) document.getElementById('posSearch').focus();
+            return;
+        }
+
+        if (method === 'CREDIT' && !document.getElementById('posCustomer').value) {
+            alert('Please select a customer for Credit (Udhari) bills.');
+            document.getElementById('customerSearch').focus();
+            return;
+        }
+
+        // Show saving overlay
+        document.getElementById('savingOverlay').style.display = 'flex';
+
+        // Fill hidden form
+        document.getElementById('hPaymentMethod').value = method;
+        document.getElementById('hCustomerId').value    = document.getElementById('posCustomer').value;
+        document.getElementById('hWalkInCustomerName').value = document.getElementById('walkInCustomerName').value.trim();
+        document.getElementById('hDiscount').value      = document.getElementById('posDiscount').value || 0;
+        document.getElementById('hIsGst').value         = quickBillHasGst ? 'true' : 'false';
+
+        // Clear draft — bill is being saved
+        clearDraft();
+
+        // Build hidden product inputs
+        const hiddenDiv = document.getElementById('hiddenItems');
+        hiddenDiv.innerHTML = '';
+        items.forEach(item => {
+            const billingUnit = normalizeBillingUnit(item.billingUnit || item.unit);
+            const quantity = item.qty;
+            hiddenDiv.innerHTML += `
+                <input type="hidden" name="productIds"  value="${item.id == null ? '' : item.id}">
+                <input type="hidden" name="itemNames"  value="${escHtml(item.name || '')}">
+                <input type="hidden" name="itemUnits"  value="${escHtml(billingUnit || item.unit || '')}">
+                <input type="hidden" name="gstPercents"  value="${item.gst ?? 0}">
+                <input type="hidden" name="quantities"  value="${quantity}">
+                <input type="hidden" name="unitPrices"  value="${item.price}">
+            `;
+        });
+        document.getElementById('quickBillForm').submit();
+    }
+
+    // ── Escape HTML ───────────────────────────────────────
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;');
+    }
+
+    function getQuickBillName(p, lang) {
+        if (lang === 'hi') return p.nameHi || p.nameEn || p.nameMr || '';
+        if (lang === 'mr') return p.nameMr || p.nameEn || p.nameHi || '';
+        return p.nameEn || p.nameHi || p.nameMr || '';
+    }
+    // Get best product name from server response (be tolerant of different keys)
+    function getProductName(p) {
+        if (!p) return '';
+        return p.displayName || p.display_name || p.display || p.name || p.nameEn || p.name_en || p.name_hi || p.nameHi || '';
+    }
+
+    renderQuickShelf();
+
+    // Bind category buttons at runtime to ensure clicks work
+    function initCategoryHandlers() {
+        document.querySelectorAll('[data-category]').forEach(btn => {
+            // avoid attaching twice
+            if (btn.__catBound) return;
+            btn.addEventListener('click', function (e) {
+                const cat = this.dataset.category || this.getAttribute('data-category');
+                if (cat === 'ALL') return showAllItems();
+                showCategory(cat);
+            });
+            btn.__catBound = true;
+        });
+    }
+    initCategoryHandlers();
+
+    // Delegated handler (more reliable for dynamic content)
+    const catContainer = document.getElementById('categoryChips');
+    if (catContainer && !catContainer.__delegated) {
+        catContainer.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-category]');
+            if (!btn) return;
+            const cat = btn.dataset.category || btn.getAttribute('data-category');
+            window._lastCategoryButton = btn;
+            console.debug('Category clicked:', cat);
+            if (cat === 'ALL') {
+                showAllItems();
+            } else {
+                showCategory(cat);
+            }
+        });
+        catContainer.__delegated = true;
+    }
+
+    // Global click debugger removed
+
+    // ── Bill Confirm Modal ────────────────────────────────
+    let pendingPaymentMethod = null;
+
+    function showConfirmModal(method) {
+        if (items.length === 0) {
+            alert('Please add at least one product.');
+            if (!isTouchDevice()) document.getElementById('posSearch').focus();
+            return;
+        }
+        if (method === 'CREDIT' && !document.getElementById('posCustomer').value) {
+            alert('Please select a customer for Credit (Udhari) bills.');
+            document.getElementById('customerSearch').focus();
+            return;
+        }
+
+        pendingPaymentMethod = method;
+
+        // Badge color & label
+        const badge = document.getElementById('confirmMethodBadge');
+        const colors = { CASH: '#28d17c', UPI: '#4f97ff', CREDIT: '#ff5a5a' };
+        badge.textContent = method;
+        badge.style.background = (colors[method] || '#888') + '33';
+        badge.style.color = colors[method] || '#888';
+        badge.style.border = '1px solid ' + (colors[method] || '#888');
+
+        // Build items table
+        renderConfirmItems();
+
+        // Open modal
+        const modal = new bootstrap.Modal(document.getElementById('billConfirmModal'));
+        modal.show();
+    }
+
+    function renderConfirmItems() {
+        const tbody = document.getElementById('confirmItemsBody');
+        tbody.innerHTML = items.map((item, i) => {
+            const factor      = getBillingFactor(item.billingUnit || item.unit);
+            const lineTotal   = (item.price * item.qty * factor).toFixed(2);
+            const displayUnit = getDisplayUnit(normalizeBillingUnit(item.billingUnit || item.unit));
+            return `<tr id="crow-${i}" style="border-bottom:1px solid #f0f0f0;">
+                <td style="padding:6px 0;font-weight:600;">${escHtml(item.name)}</td>
+                <td style="padding:6px 0;text-align:center;color:#6b7280;">${item.qty} ${displayUnit}</td>
+                <td style="padding:6px 0;text-align:right;color:#6b7280;">₹${parseFloat(item.price).toFixed(2)}</td>
+                <td style="padding:6px 0;text-align:right;font-weight:700;color:#1f2937;">₹${lineTotal}</td>
+                <td style="padding:6px 0;text-align:right;">
+                    <button onclick="removeConfirmItem(${i})"
+                            style="background:none;border:1px solid #ff5a5a;color:#ff5a5a;
+                                   width:24px;height:24px;border-radius:6px;cursor:pointer;
+                                   font-size:14px;line-height:1;display:inline-flex;
+                                   align-items:center;justify-content:center;"
+                            title="Remove">×</button>
+                </td>
+            </tr>`;
+        }).join('');
+        recalcConfirmTotals();
+    }
+
+    function removeConfirmItem(idx) {
+        items.splice(idx, 1);
+        renderItems(); // keep main POS in sync
+        if (items.length === 0) {
+            // No items left — close modal
+            bootstrap.Modal.getInstance(
+                document.getElementById('billConfirmModal'))?.hide();
+            return;
+        }
+        renderConfirmItems();
+    }
+
+    function recalcConfirmTotals() {
+        const subtotal = items.reduce((s, i) => s + (i.price * i.qty * getBillingFactor(i.billingUnit || i.unit)), 0);
+        const gstTotal = quickBillHasGst ? items.reduce((s, i) => {
+            const lt = i.price * i.qty * getBillingFactor(i.billingUnit || i.unit);
+            return s + (lt * (parseFloat(i.gst) || 0) / 100);
+        }, 0) : 0;
+        const discount = parseFloat(document.getElementById('posDiscount').value) || 0;
+        const total    = Math.max(0, subtotal + gstTotal - discount);
+        document.getElementById('confirmSubtotal').textContent = subtotal.toFixed(2);
+        document.getElementById('confirmGst').textContent      = gstTotal.toFixed(2);
+        document.getElementById('confirmDisc').textContent     = discount.toFixed(2);
+        document.getElementById('confirmTotal').textContent    = total.toFixed(2);
+        document.getElementById('confirmGstRow').style.display  = gstTotal > 0 ? 'flex' : 'none';
+        document.getElementById('confirmDiscRow').style.display = discount > 0 ? 'flex' : 'none';
+    }
+
+    function confirmAndSave() {
+        // Close modal first, then save
+        const modalEl = document.getElementById('billConfirmModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        saveBill(pendingPaymentMethod);
+    }
+
+    // ── Recent Bills Drawer ───────────────────────────────
+    function toggleRecentBills() {
+        const drawer = document.getElementById('recentBillsDrawer');
+        if (drawer.style.display === 'none') {
+            drawer.style.display = 'block';
+        } else {
+            drawer.style.display = 'none';
+        }
+    }
+    // Close drawer when clicking outside
+    document.addEventListener('click', function(e) {
+        const drawer = document.getElementById('recentBillsDrawer');
+        if (drawer && drawer.style.display !== 'none') {
+            if (!drawer.contains(e.target) && !e.target.closest('[onclick="toggleRecentBills()"]')) {
+                drawer.style.display = 'none';
+            }
+        }
+    });
+</script>
+</body>
+</html>

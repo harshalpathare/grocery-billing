@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Print ' + ${bill.billNo}">Print Invoice</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: #525659;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #1a1f2e;
+            color: #fff;
+        }
+        .toolbar-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: auto;
+        }
+        .toolbar button {
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-print { background: #4f97ff; color: #fff; }
+        .btn-close { background: #6c757d; color: #fff; }
+        .status {
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+        .viewer {
+            height: calc(100% - 52px);
+            position: relative;
+        }
+        #pdfFrame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+            background: #525659;
+        }
+        .loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 15px;
+            background: #525659;
+        }
+        @media print {
+            .toolbar, .loading { display: none !important; }
+            html, body, .viewer { height: auto; background: white; }
+            #pdfFrame {
+                position: static;
+                width: 100%;
+                height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <div class="toolbar-title" th:text="'Invoice ' + ${bill.billNo}">Invoice</div>
+        <span class="status" id="printStatus">Loading invoice PDF…</span>
+        <button type="button" class="btn-print" onclick="triggerPrint()">Print</button>
+        <button type="button" class="btn-close" onclick="window.close()">Close</button>
+    </div>
+
+    <div class="viewer">
+        <div class="loading" id="loadingMsg">Loading invoice PDF…</div>
+        <iframe id="pdfFrame" title="Invoice PDF"></iframe>
+    </div>
+
+    <script th:inline="javascript">
+        const pdfPreviewUrl = /*[[@{/bills/pdf/{id}/preview(id=${bill.id})}]]*/ '';
+        const frame = document.getElementById('pdfFrame');
+        const statusEl = document.getElementById('printStatus');
+        const loadingEl = document.getElementById('loadingMsg');
+        let blobUrl = null;
+
+        function setStatus(text) {
+            statusEl.textContent = text;
+            if (loadingEl) loadingEl.textContent = text;
+        }
+
+        function triggerPrint() {
+            try {
+                frame.contentWindow.focus();
+                frame.contentWindow.print();
+                setStatus('Print dialog opened.');
+                return true;
+            } catch (err) {
+                setStatus('Click Print or press Ctrl+P.');
+                return false;
+            }
+        }
+
+        function autoPrint() {
+            triggerPrint();
+        }
+
+        frame.addEventListener('load', function () {
+            loadingEl.style.display = 'none';
+            setStatus('Invoice ready.');
+            setTimeout(autoPrint, 400);
+            setTimeout(autoPrint, 1200);
+            setTimeout(autoPrint, 2500);
+        });
+
+        fetch(pdfPreviewUrl, { credentials: 'same-origin' })
+            .then(function (response) {
+                if (!response.ok) throw new Error('Failed to load PDF');
+                return response.blob();
+            })
+            .then(function (blob) {
+                blobUrl = URL.createObjectURL(blob);
+                frame.src = blobUrl;
+            })
+            .catch(function () {
+                setStatus('Loading via direct URL…');
+                frame.src = pdfPreviewUrl;
+            });
+
+        window.addEventListener('beforeunload', function () {
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+        });
+    </script>
+</body>
+</html>

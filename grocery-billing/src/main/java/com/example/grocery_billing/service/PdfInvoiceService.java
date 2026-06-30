@@ -433,9 +433,11 @@ public class PdfInvoiceService {
             }
 
             // Qty
-            String qty = item.getQuantity().stripTrailingZeros().toPlainString()
-                    + " " + (item.getProduct().getUnit() != null
-                    ? item.getProduct().getUnit().toUpperCase() : "");
+                String unit = item.getProduct() != null && item.getProduct().getUnit() != null
+                    ? item.getProduct().getUnit().toUpperCase()
+                    : "PIECE";
+                String qty = item.getQuantity().stripTrailingZeros().toPlainString()
+                    + " " + unit;
             td(t, qty, rowF, Element.ALIGN_CENTER, rowBg);
 
             // MRP

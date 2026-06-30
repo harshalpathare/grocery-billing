@@ -104,15 +104,13 @@
                                 <!-- English Name -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">
-                                        English Name <span class="text-danger">*</span>
+                                        English Name
                                     </label>
                                     <input type="text"
                                            th:field="*{nameEn}"
                                            class="form-control"
-                                           th:classappend="${#fields.hasErrors('nameEn')} ? 'is-invalid'"
                                            placeholder="e.g. Sugar">
-                                    <div class="invalid-feedback" th:errors="*{nameEn}"></div>
-                                    <div class="form-text">Primary name (required)</div>
+                                    <div class="form-text">Optional English name</div>
                                 </div>
 
                                 <!-- Hindi Name -->
@@ -143,6 +141,11 @@
                                     <div class="form-text">Optional Marathi name</div>
                                 </div>
 
+                            </div>
+                            <!-- At least one name hint -->
+                            <div class="mt-2 small text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Enter name in any language — at least one is required.
                             </div>
                         </div>
                         <!-- Add after the product name fields -->

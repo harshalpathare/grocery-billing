@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,8 +51,14 @@ public class PdfController {
             // 2. Generate PDF bytes
             byte[] pdfBytes = pdfInvoiceService.generateInvoicePdf(bill);
 
-            // 3. Set up download headers
-            String filename = "Invoice-" + bill.getBillNo() + ".pdf";
+            // 3. Set up download headers — smart filename with customer + date
+            String customerPart = (bill.getCustomer() != null && bill.getCustomer().getName() != null)
+                    ? bill.getCustomer().getName().replaceAll("[^a-zA-Z0-9]", "_")
+                    : "WalkIn";
+            String datePart = bill.getBillDate() != null
+                    ? bill.getBillDate().format(java.time.format.DateTimeFormatter.ofPattern("dd-MMM-yyyy"))
+                    : java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+            String filename = customerPart + "_" + bill.getBillNo() + "_" + datePart + ".pdf";
 
             HttpHeaders headers = new HttpHeaders();
 
@@ -102,5 +109,17 @@ public class PdfController {
             log.error("Error previewing PDF for bill id: {}", id, e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    // ─────────────────────────────────────────────────────
+    // PRINT PDF IN BROWSER
+    // GET /bills/pdf/{id}/print
+    // Opens a minimal page that loads the preview PDF and triggers print
+    // ─────────────────────────────────────────────────────
+    @GetMapping("/{id}/print")
+    public String printInvoicePage(@PathVariable Long id, Model model) {
+        Bill bill = billService.getBillById(id);
+        model.addAttribute("bill", bill);
+        return "bill/pdf-print";
     }
 }

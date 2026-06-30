@@ -26,10 +26,10 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ── English name (required) ──────────────────────────
-    @NotBlank(message = "English name is required")
+    // ── English name ──────────────────────────────────────
+    // At least one of nameEn, nameHi, nameMr must be provided
     @Size(max = 100)
-    @Column(name = "name_en", nullable = false, length = 100)
+    @Column(name = "name_en", nullable = true, length = 100)
     private String nameEn;
 
     // ── Hindi name ───────────────────────────────────────
@@ -64,19 +64,22 @@ public class Product {
 
     // ── GST Percentage ───────────────────────────────────
     // Common GST rates: 0%, 5%, 12%, 18%, 28%
+    @Builder.Default
     @DecimalMin("0.0")
     @DecimalMax("28.0")
     @Column(name = "gst_percent", precision = 5, scale = 2)
     private BigDecimal gstPercent = BigDecimal.ZERO;
 
     // ── Stock Quantity ───────────────────────────────────
-    @Min(value = 0, message = "Stock cannot be negative")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Stock cannot be negative")
     @Column(name = "stock_qty")
-    private Integer stockQty = 0;
+    @Builder.Default
+    private BigDecimal stockQty = BigDecimal.ZERO;
 
     // ── Unit of measurement ──────────────────────────────
     // e.g. "kg", "litre", "piece", "dozen"
     @Size(max = 20)
+    @Builder.Default
     @Column(name = "unit", length = 20)
     private String unit = "piece";
 
@@ -87,6 +90,7 @@ public class Product {
 
     // ── Active flag ──────────────────────────────────────
     // false = deleted/hidden product (soft delete)
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
 
@@ -120,6 +124,10 @@ public class Product {
         } else if ("mr".equals(lang) && nameMr != null && !nameMr.isBlank()) {
             return nameMr;
         }
-        return nameEn; // default to English
+        // Fallback: return whichever name is available
+        if (nameEn != null && !nameEn.isBlank()) return nameEn;
+        if (nameHi != null && !nameHi.isBlank()) return nameHi;
+        if (nameMr != null && !nameMr.isBlank()) return nameMr;
+        return "";
     }
 }

@@ -7,11 +7,11 @@ import com.example.grocery_billing.service.BillService;
 import com.example.grocery_billing.service.CustomerService;
 import com.example.grocery_billing.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,8 +50,9 @@ public class DashboardController {
         // ── Low stock products (stock <= 5) ───────────
         List<Product> lowStock = productService.getAllActiveProducts()
                 .stream()
-                .filter(p -> p.getStockQty() != null && p.getStockQty() <= 5
-                        && p.getStockQty() > 0)
+                .filter(p -> p.getStockQty() != null
+                        && p.getStockQty().compareTo(BigDecimal.ZERO) > 0
+                        && p.getStockQty().compareTo(BigDecimal.valueOf(5)) <= 0)
                 .collect(Collectors.toList());
         model.addAttribute("lowStockProducts", lowStock);
 

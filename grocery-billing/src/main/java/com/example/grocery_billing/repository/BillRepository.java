@@ -47,4 +47,7 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
     List<Bill> findByIsGstTrueAndBillDateBetween(LocalDate start, LocalDate end);
 
     List<Bill> findByPaymentStatusOrderByBillDateDesc(Bill.PaymentStatus status);
+
+    // Top 10 most recent bills
+    List<Bill> findTop10ByOrderByCreatedAtDesc();
 }
