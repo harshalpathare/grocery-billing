@@ -520,4 +520,39 @@ public class ProfitReportService {
         wb.close();
         return baos.toByteArray();
     }
+
+    public byte[] generateCsv(ProfitReport report) {
+        java.io.StringWriter sw = new java.io.StringWriter();
+        
+        sw.write("PRODUCT PROFIT BREAKDOWN\n");
+        sw.write("Product,Qty Sold,Sell Price,Cost Price,Total Revenue,Total Cost,Total Profit,Margin %\n");
+        for (ProductProfitRow r : report.productRows) {
+            sw.write(r.productName + ",");
+            sw.write(r.qtySold + ",");
+            sw.write(r.sellPrice + ",");
+            sw.write(r.costPrice + ",");
+            sw.write(r.totalRevenue + ",");
+            sw.write(r.totalCost + ",");
+            sw.write(r.totalProfit + ",");
+            sw.write(r.margin + "%\n");
+        }
+        
+        sw.write("\nDAILY PROFIT BREAKDOWN\n");
+        sw.write("Date,Bills,Revenue,Cost,Profit\n");
+        for (DailyProfitRow r : report.dailyRows) {
+            sw.write(r.date + ",");
+            sw.write(r.bills + ",");
+            sw.write(r.revenue + ",");
+            sw.write(r.cost + ",");
+            sw.write(r.profit + "\n");
+        }
+        
+        sw.write("\nSUMMARY\n");
+        sw.write("Total Revenue," + report.totalRevenue + "\n");
+        sw.write("Total Cost," + report.totalCost + "\n");
+        sw.write("Total Profit," + report.totalProfit + "\n");
+        sw.write("Profit Margin %," + report.profitMargin + "%\n");
+        
+        return sw.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
 }

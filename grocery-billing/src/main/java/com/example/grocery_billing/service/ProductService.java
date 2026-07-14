@@ -1,38 +1,46 @@
 package com.example.grocery_billing.service;
 
-
+import com.example.grocery_billing.config.ShopContext;
 import com.example.grocery_billing.entity.Product;
+import com.example.grocery_billing.entity.Shop;
 import com.example.grocery_billing.repository.ProductRepository;
+import com.example.grocery_billing.repository.ShopRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
-/**
- * PRODUCT SERVICE
- *
- * This is the "brain" of the product module.
- * Controller calls Service. Service calls Repository.
- * Never put business logic in Controller or Repository.
- *
- * @Service   = marks this as a Spring-managed service bean
- * @RequiredArgsConstructor = Lombok: auto-injects ProductRepository via constructor
- * @Transactional = wraps DB operations in a transaction (auto-rollback on error)
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ShopRepository    shopRepository;
+
+    // ── helpers ───────────────────────────────────────────
+    private Long shopId() {
+        return ShopContext.getShopId();
+    }
+
+    private Shop currentShop() {
+        Long id = shopId();
+        if (id == null) throw new RuntimeException("No shop in context");
+        return shopRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Shop not found: " + id));
+    }
 
     // ─────────────────────────────────────────────────────
-    // GET ALL PRODUCTS
+    // READ
     // ─────────────────────────────────────────────────────
+
     @Transactional(readOnly = true)
     public List<Product> getAllActiveProducts() {
+        Long id = shopId();
+        if (id != null) return productRepository.findByShopIdAndActiveTrueOrderByNameEnAsc(id);
         return productRepository.findByActiveTrueOrderByNameEnAsc();
     }
 
@@ -41,95 +49,84 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    // ─────────────────────────────────────────────────────
-    // GET SINGLE PRODUCT
-    // ─────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
     }
 
-    // ─────────────────────────────────────────────────────
-    // SEARCH PRODUCTS (used in billing page search box)
-    // ─────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<Product> searchProducts(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getAllActiveProducts();
-        }
+        if (keyword == null || keyword.trim().isEmpty()) return getAllActiveProducts();
+        Long id = shopId();
+        if (id != null) return productRepository.searchByShopAndAllLanguages(id, keyword.trim());
         return productRepository.searchByAllLanguages(keyword.trim());
     }
 
-    // ─────────────────────────────────────────────────────
-    // SEARCH FOR BILLING API (returns limited fields for speed)
-    // ─────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<Product> searchForBilling(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return List.of();
-        }
+        if (keyword == null || keyword.trim().isEmpty()) return List.of();
+        Long id = shopId();
+        if (id != null) return productRepository.searchByShopAndAllLanguages(id, keyword.trim());
         return productRepository.searchByAllLanguages(keyword.trim());
     }
 
+    @Transactional(readOnly = true)
+    public List<String> getAllCategories() {
+        Long id = shopId();
+        List<String> list = (id != null) ? productRepository.findAllCategoriesByShop(id) : productRepository.findAllCategories();
+        return list.stream()
+                   .filter(c -> c != null && !c.trim().isEmpty())
+                   .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Product> getProductsByCategory(String category) {
+        Long id = shopId();
+        if (id != null) return productRepository.findByShopIdAndCategoryAndActiveTrue(id, category);
+        return productRepository.findByCategoryAndActiveTrue(category);
+    }
+
+    @Transactional(readOnly = true)
+    public long countActiveProducts() {
+        Long id = shopId();
+        if (id != null) return productRepository.countByShopIdAndActiveTrue(id);
+        return productRepository.findByActiveTrueOrderByNameEnAsc().size();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Product> getLowStockProducts(BigDecimal threshold) {
+        Long id = shopId();
+        if (id != null) return productRepository.findLowStockByShop(id, threshold);
+        return List.of();
+    }
+
     // ─────────────────────────────────────────────────────
-    // SAVE (both create and update)
+    // WRITE
     // ─────────────────────────────────────────────────────
+
     public Product saveProduct(Product product) {
-        // Trim all text fields
-        if (product.getNameEn() != null) {
-            product.setNameEn(product.getNameEn().trim());
+        // Attach shop if not already set
+        if (product.getShop() == null) {
+            product.setShop(currentShop());
         }
-        if (product.getNameHi() != null) {
-            product.setNameHi(product.getNameHi().trim());
-        }
-        if (product.getNameMr() != null) {
-            product.setNameMr(product.getNameMr().trim());
-        }
+        if (product.getNameEn() != null) product.setNameEn(product.getNameEn().trim());
+        if (product.getNameHi() != null) product.setNameHi(product.getNameHi().trim());
+        if (product.getNameMr() != null) product.setNameMr(product.getNameMr().trim());
         return productRepository.save(product);
     }
 
-    // ─────────────────────────────────────────────────────
-    // SOFT DELETE (don't actually delete — just mark inactive)
-    // Why? Old bills still reference this product.
-    // Hard delete would break those bills.
-    // ─────────────────────────────────────────────────────
+    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_SUPER_ADMIN')")
     public void deleteProduct(Long id) {
         Product product = getProductById(id);
         product.setActive(false);
         productRepository.save(product);
     }
 
-    // ─────────────────────────────────────────────────────
-    // RESTORE a soft-deleted product
-    // ─────────────────────────────────────────────────────
+    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_SUPER_ADMIN')")
     public void restoreProduct(Long id) {
         Product product = getProductById(id);
         product.setActive(true);
         productRepository.save(product);
-    }
-
-    // ─────────────────────────────────────────────────────
-    // COUNT (for dashboard stats)
-    // ─────────────────────────────────────────────────────
-    @Transactional(readOnly = true)
-    public long countActiveProducts() {
-        return productRepository.findByActiveTrueOrderByNameEnAsc().size();
-    }
-
-    // ─────────────────────────────────────────────────────
-    // GET ALL CATEGORIES (for filter dropdown)
-    // ─────────────────────────────────────────────────────
-    @Transactional(readOnly = true)
-    public List<String> getAllCategories() {
-        return productRepository.findAllCategories();
-    }
-
-    // ─────────────────────────────────────────────────────
-    // GET BY CATEGORY
-    // ─────────────────────────────────────────────────────
-    @Transactional(readOnly = true)
-    public List<Product> getProductsByCategory(String category) {
-        return productRepository.findByCategoryAndActiveTrue(category);
     }
 }

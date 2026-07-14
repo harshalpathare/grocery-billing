@@ -6,7 +6,7 @@
     <title>New Bill | Grocery Billing</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=8}">
     <style>
         .item-row {
             background: #f8f9fa;
@@ -14,6 +14,19 @@
             padding: 10px 12px;
             margin-bottom: 8px;
             border: 1px solid #e8ecf0;
+        }
+        /* Fix form-control-sm for Devanagari text — give breathing room for matras */
+        .item-row .form-control,
+        .item-row .form-control-sm,
+        .item-row input,
+        .item-row select {
+            font-family: 'Noto Sans Devanagari', 'Inter', sans-serif !important;
+            line-height: 1.6 !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            padding-top: 10px !important;
+            padding-bottom: 8px !important;
+            font-size: 14px !important;
         }
         .item-row:hover {
             border-color: #4f97ff44;
@@ -62,38 +75,53 @@
         <i class="bi bi-shop"></i><span>Grocery Bill</span>
     </div>
     <nav class="sidebar-nav">
-        <a th:href="@{/}" class="nav-link">
-            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        <a th:href="@{/}" class="nav-link" th:classappend="${requestURI == '/'} ? 'active' : ''">
+            <i class="bi bi-grid-1x2-fill text-primary"></i><span>Dashboard</span>
         </a>
-        <a th:href="@{/products}" class="nav-link">
-            <i class="bi bi-box-seam"></i><span>Products</span>
+        <a th:href="@{/products}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/products')} ? 'active' : ''">
+            <i class="bi bi-box-fill text-success"></i><span>Products</span>
         </a>
-        <a th:href="@{/suppliers}" class="nav-link">
-            <i class="bi bi-truck"></i><span>Suppliers</span>
+        <a th:href="@{/suppliers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/suppliers')} ? 'active' : ''">
+            <i class="bi bi-truck-front-fill text-warning"></i><span>Suppliers</span>
         </a>
-        <a th:href="@{/purchases}" class="nav-link">
-            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        <a th:href="@{/purchases}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/purchases')} ? 'active' : ''">
+            <i class="bi bi-bag-check-fill text-info"></i><span>Purchases</span>
         </a>
-        <a th:href="@{/customers}" class="nav-link">
-            <i class="bi bi-people"></i><span>Customers</span>
+        <a th:href="@{/customers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/customers')} ? 'active' : ''">
+            <i class="bi bi-people-fill text-danger"></i><span>Customers</span>
         </a>
-        <a th:href="@{/bills/new}" class="nav-link active">
-            <i class="bi bi-receipt"></i><span>New Bill</span>
+        <a th:href="@{/bills/new}" class="nav-link" th:classappend="${requestURI != null and (requestURI == '/bills/new' or requestURI == '/bills/quick')} ? 'active' : ''">
+            <i class="bi bi-file-earmark-plus-fill text-primary"></i><span>New Bill</span>
         </a>
-        <a th:href="@{/bills}" class="nav-link">
-            <i class="bi bi-journal-text"></i><span>All Bills</span>
+        <a th:href="@{/bills}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/bills') and requestURI != '/bills/new' and !requestURI.contains('/quick')} ? 'active' : ''">
+            <i class="bi bi-receipt text-info"></i><span>All Bills</span>
         </a>
-        <a th:href="@{/credit}" class="nav-link">
-            <i class="bi bi-credit-card"></i>
+        <a th:href="@{/credit}" class="nav-link" th:if="${features['enable_credit'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/credit')} ? 'active' : ''">
+            <i class="bi bi-credit-card-fill text-danger"></i>
             <span>Credit / Udhari</span>
         </a>
-        <a th:href="@{/reports}" class="nav-link">
-            <i class="bi bi-bar-chart"></i><span>Reports</span>
+        <a th:href="@{/cashflow}" class="nav-link" th:if="${features['enable_cash_flow'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/cashflow')} ? 'active' : ''">
+            <i class="bi bi-wallet2 text-info"></i><span>Cash Flow</span>
         </a>
-    </nav>
-    <div class="sidebar-bottom">
-        <a th:href="@{/settings}" class="nav-link">
-            <i class="bi bi-gear"></i><span>Settings</span>
+        <a th:href="@{/inventory}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/inventory')} ? 'active' : ''"><i class="bi bi-box-seam-fill text-dark"></i><span>Inventory</span></a>
+
+        <a th:href="@{/expenses}" class="nav-link" th:if="${features['enable_expenses'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/expenses')} ? 'active' : ''">
+            <i class="bi bi-receipt text-danger"></i><span>Expenses</span>
+        </a>
+
+
+
+        <!-- Accounting -->
+        <a th:href="@{/accounting/dashboard}" class="nav-link" th:if="${features['enable_accounting'] == true}"  th:classappend="${requestURI != null and requestURI.startsWith('/accounting')} ? 'active' : ''">
+            <i class="bi bi-book-half text-secondary"></i><span>Accounting</span>
+        </a>
+
+        <a th:href="@{/reports}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/reports')} ? 'active' : ''">
+            <i class="bi bi-pie-chart-fill text-success"></i><span>Reports</span>
+        </a>
+        </nav><div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/settings')} ? 'active' : ''">
+            <i class="bi bi-gear-fill"></i><span>Settings</span>
         </a>
     </div>
 </div>
@@ -145,8 +173,8 @@
 
     <div class="page-content">
 
-        <div th:if="${errorMessage}"
-             class="alert alert-danger alert-dismissible fade show">
+        <div th:if="${errorMessage != null && !errorMessage.contains('Credit Limit Exceeded')}"
+             class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-circle me-2"></i>
             <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close"
@@ -512,7 +540,7 @@
                                             <div class="input-group">
                                                 <span class="input-group-text
                                                              bg-danger text-white">
-                                                    <i class="bi bi-credit-card"></i>
+                                                    <i class="bi bi-credit-card-fill text-danger"></i>
                                                 </span>
                                                 <input type="number"
                                                        name="creditAmount"
@@ -551,7 +579,7 @@
                                         </div>
                                         <span class="text-muted small">+</span>
                                         <div class="small">
-                                            <i class="bi bi-credit-card
+                                            <i class="bi bi-credit-card-fill
                                                       text-danger me-1"></i>
                                             Udhari:
                                             <strong class="text-danger">
@@ -601,7 +629,7 @@
                                 <button type="button"
                                         class="btn btn-sm btn-outline-primary"
                                         onclick="openInlineProductModal()">
-                                    <i class="bi bi-box-seam me-1"></i>
+                                    <i class="bi bi-box-fill me-1"></i>
                                     Add Product
                                 </button>
                                 <button type="button"
@@ -672,7 +700,7 @@
                                                 bg-opacity-10"
                                          style="width:40px;height:40px;
                                                 font-size:18px">
-                                        <i class="bi bi-box-seam text-primary"></i>
+                                        <i class="bi bi-box-fill text-primary"></i>
                                     </div>
                                     <div>
                                         <h5 class="modal-title mb-0">
@@ -931,6 +959,7 @@
     </div>
 </div>
 
+<script th:src="@{/js/app.js?v=25}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 
@@ -1834,7 +1863,7 @@
             <!-- Header -->
             <div class="modal-header" style="background:#1a1f2e;color:white;border:none;padding:14px 20px;">
                 <div>
-                    <h6 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Confirm Bill</h6>
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-file-earmark-plus-fill me-2"></i>Confirm Bill</h6>
                     <div style="font-size:11px;opacity:0.7;margin-top:2px;">Review before saving</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -1946,15 +1975,90 @@
         </a>
     </div>
     <div th:if="${recentBills == null or recentBills.isEmpty()}" style="text-align:center;color:#6b7280;padding:40px 0;">
-        <i class="bi bi-receipt" style="font-size:32px;opacity:0.3;"></i>
+        <i class="bi bi-file-earmark-plus-fill text-primary" style="font-size:32px;opacity:0.3;"></i>
         <p style="margin-top:10px;font-size:13px;">No bills yet</p>
     </div>
     <div style="margin-top:12px;text-align:center;">
         <a th:href="@{/bills}" class="btn btn-sm btn-outline-primary" style="width:100%;">
-            <i class="bi bi-journal-text me-1"></i>View All Bills
+            <i class="bi bi-journals me-1"></i>View All Bills
         </a>
     </div>
 </div>
 
+<!-- ── CREDIT LIMIT EXCEEDED MODAL ── -->
+<div class="modal fade" id="creditLimitModal" tabindex="-1" aria-labelledby="creditLimitModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white border-0 py-3 px-4" style="background: linear-gradient(135deg, #dc3545, #991b1b);">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="creditLimitModalTitle">
+                    <i class="bi bi-shield-lock-fill fs-4"></i>
+                    Credit Limit Exceeded
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle mb-3" style="width: 80px; height: 80px;">
+                    <i class="bi bi-exclamation-octagon-fill" style="font-size: 42px;"></i>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-2">Transaction Restricted</h5>
+                
+                <div class="alert alert-danger text-start small mb-3 border-danger shadow-sm" style="border-radius: 12px; background-color: #fff5f5;">
+                    <div class="fw-bold mb-1 text-danger">
+                        <i class="bi bi-person-fill me-1"></i>Customer Credit Limit Restriction
+                    </div>
+                    <div th:text="${errorMessage}" class="text-secondary fw-semibold">
+                        Credit Limit Exceeded for Harshal Pathare | Limit: ₹1,000.00 | Dues: ₹0.00 | Attempted Credit: ₹1,042.00 (Exceeds by ₹42.00). Please collect cash or digital payment.
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 text-start border">
+                    <div class="d-flex align-items-center gap-2 text-primary small fw-bold mb-1">
+                        <i class="bi bi-lightbulb-fill"></i>
+                        <span>Recommended Resolution</span>
+                    </div>
+                    <div class="small text-muted">
+                        Please inform the customer to pay the bill amount using <strong>CASH</strong> or <strong>UPI</strong>. You can click <strong>"Switch to Cash Payment"</strong> below to automatically switch the payment mode.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0 py-3 px-4 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Close
+                </button>
+                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" onclick="switchToCashAndSubmit()" data-bs-dismiss="modal">
+                    <i class="bi bi-cash-stack me-1"></i> Switch to Cash Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function() {
+        var errorMsg = /*[[${errorMessage}]]*/ null;
+        if (errorMsg && errorMsg.indexOf('Credit Limit Exceeded') !== -1) {
+            var modalEl = document.getElementById('creditLimitModal');
+            if (modalEl) {
+                var bsModal = new bootstrap.Modal(modalEl);
+                bsModal.show();
+            }
+        }
+    });
+
+    function switchToCashAndSubmit() {
+        var methodSelect = document.getElementById('paymentMethod') || document.getElementById('posPaymentMethod');
+        if (methodSelect) {
+            methodSelect.value = 'CASH';
+            var event = new Event('change', { bubbles: true });
+            methodSelect.dispatchEvent(event);
+        }
+    }
+    /*]]>*/
+</script>
+
 </body>
 </html>
+
+

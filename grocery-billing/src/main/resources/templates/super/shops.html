@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Shops | Super Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/super-admin.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+    <div class="brand"><i class="bi bi-lightning-fill me-2 text-warning"></i>Super Admin</div>
+    <span style="opacity:0.5">|</span>
+    <span style="opacity:0.7;font-size:14px;">Platform Management</span>
+    <div style="margin-left:auto;display:flex;gap:10px;">
+        <a th:href="@{/}" class="btn btn-sm btn-outline-light">
+            <i class="bi bi-house me-1"></i>Dashboard
+        </a>
+        <form th:action="@{/logout}" method="post" class="mb-0">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-box-arrow-right me-1"></i>Logout
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="page-wrap">
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-3">
+        <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-3">
+        <i class="bi bi-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-shop me-2 text-primary"></i>All Shops</h4>
+            <p class="text-muted mb-0 small"
+               th:text="${shops.size()} + ' shop(s) registered on the platform'">0 shops</p>
+        </div>
+        <a th:href="@{/super/shops/new}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Add New Shop
+        </a>
+    </div>
+
+    <!-- Stats row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-pill">
+                <div class="fw-bold fs-4 text-primary" th:text="${shops.size()}">0</div>
+                <div class="small text-muted">Total Shops</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-pill">
+                <div class="fw-bold fs-4 text-success"
+                     th:text="${shops.?[active].size()}">0</div>
+                <div class="small text-muted">Active</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-pill">
+                <div class="fw-bold fs-4 text-warning"
+                     th:text="${shops.?[subscriptionEndDate != null and !subscriptionActive].size()}">0</div>
+                <div class="small text-muted">Subscription Expired</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-pill">
+                <div class="fw-bold fs-4 text-danger"
+                     th:text="${shops.?[!active].size()}">0</div>
+                <div class="small text-muted">Inactive</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shops Table -->
+    <div class="card-box">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Shop Name</th>
+                        <th>Owner</th>
+                        <th>Phone</th>
+                        <th>GSTIN</th>
+                        <th>Subscription</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="shop, s : ${shops}">
+                        <td class="text-muted small" th:text="${s.index + 1}">1</td>
+                        <td>
+                            <div class="fw-semibold" th:text="${shop.shopName}">Shop</div>
+                            <div class="text-muted" style="font-size:11px;"
+                                 th:text="${shop.businessType}">GROCERY</div>
+                        </td>
+                        <td class="small" th:text="${shop.ownerName ?: '—'}">—</td>
+                        <td class="small" th:text="${shop.phone ?: '—'}">—</td>
+                        <td class="small" th:text="${shop.gstin ?: '—'}">—</td>
+                        <td>
+                            <div th:if="${shop.subscriptionEndDate != null}">
+                                <div class="small fw-semibold"
+                                     th:text="${#temporals.format(shop.subscriptionEndDate,'dd MMM yyyy')}">—</div>
+                                <span th:if="${shop.subscriptionActive}"
+                                      class="badge badge-active" style="font-size:10px;">Active</span>
+                                <span th:unless="${shop.subscriptionActive}"
+                                      class="badge badge-expired" style="font-size:10px;">Expired</span>
+                            </div>
+                            <span th:unless="${shop.subscriptionEndDate != null}"
+                                  class="text-muted small">No limit</span>
+                        </td>
+                        <td>
+                            <span th:if="${shop.active}" class="badge badge-active">Active</span>
+                            <span th:unless="${shop.active}" class="badge badge-inactive">Inactive</span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <!-- Edit -->
+                                <a th:href="@{/super/shops/{id}/edit(id=${shop.id})}"
+                                   class="btn btn-outline-primary btn-action" title="Edit Shop">
+                                    <i class="bi bi-pencil fs-6"></i>
+                                </a>
+                                <!-- Users -->
+                                <a th:href="@{/super/shops/{id}/users(id=${shop.id})}"
+                                   class="btn btn-outline-secondary btn-action"
+                                   title="View Users">
+                                    <i class="bi bi-people-fill fs-6"></i>
+                                </a>
+                                <!-- Features -->
+                                <a th:href="@{/super/shops/{id}/features(id=${shop.id})}"
+                                   class="btn btn-outline-info btn-action"
+                                   title="Manage Features">
+                                    <i class="bi bi-sliders fs-6"></i>
+                                </a>
+                                <!-- Extend subscription -->
+                                <button class="btn btn-outline-success btn-action"
+                                        title="Extend Subscription"
+                                        data-bs-toggle="modal"
+                                        th:attr="data-shopid=${shop.id},data-shopname=${shop.shopName}"
+                                        onclick="openExtendModal(this)">
+                                    <i class="bi bi-calendar-plus fs-6"></i>
+                                </button>
+                                <!-- Toggle Active -->
+                                <form th:action="@{/super/shops/{id}/toggle(id=${shop.id})}" method="post" class="m-0">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <button type="submit"
+                                            class="btn btn-action"
+                                            
+                                            th:title="${shop.active} ? 'Deactivate Shop' : 'Activate Shop'">
+                                        <i class="fs-6" ></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${shops.isEmpty()}">
+                        <td colspan="8" class="text-center py-4 text-muted">No shops yet</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Extend Subscription Modal -->
+<div class="modal fade" id="extendModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:360px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold"><i class="bi bi-calendar-plus me-2"></i>Extend Subscription</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="extendForm" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="modal-body">
+                    <p class="small text-muted mb-3">Extending subscription for: <strong id="extendShopName"></strong></p>
+                    <label class="form-label fw-semibold">Add months</label>
+                    <select name="months" class="form-select">
+                        <optgroup label="Reduce Time">
+                            <option value="-1">Reduce by 1 month</option>
+                            <option value="-3">Reduce by 3 months</option>
+                            <option value="-6">Reduce by 6 months</option>
+                        </optgroup>
+                        <optgroup label="Add Time">
+                            <option value="1">1 month</option>
+                            <option value="3">3 months</option>
+                            <option value="6">6 months</option>
+                            <option value="12" selected>12 months (1 year)</option>
+                            <option value="24">24 months (2 years)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Extend</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js?v=25}"></script>
+<script>
+    function openExtendModal(btn) {
+        const shopId   = btn.dataset.shopid;
+        const shopName = btn.dataset.shopname;
+        document.getElementById('extendShopName').textContent = shopName;
+        document.getElementById('extendForm').action = '/super/shops/' + shopId + '/extend';
+        new bootstrap.Modal(document.getElementById('extendModal')).show();
+    }
+</script>
+</body>
+</html>
+
+
+

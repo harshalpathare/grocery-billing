@@ -6,28 +6,41 @@
     <title>Settings | Grocery Billing</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=8}">
 </head>
 <body>
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
     <nav class="sidebar-nav">
-        <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
-        <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
-        <a th:href="@{/suppliers}" class="nav-link">
-            <i class="bi bi-truck"></i><span>Suppliers</span>
+        <a th:href="@{/}" class="nav-link" th:classappend="${requestURI == '/'} ? 'active' : ''"><i class="bi bi-grid-1x2-fill text-primary"></i><span>Dashboard</span></a>
+        <a th:href="@{/products}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/products')} ? 'active' : ''"><i class="bi bi-box-fill text-success"></i><span>Products</span></a>
+        <a th:href="@{/suppliers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/suppliers')} ? 'active' : ''">
+            <i class="bi bi-truck-front-fill text-warning"></i><span>Suppliers</span>
         </a>
-        <a th:href="@{/purchases}" class="nav-link">
-            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        <a th:href="@{/purchases}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/purchases')} ? 'active' : ''">
+            <i class="bi bi-bag-check-fill text-info"></i><span>Purchases</span>
         </a>
-        <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
-        <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i><span>New Bill</span></a>
-        <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
-        <a th:href="@{/credit}" class="nav-link"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
-        <a th:href="@{/reports}" class="nav-link"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
-        <a th:href="@{/settings}" class="nav-link active"><i class="bi bi-gear"></i><span>Settings</span></a>
-    </nav>
+        <a th:href="@{/customers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/customers')} ? 'active' : ''"><i class="bi bi-people-fill text-danger"></i><span>Customers</span></a>
+        <a th:href="@{/bills/new}" class="nav-link" th:classappend="${requestURI != null and (requestURI == '/bills/new' or requestURI == '/bills/quick')} ? 'active' : ''"><i class="bi bi-file-earmark-plus-fill text-primary"></i><span>New Bill</span></a>
+        <a th:href="@{/bills}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/bills') and requestURI != '/bills/new' and !requestURI.contains('/quick')} ? 'active' : ''"><i class="bi bi-receipt text-info"></i><span>All Bills</span></a>
+        <a th:href="@{/credit}" class="nav-link" th:if="${features['enable_credit'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/credit')} ? 'active' : ''"><i class="bi bi-credit-card-fill text-danger"></i><span>Credit / Udhari</span></a>
+        <a th:href="@{/cashflow}" class="nav-link" th:if="${features['enable_cash_flow'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/cashflow')} ? 'active' : ''">
+            <i class="bi bi-wallet2 text-info"></i><span>Cash Flow</span>
+        </a>
+        <a th:href="@{/inventory}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/inventory')} ? 'active' : ''"><i class="bi bi-box-seam-fill text-dark"></i><span>Inventory</span></a>
+
+        <a th:href="@{/expenses}" class="nav-link" th:if="${features['enable_expenses'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/expenses')} ? 'active' : ''">
+            <i class="bi bi-receipt text-danger"></i><span>Expenses</span>
+        </a>
+
+        <!-- Accounting -->
+        <a th:href="@{/accounting/dashboard}" class="nav-link" th:if="${features['enable_accounting'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/accounting')} ? 'active' : ''">
+            <i class="bi bi-book-half text-secondary"></i><span>Accounting</span>
+        </a>
+
+        <a th:href="@{/reports}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/reports')} ? 'active' : ''"><i class="bi bi-pie-chart-fill text-success"></i><span>Reports</span></a>
+        </nav>
 </div>
 
 <div class="main-content" id="mainContent">
@@ -35,11 +48,7 @@
         <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle"><i class="bi bi-list"></i></button>
         <h5 class="mb-0 ms-3">Settings</h5>
         <div class="ms-auto d-flex align-items-center gap-3">
-            <!-- Logged in user display -->
-            <span class="text-muted small">
-                <i class="bi bi-person-circle me-1"></i>
-                Logged in as: <strong sec:authentication="name">admin</strong>
-            </span>
+            <!-- Logged in user display removed -->
             <!-- Logout button -->
             <form th:action="@{/logout}" method="post" class="mb-0">
                 <input type="hidden"
@@ -152,7 +161,7 @@
             <div class="col-lg-7">
                 <div class="table-card">
                     <h6 class="fw-bold mb-4">
-                        <i class="bi bi-people me-2 text-success"></i>
+                        <i class="bi bi-people-fill me-2 text-success"></i>
                         User Management
                         <span class="badge bg-secondary ms-2"
                               th:text="${users.size()}">0</span>
@@ -344,11 +353,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.getElementById('sidebarToggle').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-        document.getElementById('mainContent').classList.toggle('expanded');
-    });
-</script>
+<script th:src="@{/js/app.js?v=25}"></script>
+
+
 </body>
 </html>
+
+
+
+

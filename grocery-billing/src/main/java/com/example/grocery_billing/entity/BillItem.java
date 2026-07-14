@@ -75,6 +75,11 @@ public class BillItem {
     @Column(name = "stock_quantity", precision = 12, scale = 3)
     private BigDecimal stockQuantity = BigDecimal.ZERO;
 
+    // ── Flag for Return/Exchange ──────────────────────────
+    @Column(name = "is_return", nullable = false)
+    @Builder.Default
+    private Boolean isReturn = false;
+
     // ── GST % applied to this item ────────────────────────
     @Builder.Default
     @Column(name = "gst_percent", precision = 5, scale = 2)

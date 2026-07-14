@@ -1,0 +1,1721 @@
+2026-07-14T11:37:25.318+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : Starting Application using Java 17.0.12 with PID 12148 (C:\Users\patha\Downloads\grocery-billing\grocery-billing\target\classes started by patha in C:\Users\patha\Downloads\grocery-billing\grocery-billing)
+2026-07-14T11:37:25.348+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : No active profile set, falling back to 1 default profile: "default"
+2026-07-14T11:37:25.478+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-07-14T11:37:29.135+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-14T11:37:29.573+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 382 ms. Found 15 JPA repository interfaces.
+2026-07-14T11:37:31.810+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-07-14T11:37:31.862+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-14T11:37:31.865+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-07-14T11:37:32.015+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 6535 ms
+2026-07-14T11:37:32.417+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-14T11:37:32.650+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-07-14T11:37:34.636+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-14T11:37:34.778+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-14T11:37:35.428+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@53ba2bd6
+2026-07-14T11:37:35.437+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-14T11:37:35.655+05:30  WARN 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-14T11:37:35.736+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/bohara_db?useSSL=false&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8&allowPublicKeyRetrieval=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.33
+	Default catalog/schema: bohara_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-14T11:37:39.747+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-14T11:37:39.886+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table bills 
+       modify column payment_status enum ('CREDIT','PAID','PARTIAL')
+2026-07-14T11:37:39.981+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table cash_flow 
+       modify column type enum ('IN','OUT') not null
+2026-07-14T11:37:40.016+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table purchase_orders 
+       modify column payment_status enum ('PAID','PARTIAL','PENDING')
+2026-07-14T11:37:40.098+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table purchase_orders 
+       modify column order_type enum ('PURCHASE','RETURN')
+2026-07-14T11:37:40.121+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table transactions 
+       modify column type enum ('CREDIT','DEBIT') not null
+2026-07-14T11:37:40.210+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-14T11:37:40.337+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-14T11:37:40.743+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] o.s.b.w.s.ServletContextInitializerBeans : Mapping filters: springSecurityFilterChain urls=[/*] order=-100, registration urls=[/*] order=2147483647, characterEncodingFilter urls=[/*] order=-2147483648, formContentFilter urls=[/*] order=-9900, requestContextFilter urls=[/*] order=-105
+2026-07-14T11:37:40.745+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] o.s.b.w.s.ServletContextInitializerBeans : Mapping servlets: dispatcherServlet urls=[/]
+2026-07-14T11:37:40.750+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.boot.web.servlet.RegistrationBean    : Filter registration was not registered (disabled)
+2026-07-14T11:37:44.811+05:30  WARN 12148 --- [Grocery Billing System] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-14T11:37:44.950+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-07-14T11:37:45.524+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 134 mappings in 'requestMappingHandlerMapping'
+2026-07-14T11:37:45.594+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /uploads/**] in 'resourceHandlerMapping'
+2026-07-14T11:37:45.641+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 1 @ModelAttribute, 0 @InitBinder, 2 RequestBodyAdvice, 1 ResponseBodyAdvice
+2026-07-14T11:37:45.794+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2026-07-14T11:37:46.121+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-07-14T11:37:46.130+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : Started Application in 22.137 seconds (process running for 23.726)
+2026-07-14T11:37:46.174+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Running one-time supplier balance fix...
+2026-07-14T11:37:46.306+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0
+2026-07-14T11:37:46.470+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        po1_0.id,
+        po1_0.amount_paid,
+        po1_0.created_at,
+        po1_0.is_gst,
+        po1_0.notes,
+        po1_0.order_date,
+        po1_0.payment_status,
+        po1_0.po_number,
+        po1_0.subtotal,
+        po1_0.supplier_id,
+        po1_0.supplier_invoice_no,
+        po1_0.tax_amount,
+        po1_0.total_amount,
+        po1_0.order_type 
+    from
+        purchase_orders po1_0 
+    where
+        po1_0.supplier_id=? 
+    order by
+        po1_0.order_date desc
+2026-07-14T11:37:46.493+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0 
+    where
+        s1_0.id=?
+2026-07-14T11:37:46.516+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Fixed Supplier Harshal Pathare: Payable=0, Paid=0, Balance=0
+2026-07-14T11:37:46.519+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        po1_0.id,
+        po1_0.amount_paid,
+        po1_0.created_at,
+        po1_0.is_gst,
+        po1_0.notes,
+        po1_0.order_date,
+        po1_0.payment_status,
+        po1_0.po_number,
+        po1_0.subtotal,
+        po1_0.supplier_id,
+        po1_0.supplier_invoice_no,
+        po1_0.tax_amount,
+        po1_0.total_amount,
+        po1_0.order_type 
+    from
+        purchase_orders po1_0 
+    where
+        po1_0.supplier_id=? 
+    order by
+        po1_0.order_date desc
+2026-07-14T11:37:46.539+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0 
+    where
+        s1_0.id=?
+2026-07-14T11:37:46.546+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Fixed Supplier Harshal Pathare`: Payable=2000.00, Paid=2000.00, Balance=0.00
+2026-07-14T11:37:46.556+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id 
+    from
+        users u1_0 
+    where
+        u1_0.username=? 
+    limit
+        ?
+2026-07-14T11:37:46.576+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.is_active,
+        s1_0.address,
+        s1_0.bank_details,
+        s1_0.business_type,
+        s1_0.city,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.fssai_no,
+        s1_0.gstin,
+        s1_0.license_key,
+        s1_0.logo_url,
+        s1_0.owner_name,
+        s1_0.phone,
+        s1_0.pincode,
+        s1_0.shop_name,
+        s1_0.state,
+        s1_0.subscription_end_date,
+        s1_0.terms,
+        s1_0.thank_you_msg,
+        s1_0.updated_at,
+        s1_0.upi_id 
+    from
+        shops s1_0 
+    where
+        s1_0.id=?
+2026-07-14T11:37:46.608+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id 
+    from
+        users u1_0 
+    where
+        u1_0.username=? 
+    limit
+        ?
+2026-07-14T11:37:46.617+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.created_at,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.last_login,
+        u1_0.password,
+        u1_0.role,
+        u1_0.shop_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2026-07-14T11:37:46.686+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.706+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.711+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.716+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.720+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.724+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.728+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.733+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.738+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:37:46.742+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.e.g.config.AppStartupListener          : ✅ Settings synced from DB to ShopConfig on startup
+2026-07-14T11:38:29.130+05:30  INFO 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-14T11:38:29.132+05:30  INFO 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-14T11:38:29.134+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2026-07-14T11:38:29.135+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2026-07-14T11:38:29.140+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@7b384504
+2026-07-14T11:38:29.142+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@560e3cac
+2026-07-14T11:38:29.144+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2026-07-14T11:38:29.147+05:30  INFO 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 14 ms
+2026-07-14T11:38:29.408+05:30  WARN 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.a.c.util.SessionIdGeneratorBase        : Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [156] milliseconds.
+2026-07-14T11:38:29.453+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-07-14T11:38:29.490+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.grocery_billing.controller.AuthController#loginPage(HttpServletRequest, String, String, Model)
+2026-07-14T11:38:29.679+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-2] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8]
+2026-07-14T11:38:30.667+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-07-14T11:38:31.024+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-07-14T11:38:31.042+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-8] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2026-07-14T11:38:31.057+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-8] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-07-14T11:38:31.066+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-8] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.example.grocery_billing.config.GlobalExceptionHandler#handleAllExceptions(HttpServletRequest, Exception)
+2026-07-14T11:38:31.077+05:30  WARN 12148 --- [Grocery Billing System] [http-nio-8080-exec-8] .m.m.a.ExceptionHandlerExceptionResolver : Failure in @ExceptionHandler com.example.grocery_billing.config.GlobalExceptionHandler#handleAllExceptions(HttpServletRequest, Exception)
+
+java.lang.RuntimeException: org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico for request '/favicon.ico'.
+	at com.example.grocery_billing.config.GlobalExceptionHandler.handleAllExceptions(GlobalExceptionHandler.java:32) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:252) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:184) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver.doResolveHandlerMethodException(ExceptionHandlerExceptionResolver.java:460) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver.doResolveException(AbstractHandlerMethodExceptionResolver.java:72) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver.resolveException(AbstractHandlerExceptionResolver.java:176) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.handler.HandlerExceptionResolverComposite.resolveException(HandlerExceptionResolverComposite.java:78) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.DispatcherServlet.processHandlerException(DispatcherServlet.java:1227) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.DispatcherServlet.processDispatchResult(DispatcherServlet.java:1035) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:980) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:866) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1000) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:892) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:622) ~[tomcat-embed-core-11.0.18.jar:6.1]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:874) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:710) ~[tomcat-embed-core-11.0.18.jar:6.1]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:128) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53) ~[tomcat-embed-websocket-11.0.18.jar:11.0.18]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:235) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:371) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:132) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:86) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at com.example.grocery_billing.config.ShopContextFilter.doFilterInternal(ShopContextFilter.java:55) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter.doFilter(RememberMeAuthenticationFilter.java:151) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter.doFilter(RememberMeAuthenticationFilter.java:106) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:181) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.session.ConcurrentSessionFilter.doFilter(ConcurrentSessionFilter.java:153) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.session.ConcurrentSessionFilter.doFilter(ConcurrentSessionFilter.java:131) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:245) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:239) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.csrf.CsrfFilter.doFilterInternal(CsrfFilter.java:118) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195) ~[spring-security-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317) ~[spring-security-config-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.5.jar:7.0.5]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:492) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1779) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57) ~[tomcat-embed-core-11.0.18.jar:11.0.18]
+	at java.base/java.lang.Thread.run(Thread.java:842) ~[na:na]
+Caused by: org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico for request '/favicon.ico'.
+	at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:527) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:50) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:963) ~[spring-webmvc-7.0.5.jar:7.0.5]
+	... 92 common frames omitted
+
+2026-07-14T11:38:31.136+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-8] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico for request '/favicon.ico'.]
+2026-07-14T11:38:31.138+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
+2026-07-14T11:38:31.173+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-07-14T11:38:31.175+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.grocery_billing.controller.AuthController#loginPage(HttpServletRequest, String, String, Model)
+2026-07-14T11:38:31.198+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-4] o.s.w.s.v.ContentNegotiatingViewResolver : Selected '*/*' given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8]
+2026-07-14T11:38:31.221+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-07-14T11:40:25.700+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-07-14T11:40:25.701+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.grocery_billing.controller.AuthController#loginPage(HttpServletRequest, String, String, Model)
+2026-07-14T11:40:25.714+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-5] o.s.w.s.v.ContentNegotiatingViewResolver : Selected '*/*' given [*/*]
+2026-07-14T11:40:25.725+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-07-14T11:41:45.339+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-07-14T11:41:45.341+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.grocery_billing.controller.AuthController#loginPage(HttpServletRequest, String, String, Model)
+2026-07-14T11:41:45.353+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-7] o.s.w.s.v.ContentNegotiatingViewResolver : Selected '*/*' given [*/*]
+2026-07-14T11:41:45.366+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-07-14T11:50:54.580+05:30  INFO 12148 --- [Grocery Billing System] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-14T11:50:54.598+05:30  INFO 12148 --- [Grocery Billing System] [Thread-1] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-14T11:50:54.756+05:30  INFO 12148 --- [Grocery Billing System] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-07-14T11:50:54.775+05:30  INFO 12148 --- [Grocery Billing System] [Thread-1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-14T11:50:54.787+05:30  INFO 12148 --- [Grocery Billing System] [Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-07-14T11:50:54.794+05:30  INFO 12148 --- [Grocery Billing System] [Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-07-14T11:50:55.049+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : Starting Application using Java 17.0.12 with PID 12148 (C:\Users\patha\Downloads\grocery-billing\grocery-billing\target\classes started by patha in C:\Users\patha\Downloads\grocery-billing\grocery-billing)
+2026-07-14T11:50:55.051+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : No active profile set, falling back to 1 default profile: "default"
+2026-07-14T11:50:55.886+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-14T11:50:56.027+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 135 ms. Found 15 JPA repository interfaces.
+2026-07-14T11:50:56.389+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-07-14T11:50:56.395+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-14T11:50:56.396+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-07-14T11:50:56.482+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1421 ms
+2026-07-14T11:50:56.616+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-14T11:50:56.707+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-14T11:50:56.710+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-07-14T11:50:56.720+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@78b9c819
+2026-07-14T11:50:56.721+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-07-14T11:50:56.723+05:30  WARN 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-14T11:50:56.725+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/bohara_db?useSSL=false&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8&allowPublicKeyRetrieval=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.33
+	Default catalog/schema: bohara_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-14T11:50:57.245+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-14T11:50:57.267+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table bills 
+       modify column payment_status enum ('CREDIT','PAID','PARTIAL')
+2026-07-14T11:50:57.301+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table cash_flow 
+       modify column type enum ('IN','OUT') not null
+2026-07-14T11:50:57.317+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table purchase_orders 
+       modify column payment_status enum ('PAID','PARTIAL','PENDING')
+2026-07-14T11:50:57.348+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table purchase_orders 
+       modify column order_type enum ('PURCHASE','RETURN')
+2026-07-14T11:50:57.374+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table transactions 
+       modify column type enum ('CREDIT','DEBIT') not null
+2026-07-14T11:50:57.425+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-14T11:50:57.558+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] o.s.b.w.s.ServletContextInitializerBeans : Mapping filters: springSecurityFilterChain urls=[/*] order=-100, registration urls=[/*] order=2147483647, characterEncodingFilter urls=[/*] order=-2147483648, formContentFilter urls=[/*] order=-9900, requestContextFilter urls=[/*] order=-105
+2026-07-14T11:50:57.559+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] o.s.b.w.s.ServletContextInitializerBeans : Mapping servlets: dispatcherServlet urls=[/]
+2026-07-14T11:50:57.560+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.boot.web.servlet.RegistrationBean    : Filter registration was not registered (disabled)
+2026-07-14T11:50:58.514+05:30  WARN 12148 --- [Grocery Billing System] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-14T11:50:58.609+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-07-14T11:50:58.957+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 134 mappings in 'requestMappingHandlerMapping'
+2026-07-14T11:50:59.023+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /uploads/**] in 'resourceHandlerMapping'
+2026-07-14T11:50:59.053+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 1 @ModelAttribute, 0 @InitBinder, 2 RequestBodyAdvice, 1 ResponseBodyAdvice
+2026-07-14T11:50:59.127+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2026-07-14T11:50:59.387+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-07-14T11:50:59.399+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : Started Application in 4.42 seconds (process running for 816.995)
+2026-07-14T11:50:59.402+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Running one-time supplier balance fix...
+2026-07-14T11:50:59.412+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0
+2026-07-14T11:50:59.507+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        po1_0.id,
+        po1_0.amount_paid,
+        po1_0.created_at,
+        po1_0.is_gst,
+        po1_0.notes,
+        po1_0.order_date,
+        po1_0.payment_status,
+        po1_0.po_number,
+        po1_0.subtotal,
+        po1_0.supplier_id,
+        po1_0.supplier_invoice_no,
+        po1_0.tax_amount,
+        po1_0.total_amount,
+        po1_0.order_type 
+    from
+        purchase_orders po1_0 
+    where
+        po1_0.supplier_id=? 
+    order by
+        po1_0.order_date desc
+2026-07-14T11:50:59.516+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0 
+    where
+        s1_0.id=?
+2026-07-14T11:50:59.524+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Fixed Supplier Harshal Pathare: Payable=0, Paid=0, Balance=0
+2026-07-14T11:50:59.526+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        po1_0.id,
+        po1_0.amount_paid,
+        po1_0.created_at,
+        po1_0.is_gst,
+        po1_0.notes,
+        po1_0.order_date,
+        po1_0.payment_status,
+        po1_0.po_number,
+        po1_0.subtotal,
+        po1_0.supplier_id,
+        po1_0.supplier_invoice_no,
+        po1_0.tax_amount,
+        po1_0.total_amount,
+        po1_0.order_type 
+    from
+        purchase_orders po1_0 
+    where
+        po1_0.supplier_id=? 
+    order by
+        po1_0.order_date desc
+2026-07-14T11:50:59.532+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0 
+    where
+        s1_0.id=?
+2026-07-14T11:50:59.540+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Fixed Supplier Harshal Pathare`: Payable=2000.00, Paid=2000.00, Balance=0.00
+2026-07-14T11:50:59.575+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id 
+    from
+        users u1_0 
+    where
+        u1_0.username=? 
+    limit
+        ?
+2026-07-14T11:50:59.581+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.is_active,
+        s1_0.address,
+        s1_0.bank_details,
+        s1_0.business_type,
+        s1_0.city,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.fssai_no,
+        s1_0.gstin,
+        s1_0.license_key,
+        s1_0.logo_url,
+        s1_0.owner_name,
+        s1_0.phone,
+        s1_0.pincode,
+        s1_0.shop_name,
+        s1_0.state,
+        s1_0.subscription_end_date,
+        s1_0.terms,
+        s1_0.thank_you_msg,
+        s1_0.updated_at,
+        s1_0.upi_id 
+    from
+        shops s1_0 
+    where
+        s1_0.id=?
+2026-07-14T11:50:59.588+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id 
+    from
+        users u1_0 
+    where
+        u1_0.username=? 
+    limit
+        ?
+2026-07-14T11:50:59.595+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.created_at,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.last_login,
+        u1_0.password,
+        u1_0.role,
+        u1_0.shop_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2026-07-14T11:50:59.607+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-07-14T11:50:59.611+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.616+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.622+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.627+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.634+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.640+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.645+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.649+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.655+05:30 DEBUG 12148 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-07-14T11:50:59.659+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.e.g.config.AppStartupListener          : ✅ Settings synced from DB to ShopConfig on startup
+2026-07-14T11:51:12.815+05:30  INFO 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-14T11:51:12.816+05:30  INFO 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-14T11:51:12.816+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2026-07-14T11:51:12.817+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2026-07-14T11:51:12.820+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@4a5afe02
+2026-07-14T11:51:12.822+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@a0d78e
+2026-07-14T11:51:12.823+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2026-07-14T11:51:12.823+05:30  INFO 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 7 ms
+2026-07-14T11:51:12.825+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/reports", parameters={}
+2026-07-14T11:51:12.826+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.grocery_billing.controller.ReportController#reportsHome(Model)
+2026-07-14T11:51:12.859+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date=?
+2026-07-14T11:51:12.874+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:12.881+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(c1_0.balance), 0) 
+    from
+        customers c1_0 
+    where
+        c1_0.active=true 
+        and c1_0.balance>0
+2026-07-14T11:51:12.912+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        count(b1_0.id) 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date=?
+2026-07-14T11:51:12.925+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:12.940+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:12.945+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:12.953+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:12.970+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:12.975+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:12.981+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:12.988+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:12.990+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:12.996+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.000+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.005+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.011+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.017+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.022+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.028+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.035+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.041+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.046+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.052+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.057+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.063+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.074+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.078+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.084+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.091+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.095+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.101+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.108+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.112+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.119+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.124+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.128+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.132+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.139+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(b1_0.total_amount), 0) 
+    from
+        bills b1_0 
+    where
+        year(b1_0.bill_date)=? 
+        and month(b1_0.bill_date)=?
+2026-07-14T11:51:13.143+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.is_gst=true 
+        and b1_0.bill_date between ? and ?
+2026-07-14T11:51:13.147+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date between ? and ? 
+    order by
+        b1_0.bill_date desc
+2026-07-14T11:51:13.158+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        b1_0.id,
+        b1_0.bill_date,
+        b1_0.bill_no,
+        b1_0.cgst_amount,
+        b1_0.created_at,
+        b1_0.customer_id,
+        b1_0.discount,
+        b1_0.extra_cost,
+        b1_0.gst_amount,
+        b1_0.igst_amount,
+        b1_0.is_gst,
+        b1_0.notes,
+        b1_0.payment_method,
+        b1_0.payment_status,
+        b1_0.sgst_amount,
+        b1_0.shop_id,
+        b1_0.subtotal,
+        b1_0.subtotal_before_tax,
+        b1_0.total_amount,
+        b1_0.total_tax,
+        b1_0.transport_cost,
+        b1_0.walk_in_customer_name 
+    from
+        bills b1_0 
+    where
+        b1_0.bill_date=? 
+    order by
+        b1_0.created_at desc
+2026-07-14T11:51:13.170+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.address,
+        c1_0.balance,
+        c1_0.created_at,
+        c1_0.credit_limit,
+        c1_0.email,
+        c1_0.gstin,
+        c1_0.loyalty_points,
+        c1_0.name,
+        c1_0.notes,
+        c1_0.phone,
+        c1_0.shop_id,
+        c1_0.total_credit,
+        c1_0.total_paid 
+    from
+        customers c1_0 
+    where
+        c1_0.balance>? 
+        and c1_0.active=true
+2026-07-14T11:51:13.177+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        coalesce(sum(c1_0.balance), 0) 
+    from
+        customers c1_0 
+    where
+        c1_0.active=true 
+        and c1_0.balance>0
+2026-07-14T11:51:13.183+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        t1_0.id,
+        t1_0.amount,
+        t1_0.balance_after,
+        t1_0.bill_id,
+        t1_0.created_at,
+        t1_0.customer_id,
+        t1_0.description,
+        t1_0.transaction_date,
+        t1_0.type 
+    from
+        transactions t1_0 
+    where
+        t1_0.transaction_date between ? and ? 
+    order by
+        t1_0.transaction_date desc
+2026-07-14T11:51:13.204+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.w.s.v.ContentNegotiatingViewResolver : Selected '*/*' given [*/*]
+2026-07-14T11:51:13.328+05:30 DEBUG 12148 --- [Grocery Billing System] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-07-14T11:59:42.730+05:30  INFO 12148 --- [Grocery Billing System] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 3 class path changes (0 additions, 0 deletions, 3 modifications)
+2026-07-14T11:59:42.743+05:30  INFO 12148 --- [Grocery Billing System] [Thread-5] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-14T11:59:42.949+05:30  INFO 12148 --- [Grocery Billing System] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-07-14T11:59:42.958+05:30  INFO 12148 --- [Grocery Billing System] [Thread-5] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-14T11:59:42.961+05:30  INFO 12148 --- [Grocery Billing System] [Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-07-14T11:59:42.968+05:30  INFO 12148 --- [Grocery Billing System] [Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+2026-07-14T11:59:43.207+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : Starting Application using Java 17.0.12 with PID 12148 (C:\Users\patha\Downloads\grocery-billing\grocery-billing\target\classes started by patha in C:\Users\patha\Downloads\grocery-billing\grocery-billing)
+2026-07-14T11:59:43.209+05:30  INFO 12148 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : No active profile set, falling back to 1 default profile: "default"

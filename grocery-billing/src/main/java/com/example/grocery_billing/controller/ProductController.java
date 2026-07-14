@@ -3,6 +3,9 @@ package com.example.grocery_billing.controller;
 
 import com.example.grocery_billing.entity.Product;
 import com.example.grocery_billing.service.ProductService;
+import com.example.grocery_billing.service.FileStorageService;
+import com.example.grocery_billing.service.ExcelProductService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -37,6 +41,8 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService productService;
+    private final FileStorageService fileStorageService;
+    private final ExcelProductService excelProductService;
 
     // ─────────────────────────────────────────────────────
     // LIST ALL PRODUCTS
@@ -88,10 +94,11 @@ public class ProductController {
     // SAVE NEW PRODUCT
     // POST /products/new
     // ─────────────────────────────────────────────────────
-        @PostMapping("/new")
+    @PostMapping("/new")
     public String saveProduct(
             @Valid @ModelAttribute("product") Product product,
             BindingResult bindingResult,
+            @RequestParam(value = "image", required = false) MultipartFile image,
             Model model,
             RedirectAttributes redirectAttributes) {
 
@@ -105,6 +112,10 @@ public class ProductController {
         }
 
         try {
+            if (image != null && !image.isEmpty()) {
+                String imageUrl = fileStorageService.saveFile(image);
+                product.setImageUrl(imageUrl);
+            }
             productService.saveProduct(product);
             String displayName = product.getNameEn() != null && !product.getNameEn().isBlank()
                     ? product.getNameEn()
@@ -197,8 +208,9 @@ public class ProductController {
     @PostMapping("/{id}/edit")
     public String updateProduct(
             @PathVariable Long id,
-            @Valid @ModelAttribute("product") Product formProduct,
+            @Valid @ModelAttribute("product") Product product,
             BindingResult bindingResult,
+            @RequestParam(value = "image", required = false) MultipartFile image,
             Model model,
             RedirectAttributes redirectAttributes) {
 
@@ -211,21 +223,30 @@ public class ProductController {
         }
 
         try {
-            Product product = productService.getProductById(id);
-            product.setNameEn(formProduct.getNameEn());
-            product.setNameHi(formProduct.getNameHi());
-            product.setNameMr(formProduct.getNameMr());
-            product.setHsnCode(formProduct.getHsnCode());
-            product.setPrice(formProduct.getPrice());
-            product.setGstPercent(formProduct.getGstPercent());
-            product.setUnit(formProduct.getUnit());
-            product.setStockQty(formProduct.getStockQty());
-            product.setCategory(formProduct.getCategory());
-            product.setActive(formProduct.getActive() != null ? formProduct.getActive() : Boolean.TRUE);
+            // Must fetch existing to retain created_at, shop, image etc if not provided
+            Product existingProduct = productService.getProductById(id);
+            
+            // Set fields that shouldn't be overridden by the form if they are null
+            product.setCreatedAt(existingProduct.getCreatedAt());
+            product.setShop(existingProduct.getShop());
+            
+            // Handle image upload
+            if (image != null && !image.isEmpty()) {
+                String imageUrl = fileStorageService.saveFile(image);
+                product.setImageUrl(imageUrl);
+            } else {
+                product.setImageUrl(existingProduct.getImageUrl());
+            }
 
             productService.saveProduct(product);
+            
+            String displayName = product.getNameEn() != null && !product.getNameEn().isBlank()
+                    ? product.getNameEn()
+                    : (product.getNameHi() != null && !product.getNameHi().isBlank()
+                        ? product.getNameHi() : product.getNameMr());
+                        
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Product '" + product.getNameEn() + "' updated successfully!");
+                    "Product '" + displayName + "' updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Error updating product: " + e.getMessage());
@@ -349,6 +370,43 @@ public class ProductController {
     }
 
     // ─────────────────────────────────────────────────────
+    // BULK EXPORT / IMPORT
+    // ─────────────────────────────────────────────────────
+    @GetMapping("/export")
+    public void exportProducts(HttpServletResponse response) throws Exception {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=products_export.xlsx");
+        List<Product> products = productService.getAllActiveProducts();
+        excelProductService.exportToExcel(products, response.getOutputStream());
+    }
+
+    @PostMapping("/import")
+    public String importProducts(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+        if (file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please select a file to import.");
+            return "redirect:/products";
+        }
+        try {
+            int count = excelProductService.importFromExcel(file);
+            redirectAttributes.addFlashAttribute("successMessage", "Successfully imported/updated " + count + " products.");
+        } catch (Exception e) {
+            Throwable rootCause = e;
+            while (rootCause.getCause() != null && rootCause != rootCause.getCause()) {
+                rootCause = rootCause.getCause();
+            }
+            if (rootCause instanceof jakarta.validation.ConstraintViolationException cve) {
+                String errorDetails = cve.getConstraintViolations().stream()
+                        .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                        .collect(java.util.stream.Collectors.joining(", "));
+                redirectAttributes.addFlashAttribute("errorMessage", "Validation error: " + errorDetails);
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Error importing products: " + rootCause.getMessage());
+            }
+        }
+        return "redirect:/products";
+    }
+
+    // ─────────────────────────────────────────────────────
     // DTO (Data Transfer Object) for the search API
     // A simple record — just data, no JPA annotations
     // ─────────────────────────────────────────────────────
@@ -362,4 +420,18 @@ public class ProductController {
             String category,
             java.math.BigDecimal stockQty
     ) {}
+
+    @PostMapping("/bulk-delete")
+    public String bulkDelete(@RequestParam("ids") java.util.List<Long> ids, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            for (Long id : ids) {
+                productService.deleteProduct(id);
+            }
+            ra.addFlashAttribute("successMessage", "Selected products deleted successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error deleting products: " + e.getMessage());
+        }
+        return "redirect:/products";
+    }
+
 }

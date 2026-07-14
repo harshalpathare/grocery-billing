@@ -2,49 +2,55 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Credit / Udhari | Grocery Billing</title>
+    <title th:text="${pageTitle}">Credit / Udhari Overview</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=8}">
 </head>
 <body>
-
 <div class="sidebar" id="sidebar">
     <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
     <nav class="sidebar-nav">
-        <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
-        <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
-        <a th:href="@{/suppliers}" class="nav-link">
-            <i class="bi bi-truck"></i><span>Suppliers</span>
+        <a th:href="@{/}" class="nav-link" th:classappend="${requestURI == '/'} ? 'active' : ''"><i class="bi bi-grid-1x2-fill text-primary"></i><span>Dashboard</span></a>
+        <a th:href="@{/products}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/products')} ? 'active' : ''"><i class="bi bi-box-fill text-success"></i><span>Products</span></a>
+        <a th:href="@{/suppliers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/suppliers')} ? 'active' : ''"><i class="bi bi-truck-front-fill text-warning"></i><span>Suppliers</span></a>
+        <a th:href="@{/purchases}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/purchases')} ? 'active' : ''"><i class="bi bi-bag-check-fill text-info"></i><span>Purchases</span></a>
+        <a th:href="@{/customers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/customers')} ? 'active' : ''"><i class="bi bi-people-fill text-danger"></i><span>Customers</span></a>
+        <a th:href="@{/bills/new}" class="nav-link" th:classappend="${requestURI != null and (requestURI == '/bills/new' or requestURI == '/bills/quick')} ? 'active' : ''"><i class="bi bi-file-earmark-plus-fill text-primary"></i><span>New Bill</span></a>
+        <a th:href="@{/bills}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/bills') and requestURI != '/bills/new' and !requestURI.contains('/quick')} ? 'active' : ''"><i class="bi bi-receipt text-info"></i><span>All Bills</span></a>
+        <a th:href="@{/credit}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/credit')} ? 'active' : ''"><i class="bi bi-credit-card-fill text-danger"></i><span>Credit / Udhari</span></a>
+        <a th:href="@{/cashflow}" class="nav-link" th:if="${features['enable_cash_flow'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/cashflow')} ? 'active' : ''">
+            <i class="bi bi-wallet2 text-info"></i><span>Cash Flow</span>
         </a>
-        <a th:href="@{/purchases}" class="nav-link">
-            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        <a th:href="@{/inventory}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/inventory')} ? 'active' : ''"><i class="bi bi-box-seam-fill text-dark"></i><span>Inventory</span></a>
+
+        <a th:href="@{/expenses}" class="nav-link" th:if="${features['enable_expenses'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/expenses')} ? 'active' : ''">
+            <i class="bi bi-receipt text-danger"></i><span>Expenses</span>
         </a>
-        <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
-        <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i><span>New Bill</span></a>
-        <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
-        <a th:href="@{/credit}" class="nav-link active"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
-        <a th:href="@{/reports}" class="nav-link"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
-    </nav>
-    <div class="sidebar-bottom">
-        <a th:href="@{/settings}" class="nav-link">
-            <i class="bi bi-gear"></i><span>Settings</span>
+
+
+
+        <!-- Accounting -->
+        <a th:href="@{/accounting/dashboard}" class="nav-link" th:if="${features['enable_accounting'] == true}"  th:classappend="${requestURI != null and requestURI.startsWith('/accounting')} ? 'active' : ''">
+            <i class="bi bi-book-half text-secondary"></i><span>Accounting</span>
         </a>
+
+        <a th:href="@{/reports}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/reports')} ? 'active' : ''"><i class="bi bi-pie-chart-fill text-success"></i><span>Reports</span></a>
+        </nav><div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/settings')} ? 'active' : ''"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
     </div>
 </div>
 
 <div class="main-content" id="mainContent">
     <nav class="top-navbar">
         <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle"><i class="bi bi-list"></i></button>
-        <h5 class="mb-0 ms-3">Credit / Udhari (उधारी)</h5>
+        <h5 class="mb-0 ms-3" th:text="${pageTitle}">Credit / Udhari</h5>
         <div class="ms-auto d-flex align-items-center gap-2">
+            <a th:href="@{/credit/export}" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel me-1"></i>Export Dues Report
+            </a>
             <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
-                <input type="hidden"
-                       th:name="${_csrf.parameterName}"
-                       th:value="${_csrf.token}">
-                <button type="submit"
-                        class="btn btn-sm btn-outline-danger"
-                        title="Logout">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
                     <i class="bi bi-box-arrow-right"></i>
                 </button>
             </form>
@@ -52,88 +58,191 @@
     </nav>
 
     <div class="page-content">
-
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <!-- Total Pending Banner -->
-        <div class="alert border-0 mb-4 p-4"
-             style="background:linear-gradient(135deg,#fff5f5,#ffe8e8);border-left:4px solid #dc3545 !important;border-radius:12px">
-            <div class="d-flex align-items-center gap-3">
-                <i class="bi bi-exclamation-triangle-fill text-danger fs-2"></i>
-                <div>
-                    <div class="small text-muted fw-semibold">TOTAL PENDING DUES (उधारी)</div>
-                    <div class="fs-2 fw-bold text-danger">
-                        ₹<span th:text="${#numbers.formatDecimal(totalPending, 1, 2)}">0.00</span>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="dashboard-card stat-card h-100" style="border-left-color: #198754;">
+                    <div class="stat-icon" style="background: rgba(25,135,84,0.1); color: #198754;">
+                        <i class="bi bi-arrow-down-circle"></i>
                     </div>
-                    <div class="small text-muted"
-                         th:text="${customers.size()} + ' customer(s) have pending balance'"></div>
+                    <div class="stat-details">
+                        <div class="stat-title">To Collect (Customers)</div>
+                        <div class="stat-value text-success">₹<span th:text="${#numbers.formatDecimal(totalCustomerPending, 1, 2)}">0.00</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="dashboard-card stat-card h-100" style="border-left-color: #dc3545;">
+                    <div class="stat-icon" style="background: rgba(220,53,69,0.1); color: #dc3545;">
+                        <i class="bi bi-arrow-up-circle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-title">To Pay (Suppliers)</div>
+                        <div class="stat-value text-danger">₹<span th:text="${#numbers.formatDecimal(totalSupplierPending, 1, 2)}">0.00</span></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Customers with dues -->
-        <div class="table-card">
-            <h6 class="fw-bold mb-3">
-                <i class="bi bi-people me-2"></i>Customers with Pending Dues
-            </h6>
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4" id="creditTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-success"  id="customer-tab" data-bs-toggle="tab" data-bs-target="#customerDues" type="button" role="tab">
+                    <i class="bi bi-people-fill me-1"></i> Customer Dues (<span th:text="${customers.size()}">0</span>)
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-danger"  id="supplier-tab" data-bs-toggle="tab" data-bs-target="#supplierDues" type="button" role="tab">
+                    <i class="bi bi-truck-front-fill me-1"></i> Supplier Dues (<span th:text="${suppliers.size()}">0</span>)
+                </button>
+            </li>
+        </ul>
 
-            <div th:if="${customers.isEmpty()}" class="text-center py-5 text-muted">
-                <i class="bi bi-check-circle-fill text-success" style="font-size:56px"></i>
-                <p class="mt-3 fw-semibold">All clear! No pending dues.</p>
+        <div class="tab-content" id="creditTabsContent">
+            <!-- Customer Dues Tab -->
+            <div class="tab-pane fade"  id="customerDues" role="tabpanel" tabindex="0">
+                <div class="table-card shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Phone</th>
+                                <th class="text-end">Pending Amount</th>
+                                <th class="text-center" th:if="${features['enable_sms'] == true}">Reminder</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="c : ${customers}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded-circle p-2 me-2 d-flex align-items-center justify-content-center text-secondary" style="width: 35px; height: 35px;">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span class="fw-semibold" th:text="${c.name}"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted" th:text="${c.phone != null and !c.phone.isEmpty() ? c.phone : 'N/A'}"></span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge bg-danger fs-6">
+                                        ₹<span th:text="${#numbers.formatDecimal(c.totalCredit - (c.totalPaid != null ? c.totalPaid : 0), 1, 2)}"></span>
+                                    </span>
+                                </td>
+                                <td class="text-center" th:if="${features['enable_sms'] == true}">
+                                    <a th:if="${c.phone != null and !c.phone.isEmpty()}" 
+                                       th:href="'https://wa.me/91' + ${c.phone} + '?text=Dear%20' + ${c.name} + ',%20this%20is%20a%20gentle%20reminder%20that%20your%20due%20of%20Rs.%20' + ${#numbers.formatDecimal(c.totalCredit - (c.totalPaid != null ? c.totalPaid : 0), 1, 2)} + '%20at%20' + ${shopName} + '%20is%20pending.%20Please%20clear%20it%20soon.'" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-whatsapp"></i> Send
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/credit/pay/{id}(id=${c.id})}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-wallet2"></i> Collect
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${customers.isEmpty()}">
+                                <td colspan="5" class="text-center text-muted py-4">No pending customer dues!</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <div th:unless="${customers.isEmpty()}" class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Customer</th>
-                        <th>Phone</th>
-                        <th class="text-end">Total Credit</th>
-                        <th class="text-end">Total Paid</th>
-                        <th class="text-end">Pending Balance</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="c, s : ${customers}">
-                        <td th:text="${s.index + 1}" class="text-muted"></td>
-                        <td>
-                            <a th:href="@{/customers/{id}(id=${c.id})}"
-                               th:text="${c.name}"
-                               class="fw-semibold text-decoration-none"></a>
-                        </td>
-                        <td th:text="${c.phone}"></td>
-                        <td class="text-end">₹<span th:text="${#numbers.formatDecimal(c.totalCredit,1,2)}"></span></td>
-                        <td class="text-end text-success">₹<span th:text="${#numbers.formatDecimal(c.totalPaid,1,2)}"></span></td>
-                        <td class="text-end fw-bold text-danger">
-                            ₹<span th:text="${#numbers.formatDecimal(c.balance,1,2)}"></span>
-                        </td>
-                        <td class="text-center">
-                            <a th:href="@{/credit/pay/{id}(id=${c.id})}"
-                               class="btn btn-sm btn-success">
-                                <i class="bi bi-cash-coin me-1"></i>Receive Payment
-                            </a>
-                            <form th:action="@{/credit/clear/{id}(id=${c.id})}"
-                                  method="post" class="d-inline"
-                                  onsubmit="return confirm('Clear ALL dues for '
-                    + this.dataset.name + '? This will mark full balance as paid.');"
-                                  th:data-name="${c.name}">
-                                <input type="hidden"
-                                       th:name="${_csrf.parameterName}"
-                                       th:value="${_csrf.token}">
-                                <button type="submit" class="btn btn-sm btn-outline-success"
-                                        title="Clear all dues">
-                                    <i class="bi bi-check2-all me-1"></i>Clear All
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+            <!-- Supplier Dues Tab -->
+            <div class="tab-pane fade"  id="supplierDues" role="tabpanel" tabindex="0">
+                <div class="table-card shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Supplier Name</th>
+                                <th>Phone</th>
+                                <th class="text-end">Pending Amount</th>
+                                <th class="text-center" th:if="${features['enable_sms'] == true}">Reminder</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="s : ${suppliers}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded-circle p-2 me-2 d-flex align-items-center justify-content-center text-secondary" style="width: 35px; height: 35px;">
+                                            <i class="bi bi-truck"></i>
+                                        </div>
+                                        <span class="fw-semibold" th:text="${s.name}"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted" th:text="${s.phone != null and !s.phone.isEmpty() ? s.phone : 'N/A'}"></span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge bg-danger fs-6">
+                                        ₹<span th:text="${#numbers.formatDecimal((s.totalPayable != null ? s.totalPayable : 0) - (s.totalPaid != null ? s.totalPaid : 0), 1, 2)}"></span>
+                                    </span>
+                                </td>
+                                <td class="text-center" th:if="${features['enable_sms'] == true}">
+                                    <a th:if="${s.phone != null and !s.phone.isEmpty()}" 
+                                       th:href="'https://wa.me/91' + ${s.phone} + '?text=Dear%20' + ${s.name} + ',%20we%20have%20noted%20our%20pending%20due%20of%20Rs.%20' + ${#numbers.formatDecimal((s.totalPayable != null ? s.totalPayable : 0) - (s.totalPaid != null ? s.totalPaid : 0), 1, 2)} + '%20for%20' + ${shopName} + '.%20We%20will%20process%20the%20payment%20shortly.'" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-whatsapp"></i> Notify
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" th:data-bs-target="'#paySupplierModal-' + ${s.id}">
+                                        <i class="bi bi-cash-stack"></i> Pay
+                                    </button>
+
+                                    <!-- Supplier Quick Pay Modal -->
+                                    <div class="modal fade" th:id="'paySupplierModal-' + ${s.id}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Pay Supplier: <span th:text="${s.name}"></span></h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form th:action="@{/credit/pay/supplier/{id}(id=${s.id})}" method="post">
+                                                    <div class="modal-body text-start">
+                                                        <div class="alert alert-info py-2">
+                                                            Pending Balance: <strong class="fs-5">₹<span th:text="${#numbers.formatDecimal((s.totalPayable != null ? s.totalPayable : 0) - (s.totalPaid != null ? s.totalPaid : 0), 1, 2)}"></span></strong>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Payment Amount (₹) <span class="text-danger">*</span></label>
+                                                            <input type="number" step="0.01" min="0.01" th:max="${(s.totalPayable != null ? s.totalPayable : 0) - (s.totalPaid != null ? s.totalPaid : 0)}" class="form-control fw-bold" name="amount" required placeholder="0.00">
+                                                            <div class="form-text">Will be deducted from Cash Flow automatically.</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i> Confirm Payment</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${suppliers.isEmpty()}">
+                                <td colspan="5" class="text-center text-muted py-4">No pending supplier dues!</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -141,11 +250,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.getElementById('sidebarToggle').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-        document.getElementById('mainContent').classList.toggle('expanded');
-    });
-</script>
+<script th:src="@{/js/app.js?v=25}"></script>
+
+
 </body>
 </html>
+
+
+

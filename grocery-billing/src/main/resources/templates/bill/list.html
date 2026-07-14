@@ -2,10 +2,11 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Bills | Grocery Billing</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=8}">
     <style>
         .filter-bar {
             background: white;
@@ -52,29 +53,30 @@
             padding: 12px 14px;
             vertical-align: middle;
             border-bottom: 1px solid #f0f2f5;
-            overflow: hidden;
-            text-overflow: ellipsis;
             white-space: nowrap;
         }
         #billsTable tbody tr:last-child td {
             border-bottom: none;
         }
-        #billsTable th:nth-child(1),
-        #billsTable td:nth-child(1) { width: 14%; }
+        #billsTable tbody tr td:last-child {
+            overflow: visible;
+        }
         #billsTable th:nth-child(2),
-        #billsTable td:nth-child(2) { width: 11%; }
+        #billsTable td:nth-child(2) { width: 14%; }
         #billsTable th:nth-child(3),
-        #billsTable td:nth-child(3) { width: 18%; }
+        #billsTable td:nth-child(3) { width: 11%; }
         #billsTable th:nth-child(4),
-        #billsTable td:nth-child(4) { width: 10%; }
+        #billsTable td:nth-child(4) { width: 18%; }
         #billsTable th:nth-child(5),
-        #billsTable td:nth-child(5) { width: 12%; }
+        #billsTable td:nth-child(5) { width: 10%; }
         #billsTable th:nth-child(6),
-        #billsTable td:nth-child(6) { width: 11%; }
+        #billsTable td:nth-child(6) { width: 12%; }
         #billsTable th:nth-child(7),
         #billsTable td:nth-child(7) { width: 10%; }
         #billsTable th:nth-child(8),
-        #billsTable td:nth-child(8) { width: 14%; }
+        #billsTable td:nth-child(8) { width: 10%; }
+        #billsTable th:nth-child(9),
+        #billsTable td:nth-child(9) { width: 15%; }
         #billsTable td.text-center .d-inline-flex {
             white-space: nowrap;
         }
@@ -95,38 +97,53 @@
         <i class="bi bi-shop"></i><span>Grocery Bill</span>
     </div>
     <nav class="sidebar-nav">
-        <a th:href="@{/}" class="nav-link">
-            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        <a th:href="@{/}" class="nav-link" th:classappend="${requestURI == '/'} ? 'active' : ''">
+            <i class="bi bi-grid-1x2-fill text-primary"></i><span>Dashboard</span>
         </a>
-        <a th:href="@{/products}" class="nav-link">
-            <i class="bi bi-box-seam"></i><span>Products</span>
+        <a th:href="@{/products}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/products')} ? 'active' : ''">
+            <i class="bi bi-box-fill text-success"></i><span>Products</span>
         </a>
-        <a th:href="@{/suppliers}" class="nav-link">
-            <i class="bi bi-truck"></i><span>Suppliers</span>
+        <a th:href="@{/suppliers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/suppliers')} ? 'active' : ''">
+            <i class="bi bi-truck-front-fill text-warning"></i><span>Suppliers</span>
         </a>
-        <a th:href="@{/purchases}" class="nav-link">
-            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        <a th:href="@{/purchases}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/purchases')} ? 'active' : ''">
+            <i class="bi bi-bag-check-fill text-info"></i><span>Purchases</span>
         </a>
-        <a th:href="@{/customers}" class="nav-link">
-            <i class="bi bi-people"></i><span>Customers</span>
+        <a th:href="@{/customers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/customers')} ? 'active' : ''">
+            <i class="bi bi-people-fill text-danger"></i><span>Customers</span>
         </a>
-        <a th:href="@{/bills/new}" class="nav-link">
-            <i class="bi bi-receipt"></i><span>New Bill</span>
+        <a th:href="@{/bills/new}" class="nav-link" th:classappend="${requestURI != null and (requestURI == '/bills/new' or requestURI == '/bills/quick')} ? 'active' : ''">
+            <i class="bi bi-file-earmark-plus-fill text-primary"></i><span>New Bill</span>
         </a>
-        <a th:href="@{/bills}" class="nav-link active">
-            <i class="bi bi-journal-text"></i><span>All Bills</span>
+        <a th:href="@{/bills}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/bills') and requestURI != '/bills/new' and !requestURI.contains('/quick')} ? 'active' : ''">
+            <i class="bi bi-receipt text-info"></i><span>All Bills</span>
         </a>
-        <a th:href="@{/credit}" class="nav-link">
-            <i class="bi bi-credit-card"></i>
+        <a th:href="@{/credit}" class="nav-link" th:if="${features['enable_credit'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/credit')} ? 'active' : ''">
+            <i class="bi bi-credit-card-fill text-danger"></i>
             <span>Credit / Udhari</span>
         </a>
-        <a th:href="@{/reports}" class="nav-link">
-            <i class="bi bi-bar-chart"></i><span>Reports</span>
+        <a th:href="@{/cashflow}" class="nav-link" th:if="${features['enable_cash_flow'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/cashflow')} ? 'active' : ''">
+            <i class="bi bi-wallet2 text-info"></i><span>Cash Flow</span>
         </a>
-    </nav>
-    <div class="sidebar-bottom">
-        <a th:href="@{/settings}" class="nav-link">
-            <i class="bi bi-gear"></i><span>Settings</span>
+        <a th:href="@{/inventory}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/inventory')} ? 'active' : ''"><i class="bi bi-box-seam-fill text-dark"></i><span>Inventory</span></a>
+
+        <a th:href="@{/expenses}" class="nav-link" th:if="${features['enable_expenses'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/expenses')} ? 'active' : ''">
+            <i class="bi bi-receipt text-danger"></i><span>Expenses</span>
+        </a>
+
+
+
+        <!-- Accounting -->
+        <a th:href="@{/accounting/dashboard}" class="nav-link" th:if="${features['enable_accounting'] == true}"  th:classappend="${requestURI != null and requestURI.startsWith('/accounting')} ? 'active' : ''">
+            <i class="bi bi-book-half text-secondary"></i><span>Accounting</span>
+        </a>
+
+        <a th:href="@{/reports}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/reports')} ? 'active' : ''">
+            <i class="bi bi-pie-chart-fill text-success"></i><span>Reports</span>
+        </a>
+        </nav><div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/settings')} ? 'active' : ''">
+            <i class="bi bi-gear-fill"></i><span>Settings</span>
         </a>
     </div>
 </div>
@@ -139,27 +156,6 @@
         </button>
         <h5 class="mb-0 ms-3">All Bills</h5>
         <div class="ms-auto d-flex align-items-center gap-2">
-            <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary position-relative"
-                        data-bs-toggle="dropdown">
-                    <i class="bi bi-bell"></i>
-                    <span class="position-absolute top-0 start-100
-                                 translate-middle badge rounded-pill
-                                 bg-danger d-none"
-                          id="notifCount">0</span>
-                </button>
-                <div class="dropdown-menu dropdown-menu-end p-0"
-                     style="min-width:300px;max-height:400px;overflow-y:auto">
-                    <div class="p-3 border-bottom fw-bold small text-muted">
-                        Notifications
-                    </div>
-                    <div id="notifItems">
-                        <div class="p-3 text-muted small text-center">
-                            Loading...
-                        </div>
-                    </div>
-                </div>
-            </div>
             <a th:href="@{/bills/new}" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-circle me-1"></i>New Bill
             </a>
@@ -189,7 +185,7 @@
                 <div class="stat-card">
                     <div class="d-flex align-items-center gap-3">
                         <div class="stat-icon bg-primary bg-opacity-10">
-                            <i class="bi bi-receipt text-primary"></i>
+                            <i class="bi bi-file-earmark-plus-fill text-primary"></i>
                         </div>
                         <div>
                             <div class="text-muted small">Today's Bills</div>
@@ -217,7 +213,7 @@
                 <div class="stat-card">
                     <div class="d-flex align-items-center gap-3">
                         <div class="stat-icon bg-info bg-opacity-10">
-                            <i class="bi bi-journal-text text-info"></i>
+                            <i class="bi bi-journals text-info"></i>
                         </div>
                         <div>
                             <div class="text-muted small">Total Bills</div>
@@ -289,7 +285,7 @@
 
             <div th:if="${bills.isEmpty()}"
                  class="text-center py-5 text-muted">
-                <i class="bi bi-receipt" style="font-size:56px;opacity:0.2"></i>
+                <i class="bi bi-file-earmark-plus-fill text-primary" style="font-size:56px;opacity:0.2"></i>
                 <p class="mt-3 fw-semibold">No bills yet</p>
                 <a th:href="@{/bills/new}" class="btn btn-primary">
                     <i class="bi bi-plus-circle me-1"></i>Create First Bill
@@ -298,12 +294,24 @@
 
             <div th:unless="${bills.isEmpty()}">
 
-                <!-- ✅ Single wrapper — no nested table-responsive -->
-                <div id="bills-wrapper">
-                    <table id="billsTable" class="table table-hover mb-0">
+                <!-- Bulk Actions -->
+                <div id="bulkActions" class="d-none mb-3">
+                    <form id="bulkDeleteForm" method="post" action="/bills/bulk-delete">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()">
+                            <i class="bi bi-trash-fill me-1"></i> Delete Selected (<span id="selectedCount">0</span>)
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Added table-card and table-responsive so wide tables don't bleed into the corner -->
+                <div id="bills-wrapper" class="table-card">
+                    <div class="table-responsive">
+                        <table id="billsTable" class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th class="sortable" data-col="billno">
+                                <th style="width: 40px"><input type="checkbox" id="selectAll" class="form-check-input"></th>
+<th class="sortable" data-col="billno">
                                     Bill No.
                                     <i class="bi bi-chevron-expand ms-1 small"></i>
                                 </th>
@@ -333,7 +341,8 @@
                                     bill.billDate,'yyyy-MM-dd')}"
                                 th:data-amount="${bill.totalAmount}">
 
-                                <td>
+                                <td><input type="checkbox" class="form-check-input rowCheckbox" th:value="${bill.id}"></td>
+<td>
                                     <a th:href="@{/bills/{id}(id=${bill.id})}"
                                        th:text="${bill.billNo}"
                                        class="fw-semibold text-decoration-none text-primary">
@@ -404,11 +413,39 @@
                                                 onclick="setDelete(this)">
                                             <i class="bi bi-trash"></i>
                                         </button>
+
+                                        <textarea th:id="'waMessageText_' + ${bill.id}" style="display:none;">Hello [[${bill.customer != null ? bill.customer.name : (bill.walkInCustomerName != null and !bill.walkInCustomerName.isBlank() ? bill.walkInCustomerName : 'Customer')}]],
+Here is your bill summary from [[${bill.shop.shopName}]]:
+
+*Bill No:* [[${bill.billNo}]]
+*Date:* [[${#temporals.format(bill.billDate, 'dd MMM yyyy')}]]
+
+*Items:*
+<th:block th:each="item : ${bill.billItems}" th:if="${item != null}">
+- [[${item.productNameSnapshot != null ? item.productNameSnapshot : (item.product != null ? item.product.nameEn : 'Item')}]] x [[${(item.displayQuantity != null ? item.displayQuantity : item.quantity).stripTrailingZeros().toPlainString()}]] [[${(item.billingUnit != null && !item.billingUnit.isBlank()) ? item.billingUnit : ((item.product != null && item.product.unit != null) ? item.product.unit : 'piece')}]] = ₹[[${#numbers.formatDecimal(item.itemTotal,1,2)}]]
+</th:block>
+
+*Subtotal:* ₹[[${#numbers.formatDecimal(bill.subtotal,1,2)}]]
+<th:block th:if="${bill.isGst and bill.gstAmount != null and bill.gstAmount > 0}">
+*GST Amount:* ₹[[${#numbers.formatDecimal(bill.gstAmount,1,2)}]]
+</th:block>
+*Total Amount:* ₹[[${#numbers.formatDecimal(bill.totalAmount,1,2)}]]
+
+Thank you for shopping with us!</textarea>
+                                        
+                                        <button type="button" class="btn btn-sm btn-outline-success" 
+                                                th:data-phone="${bill.customer != null ? bill.customer.phone : ''}"
+                                                th:data-text-id="'waMessageText_' + ${bill.id}"
+                                                onclick="sendBillTextOnWhatsApp(this)"
+                                                title="Send WhatsApp Bill">
+                                            <i class="bi bi-whatsapp"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
 
                 <!-- No results -->
@@ -457,6 +494,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js?v=25}"></script>
 <script>
 
     // ── Sidebar ───────────────────────────────────────
@@ -609,59 +647,78 @@
         });
     });
 
-    // ── NOTIFICATIONS ─────────────────────────────────
-    fetch('/api/notifications')
-        .then(r => r.json())
-        .then(data => {
-            const total = (data.lowStockCount || 0)
-                    + (data.creditCount || 0);
-            const badge = document.getElementById('notifCount');
-            if (total > 0) {
-                badge.textContent = total;
-                badge.classList.remove('d-none');
-            }
-            let html = '';
-            if (data.lowStockItems && data.lowStockItems.length > 0) {
-                html += `<div class="px-3 py-2 bg-light border-bottom
-                             small fw-bold text-danger">
-                             <i class="bi bi-exclamation-triangle me-1"></i>
-                             Low Stock (${data.lowStockCount})
-                         </div>`;
-                data.lowStockItems.forEach(p => {
-                    html += `<a href="/products"
-                                class="dropdown-item py-2 small">
-                                 <i class="bi bi-box-seam text-danger me-2"></i>
-                                 ${p.name} — <strong>${p.stock} left</strong>
-                             </a>`;
-                });
-            }
-            if (data.creditItems && data.creditItems.length > 0) {
-                html += `<div class="px-3 py-2 bg-light border-bottom
-                             small fw-bold text-warning">
-                             <i class="bi bi-credit-card me-1"></i>
-                             Pending Credit (${data.creditCount})
-                         </div>`;
-                data.creditItems.forEach(c => {
-                    html += `<a href="/credit"
-                                class="dropdown-item py-2 small">
-                                 <i class="bi bi-person text-warning me-2"></i>
-                                 ${c.name} — <strong>₹${c.balance}</strong>
-                             </a>`;
-                });
-            }
-            if (!html) html = `<div class="p-3 text-muted small text-center">
-                                   <i class="bi bi-check-circle text-success me-1"></i>
-                                   All clear!
-                               </div>`;
-            document.getElementById('notifItems').innerHTML = html;
-        }).catch(() => {
-            document.getElementById('notifItems').innerHTML =
-                    '<div class="p-3 text-muted small text-center">Unable to load</div>';
-        });
+
 
     // ── INIT ──────────────────────────────────────────
     applyFilters();
 
+    function sendBillTextOnWhatsApp(btn) {
+        var phone = btn.getAttribute('data-phone');
+        var textId = btn.getAttribute('data-text-id');
+        var textNode = document.getElementById(textId).value;
+        var waText = textNode.trim();
+        
+        const encodedMessage = encodeURIComponent(waText);
+        let waUrl = 'https://wa.me/';
+        if (phone && phone.trim() !== '') {
+            waUrl += '91' + phone;
+        }
+        waUrl += '?text=' + encodedMessage;
+        
+        window.open(waUrl, '_blank');
+    }
+
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('selectAll');
+        const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
+        const bulkActions = document.getElementById('bulkActions');
+        const selectedCount = document.getElementById('selectedCount');
+        const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+
+        function updateBulkActions() {
+            const checked = document.querySelectorAll('.rowCheckbox:checked');
+            selectedCount.textContent = checked.length;
+            if (checked.length > 0) {
+                bulkActions.classList.remove('d-none');
+            } else {
+                bulkActions.classList.add('d-none');
+            }
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                rowCheckboxes.forEach(cb => cb.checked = this.checked);
+                updateBulkActions();
+            });
+        }
+
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateBulkActions);
+        });
+
+        window.confirmBulkDelete = function() {
+            if (confirm('Are you sure you want to delete all selected items? This cannot be undone.')) {
+                bulkDeleteForm.querySelectorAll('.bulk-id').forEach(el => el.remove());
+                document.querySelectorAll('.rowCheckbox:checked').forEach(cb => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'ids';
+                    input.value = cb.value;
+                    input.className = 'bulk-id';
+                    bulkDeleteForm.appendChild(input);
+                });
+                bulkDeleteForm.submit();
+            }
+        }
+    });
+</script>
+
 </body>
 </html>
+
+
+
+

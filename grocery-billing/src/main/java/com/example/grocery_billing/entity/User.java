@@ -7,14 +7,11 @@ import java.time.LocalDateTime;
 
 /**
  * USER ENTITY
- * Stores login credentials for shop staff.
- *
- * Passwords are stored as BCrypt hashes — NEVER plain text.
- * Example: password "admin123" → "$2a$10$xyz..."
  *
  * Roles:
- *   ROLE_ADMIN → full access (add/edit/delete everything)
- *   ROLE_USER  → view + billing only (cannot delete or manage settings)
+ *   ROLE_SUPER_ADMIN → software owner — sees all shops, manages everything
+ *   ROLE_OWNER       → shop owner — full access to their own shop
+ *   ROLE_CASHIER     → billing staff — can create bills only, no settings/reports
  */
 @Entity
 @Table(name = "users")
@@ -33,7 +30,6 @@ public class User {
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    // Stores BCrypt hash — minimum 60 chars
     @NotBlank
     @Column(nullable = false, length = 100)
     private String password;
@@ -43,11 +39,22 @@ public class User {
     @Column(name = "full_name", length = 100)
     private String fullName;
 
-    // ROLE_ADMIN or ROLE_USER
-    @Column(nullable = false, length = 20)
-    private String role = "ROLE_USER";
+    // ── Role ─────────────────────────────────────────────
+    // ROLE_SUPER_ADMIN, ROLE_OWNER, ROLE_CASHIER
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private String role = "ROLE_CASHIER";
+
+    // ── Shop link ─────────────────────────────────────────
+    // NULL for SUPER_ADMIN (they see all shops)
+    // Required for OWNER and CASHIER
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    @ToString.Exclude
+    private Shop shop;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean enabled = true;
 
     @Column(name = "created_at", updatable = false)
@@ -59,5 +66,22 @@ public class User {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    // ── Helper ────────────────────────────────────────────
+    public Long getShopId() {
+        return shop != null ? shop.getId() : null;
+    }
+
+    public boolean isSuperAdmin() {
+        return "ROLE_SUPER_ADMIN".equals(role);
+    }
+
+    public boolean isOwner() {
+        return "ROLE_OWNER".equals(role);
+    }
+
+    public boolean isCashier() {
+        return "ROLE_CASHIER".equals(role);
     }
 }

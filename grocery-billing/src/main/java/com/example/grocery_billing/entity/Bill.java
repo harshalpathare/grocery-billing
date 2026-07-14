@@ -12,11 +12,6 @@ import java.util.List;
 
 /**
  * BILL ENTITY
- * Maps to the 'bills' table.
- * Represents one complete invoice/receipt.
- *
- * Real-world: Customer Ramesh buys Sugar + Rice + Oil.
- * One Bill is created, with 3 BillItems inside it.
  */
 @Entity
 @Table(name = "bills")
@@ -29,6 +24,12 @@ public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // ── Shop (multi-tenant) ───────────────────────────────
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    @ToString.Exclude
+    private Shop shop;
 
     // ── Bill number ───────────────────────────────────────
     // e.g. "BILL-2024-001", "BILL-2024-002" etc.
@@ -64,6 +65,21 @@ public class Bill {
 
     @Column(name = "gst_amount", precision = 12, scale = 2)
     private BigDecimal gstAmount = BigDecimal.ZERO;
+
+    @Column(name = "cgst_amount", precision = 12, scale = 2)
+    private BigDecimal cgstAmount = BigDecimal.ZERO;
+
+    @Column(name = "sgst_amount", precision = 12, scale = 2)
+    private BigDecimal sgstAmount = BigDecimal.ZERO;
+
+    @Column(name = "igst_amount", precision = 12, scale = 2)
+    private BigDecimal igstAmount = BigDecimal.ZERO;
+
+    @Column(name = "subtotal_before_tax", precision = 12, scale = 2)
+    private BigDecimal subtotalBeforeTax = BigDecimal.ZERO;
+
+    @Column(name = "total_tax", precision = 12, scale = 2)
+    private BigDecimal totalTax = BigDecimal.ZERO;
 
     @Column(name = "transport_cost", precision = 10, scale = 2)
     private BigDecimal transportCost = BigDecimal.ZERO;
@@ -117,17 +133,30 @@ public class Bill {
     // ── Helper: recalculate totals ────────────────────────
     public void calculateTotals() {
         this.subtotal = billItems.stream()
-                .map(BillItem::getItemTotal)
+                .map(item -> item.getIsReturn() != null && item.getIsReturn() ? item.getItemTotal().negate() : item.getItemTotal())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        this.subtotalBeforeTax = this.subtotal;
 
         if (Boolean.TRUE.equals(this.isGst)) {
             this.gstAmount = billItems.stream()
-                    .map(item -> item.getItemTotal()
-                            .multiply(item.getGstPercent())
-                            .divide(BigDecimal.valueOf(100)))
+                    .map(item -> {
+                        BigDecimal tax = item.getItemTotal()
+                                .multiply(item.getGstPercent())
+                                .divide(BigDecimal.valueOf(100));
+                        return item.getIsReturn() != null && item.getIsReturn() ? tax.negate() : tax;
+                    })
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
+            this.cgstAmount = this.gstAmount.divide(BigDecimal.valueOf(2), 2, java.math.RoundingMode.HALF_UP);
+            this.sgstAmount = this.gstAmount.divide(BigDecimal.valueOf(2), 2, java.math.RoundingMode.HALF_UP);
+            this.igstAmount = BigDecimal.ZERO; // Assuming intra-state for now
+            this.totalTax = this.gstAmount;
         } else {
             this.gstAmount = BigDecimal.ZERO;
+            this.cgstAmount = BigDecimal.ZERO;
+            this.sgstAmount = BigDecimal.ZERO;
+            this.igstAmount = BigDecimal.ZERO;
+            this.totalTax = BigDecimal.ZERO;
         }
 
         this.totalAmount = subtotal

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory Dashboard | Grocery Billing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=8}">
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/}" class="nav-link" th:classappend="${requestURI == '/'} ? 'active' : ''"><i class="bi bi-grid-1x2-fill text-primary"></i><span>Dashboard</span></a>
+        <a th:href="@{/products}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/products')} ? 'active' : ''"><i class="bi bi-box-fill text-success"></i><span>Products</span></a>
+        <a th:href="@{/suppliers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/suppliers')} ? 'active' : ''"><i class="bi bi-truck-front-fill text-warning"></i><span>Suppliers</span></a>
+        <a th:href="@{/purchases}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/purchases')} ? 'active' : ''"><i class="bi bi-bag-check-fill text-info"></i><span>Purchases</span></a>
+        <a th:href="@{/customers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/customers')} ? 'active' : ''"><i class="bi bi-people-fill text-danger"></i><span>Customers</span></a>
+        <a th:href="@{/bills/new}" class="nav-link" th:classappend="${requestURI != null and (requestURI == '/bills/new' or requestURI == '/bills/quick')} ? 'active' : ''"><i class="bi bi-file-earmark-plus-fill text-primary"></i><span>New Bill</span></a>
+        <a th:href="@{/bills}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/bills') and requestURI != '/bills/new' and !requestURI.contains('/quick')} ? 'active' : ''"><i class="bi bi-receipt text-info"></i><span>All Bills</span></a>
+        <a th:href="@{/credit}" class="nav-link" th:if="${features['enable_credit'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/credit')} ? 'active' : ''"><i class="bi bi-credit-card-fill text-danger"></i><span>Credit / Udhari</span></a>
+        <a th:href="@{/cashflow}" class="nav-link" th:if="${features['enable_cash_flow'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/cashflow')} ? 'active' : ''">
+            <i class="bi bi-wallet2 text-info"></i><span>Cash Flow</span>
+        </a>
+        <a th:href="@{/inventory}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/inventory')} ? 'active' : ''"><i class="bi bi-box-seam-fill text-dark"></i><span>Inventory</span></a>
+
+        <a th:href="@{/expenses}" class="nav-link" th:if="${features['enable_expenses'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/expenses')} ? 'active' : ''">
+            <i class="bi bi-receipt text-danger"></i><span>Expenses</span>
+        </a>
+
+
+
+        <!-- Accounting -->
+        <a th:href="@{/accounting/dashboard}" class="nav-link" th:if="${features['enable_accounting'] == true}"  th:classappend="${requestURI != null and requestURI.startsWith('/accounting')} ? 'active' : ''">
+            <i class="bi bi-book-half text-secondary"></i><span>Accounting</span>
+        </a>
+
+        <a th:href="@{/reports}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/reports')} ? 'active' : ''"><i class="bi bi-pie-chart-fill text-success"></i><span>Reports</span></a>
+        </nav><div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/settings')} ? 'active' : ''"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
+    </div>
+</div>
+
+<div class="main-content" id="mainContent">
+    <nav class="top-navbar">
+        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle"><i class="bi bi-list"></i></button>
+        <h5 class="mb-0 ms-3">Inventory Dashboard</h5>
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <a th:href="@{/inventory/export}" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel me-1"></i>Export Inventory
+            </a>
+            <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="row g-4 mb-4">
+            <!-- Summary Tiles -->
+            <div class="col-md-3">
+                <div class="dashboard-card stat-card" style="border-left-color: #0d6efd;">
+                    <div class="stat-icon" style="background: rgba(13,110,253,0.1); color: #0d6efd;">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-title">Active Products</div>
+                        <div class="stat-value" th:text="${summary.totalActiveProducts()}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stat-card" style="border-left-color: #198754;">
+                    <div class="stat-icon" style="background: rgba(25,135,84,0.1); color: #198754;">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-title">Stock Value</div>
+                        <div class="stat-value">₹<span th:text="${#numbers.formatDecimal(summary.totalStockValue(), 1, 2)}">0</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stat-card" style="border-left-color: #ffc107;">
+                    <div class="stat-icon" style="background: rgba(255,193,7,0.1); color: #ffc107;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-title">Low Stock Alerts</div>
+                        <div class="stat-value text-warning" th:text="${summary.lowStockCount()}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stat-card" style="border-left-color: #dc3545;">
+                    <div class="stat-icon" style="background: rgba(220,53,69,0.1); color: #dc3545;">
+                        <i class="bi bi-x-octagon"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-title">Out of Stock</div>
+                        <div class="stat-value text-danger" th:text="${summary.outOfStockCount()}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a th:href="@{/inventory/reports/stock}" class="btn btn-outline-primary"><i class="bi bi-list-ul me-1"></i>Stock Report</a>
+                    <a th:href="@{/inventory/reports/fast}" class="btn btn-outline-success"><i class="bi bi-graph-up-arrow me-1"></i>Fast Moving</a>
+                    <a th:href="@{/inventory/reports/slow}" class="btn btn-outline-warning"><i class="bi bi-graph-down-arrow me-1"></i>Slow Moving</a>
+                    <a th:href="@{/inventory/reports/dead}" class="btn btn-outline-secondary"><i class="bi bi-moon me-1"></i>Dead Stock</a>
+                    <a th:href="@{/inventory/reports/expiry}" class="btn btn-outline-danger"><i class="bi bi-calendar-x me-1"></i>Expiry Report</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Alerts -->
+            <div class="col-lg-6">
+                <!-- Out of Stock -->
+                <div class="table-card mb-4 border-danger border-start border-4 shadow-sm">
+                    <h6 class="fw-bold text-danger mb-3"><i class="bi bi-exclamation-circle-fill me-2"></i>Out of Stock Alerts</h6>
+                    <div th:if="${outOfStockAlerts.isEmpty()}" class="text-muted small">No items out of stock!</div>
+                    <div th:unless="${outOfStockAlerts.isEmpty()}" class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="p : ${outOfStockAlerts}">
+                                <td th:text="${p.nameEn}"></td>
+                                <td th:text="${p.category}"></td>
+                                <td><a th:href="@{/purchases/new}" class="btn btn-sm btn-outline-danger py-0 px-2">Order</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Low Stock -->
+                <div class="table-card border-warning border-start border-4 shadow-sm">
+                    <h6 class="fw-bold text-warning mb-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>Low Stock Alerts</h6>
+                    <div th:if="${lowStockAlerts.isEmpty()}" class="text-muted small">No low stock items.</div>
+                    <div th:unless="${lowStockAlerts.isEmpty()}" class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Stock</th>
+                                <th>Min</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="p : ${lowStockAlerts}">
+                                <td th:text="${p.nameEn}"></td>
+                                <td class="fw-bold text-warning" th:text="${p.stockQty}"></td>
+                                <td th:text="${p.minStock}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Expiry Alerts -->
+            <div class="col-lg-6">
+                <div class="table-card border-danger border-start border-4 shadow-sm h-100">
+                    <h6 class="fw-bold text-danger mb-3"><i class="bi bi-calendar-x-fill me-2"></i>Expiring Soon (Next 30 Days)</h6>
+                    <div th:if="${expiryAlerts.isEmpty()}" class="text-muted small">No items expiring soon.</div>
+                    <div th:unless="${expiryAlerts.isEmpty()}" class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Stock</th>
+                                <th>Expiry Date</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="p : ${expiryAlerts}">
+                                <td th:text="${p.nameEn}"></td>
+                                <td th:text="${p.stockQty}"></td>
+                                <td class="fw-bold text-danger" th:text="${p.expiryDate}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js?v=25}"></script>
+
+
+</body>
+</html>
+
+
+

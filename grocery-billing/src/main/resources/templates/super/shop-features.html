@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | Super Admin'"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/super-admin.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+    <a th:href="@{/super/shops}" class="brand"><i class="bi bi-lightning-fill me-2 text-warning"></i>Super Admin</a>
+    <span style="opacity:0.5">|</span>
+    <span style="opacity:0.7;font-size:14px;" th:text="${pageTitle}">Shop Features</span>
+    <div style="margin-left:auto;display:flex;gap:10px;">
+        <a th:href="@{/super/shops}" class="btn btn-sm btn-outline-light">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a th:href="@{/}" class="btn btn-sm btn-outline-light">
+            <i class="bi bi-house me-1"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="page-wrap">
+    
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-3">
+        <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-3">
+        <i class="bi bi-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card-box">
+        <div class="d-flex align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-0"><i class="bi bi-sliders me-2 text-primary"></i>Features: <span th:text="${shop.shopName}"></span></h4>
+                <p class="text-muted mb-0 small">Toggle modules on/off for this tenant.</p>
+            </div>
+        </div>
+        <form th:action="@{/super/shops/{id}/features(id=${shop.id})}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-credit-card-fill me-2 text-success"></i>Credit & Udhari System</h6>
+                    <p class="text-muted small mb-0">Allow shop to manage customer pending balances and split payments.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_credit" 
+                           th:checked="${features['enable_credit']}">
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-file-earmark-plus-fill me-2 text-primary"></i>GST Billing</h6>
+                    <p class="text-muted small mb-0">Enable GST tax calculations, HSN fields, and legal tax invoice printing.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_gst" 
+                           th:checked="${features['enable_gst']}">
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-box-fill me-2 text-warning"></i>Inventory & Suppliers</h6>
+                    <p class="text-muted small mb-0">Manage product stock levels, suppliers, and purchase orders.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_inventory" 
+                           th:checked="${features['enable_inventory']}">
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>Data Export (CSV/Excel)</h6>
+                    <p class="text-muted small mb-0">Allow shop to download reports and lists as CSV or Excel files.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_export" role="switch"
+                           th:checked="${features['enable_export']}">
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-chat-dots me-2 text-primary"></i>SMS / WhatsApp Notifications</h6>
+                    <p class="text-muted small mb-0">Automatically send bill receipts to customers via SMS or WhatsApp.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_sms" role="switch"
+                           th:checked="${features['enable_sms']}">
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-wallet2 me-2 text-info"></i>Cash Flow Tracking</h6>
+                    <p class="text-muted small mb-0">Track all incoming and outgoing cash transactions manually.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_cash_flow" role="switch"
+                           th:checked="${features['enable_cash_flow']}">
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-star-fill me-2 text-warning"></i>Loyalty Points System</h6>
+                    <p class="text-muted small mb-0">Automatically award customers 1 loyalty point for every ₹100 spent on a bill.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_loyalty" role="switch"
+                           th:checked="${features['enable_loyalty']}">
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-book-half me-2 text-secondary"></i>Accounting Module</h6>
+                    <p class="text-muted small mb-0">Enable double-entry accounting features like Journal, Ledger, Cash Book, Bank Book, and Trial Balance.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_accounting" role="switch"
+                           th:checked="${features['enable_accounting']}">
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-receipt me-2 text-danger"></i>Expenses Module</h6>
+                    <p class="text-muted small mb-0">Enable tracking of daily shop expenses.</p>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" name="enable_expenses" role="switch"
+                           th:checked="${features['enable_expenses']}">
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-1"></i> Save Configuration</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js?v=25}"></script>
+</body>
+</html>
+
+
+

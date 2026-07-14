@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings | Grocery Billing</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=8}">
     <style>
         .settings-section {
             border-left: 3px solid #4f97ff;
@@ -18,385 +20,379 @@
 
 <body>
 
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <i class="bi bi-shop"></i><span>Grocery Bill</span>
-        </div>
-        <nav class="sidebar-nav">
-            <a th:href="@{/}" class="nav-link">
-                <i class="bi bi-speedometer2"></i>
-                <span>Dashboard</span>
-            </a>
-            <a th:href="@{/products}" class="nav-link">
-                <i class="bi bi-box-seam"></i>
-                <span>Products</span>
-            </a>
-            <a th:href="@{/suppliers}" class="nav-link">
-                <i class="bi bi-truck"></i>
-                <span>Suppliers</span>
-            </a>
-            <a th:href="@{/purchases}" class="nav-link">
-                <i class="bi bi-cart-check"></i>
-                <span>Purchases</span>
-            </a>
-            <a th:href="@{/customers}" class="nav-link">
-                <i class="bi bi-people"></i>
-                <span>Customers</span>
-            </a>
-            <a th:href="@{/bills/new}" class="nav-link">
-                <i class="bi bi-receipt"></i>
-                <span>New Bill</span>
-            </a>
-            <a th:href="@{/bills}" class="nav-link">
-                <i class="bi bi-journal-text"></i>
-                <span>All Bills</span>
-            </a>
-            <a th:href="@{/credit}" class="nav-link">
-                <i class="bi bi-credit-card"></i>
-                <span>Credit / Udhari</span>
-            </a>
-            <a th:href="@{/reports}" class="nav-link">
-                <i class="bi bi-bar-chart"></i>
-                <span>Reports</span>
-            </a>
-        </nav>
-        <div class="sidebar-bottom">
-            <a th:href="@{/settings}" class="nav-link active">
-                <i class="bi bi-gear"></i>
-                <span>Settings</span>
-            </a>
-        </div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/}"           class="nav-link" th:classappend="${requestURI == '/'} ? 'active' : ''"><i class="bi bi-grid-1x2-fill text-primary"></i><span>Dashboard</span></a>
+        <a th:href="@{/products}"   class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/products')} ? 'active' : ''"><i class="bi bi-box-fill text-success"></i><span>Products</span></a>
+        <a th:href="@{/suppliers}"  class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/suppliers')} ? 'active' : ''"><i class="bi bi-truck-front-fill text-warning"></i><span>Suppliers</span></a>
+        <a th:href="@{/purchases}"  class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/purchases')} ? 'active' : ''"><i class="bi bi-bag-check-fill text-info"></i><span>Purchases</span></a>
+        <a th:href="@{/customers}"  class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/customers')} ? 'active' : ''"><i class="bi bi-people-fill text-danger"></i><span>Customers</span></a>
+        <a th:href="@{/bills/new}"  class="nav-link" th:classappend="${requestURI != null and (requestURI == '/bills/new' or requestURI == '/bills/quick')} ? 'active' : ''"><i class="bi bi-file-earmark-plus-fill text-primary"></i><span>New Bill</span></a>
+        <a th:href="@{/bills}"      class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/bills') and requestURI != '/bills/new' and !requestURI.contains('/quick')} ? 'active' : ''"><i class="bi bi-receipt text-info"></i><span>All Bills</span></a>
+        <a th:href="@{/credit}"     class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/credit')} ? 'active' : ''"><i class="bi bi-credit-card-fill text-danger"></i><span>Credit / Udhari</span></a>
+        <a th:href="@{/cashflow}" class="nav-link" th:if="${features['enable_cash_flow'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/cashflow')} ? 'active' : ''">
+            <i class="bi bi-wallet2 text-info"></i><span>Cash Flow</span>
+        </a>
+        <a th:href="@{/inventory}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/inventory')} ? 'active' : ''"><i class="bi bi-box-seam-fill text-dark"></i><span>Inventory</span></a>
+
+        <a th:href="@{/expenses}" class="nav-link" th:if="${features['enable_expenses'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/expenses')} ? 'active' : ''">
+            <i class="bi bi-receipt text-danger"></i><span>Expenses</span>
+        </a>
+
+
+
+        <!-- Accounting -->
+        <a th:href="@{/accounting/dashboard}" class="nav-link" th:if="${features['enable_accounting'] == true}"  th:classappend="${requestURI != null and requestURI.startsWith('/accounting')} ? 'active' : ''">
+            <i class="bi bi-book-half text-secondary"></i><span>Accounting</span>
+        </a>
+
+        <a th:href="@{/reports}"    class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/reports')} ? 'active' : ''"><i class="bi bi-pie-chart-fill text-success"></i><span>Reports</span></a>
+        </nav><div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/settings')} ? 'active' : ''"><i class="bi bi-gear-fill"></i><span>Settings</span></a>
     </div>
+</div>
 
-    <div class="main-content" id="mainContent">
-        <nav class="top-navbar">
-            <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
-                <i class="bi bi-list"></i>
-            </button>
-            <h5 class="mb-0 ms-3">
-                <i class="bi bi-gear me-2"></i>Settings
-            </h5>
-            <div class="ms-auto d-flex gap-2">
-                <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-box-arrow-right"></i>
-                    </button>
-                </form>
-            </div>
-        </nav>
-
-        <div class="page-content">
-
-            <!-- Alerts -->
-            <div th:if="${successMessage}" class="alert alert-success
-                    alert-dismissible fade show">
-                <i class="bi bi-check-circle me-2"></i>
-                <span th:text="${successMessage}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            <div th:if="${errorMessage}" class="alert alert-danger
-                    alert-dismissible fade show">
-                <i class="bi bi-exclamation-circle me-2"></i>
-                <span th:text="${errorMessage}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <form th:action="@{/settings}" method="post">
+<div class="main-content" id="mainContent">
+    <nav class="top-navbar">
+        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle"><i class="bi bi-list"></i></button>
+        <h5 class="mb-0 ms-3"><i class="bi bi-gear-fill me-2"></i>Settings</h5>
+        <div class="ms-auto d-flex gap-2">
+            <form th:action="@{/logout}" method="post" class="mb-0 d-inline">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </nav>
 
-                <div class="row g-4">
+    <div class="page-content">
 
-                    <!-- LEFT COLUMN -->
-                    <div class="col-lg-7">
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
-                        <!-- Shop Information -->
-                        <div class="table-card mb-4">
-                            <h6 class="fw-bold mb-4
-                                   settings-section">
-                                <i class="bi bi-shop
-                                      text-primary me-2">
-                                </i>Shop Information
-                            </h6>
-                            <div class="row g-3">
+        <!-- ── SHOP SETTINGS FORM ── -->
+        <form th:action="@{/settings}" method="post" th:object="${shop}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-                                <div class="col-md-6">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        Shop Name *
-                                    </label>
-                                    <input type="text" name="shop.name" class="form-control"
-                                        th:value="${settings['shop.name']}" placeholder="My Grocery Store" required>
-                                </div>
+            <div class="row g-4">
 
-                                <div class="col-md-6">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        Phone Number
-                                    </label>
-                                    <input type="text" name="shop.phone" class="form-control"
-                                        th:value="${settings['shop.phone']}" placeholder="9999999999">
-                                </div>
+                <!-- LEFT COLUMN -->
+                <div class="col-lg-7">
 
-                                <div class="col-12">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        Address
-                                    </label>
-                                    <textarea name="shop.address" class="form-control" rows="2"
-                                        placeholder="Shop No. 5, Main Market...">
-                                    <th:block th:text="${settings['shop.address']}"></th:block>
-                                </textarea>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        Email
-                                    </label>
-                                    <input type="email" name="shop.email" class="form-control"
-                                        th:value="${settings['shop.email']}" placeholder="shop@gmail.com">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        Shop Logo URL
-                                    </label>
-                                    <input type="text" name="shop.logo-url" class="form-control"
-                                        th:value="${settings['shop.logo-url']}"
-                                        placeholder="https://example.com/logo.png">
-                                </div>
-
+                    <!-- Shop Information -->
+                    <div class="table-card mb-4">
+                        <h6 class="fw-bold mb-4 settings-section">
+                            <i class="bi bi-shop text-primary me-2"></i>Shop Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Shop Name *</label>
+                                <input type="text" th:field="*{shopName}" class="form-control"
+                                       placeholder="My Grocery Store" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Owner Name</label>
+                                <input type="text" th:field="*{ownerName}" class="form-control"
+                                       placeholder="Ramesh Kumar">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Address</label>
+                                <textarea th:field="*{address}" class="form-control" rows="2"
+                                          placeholder="Shop No. 5, Main Market, City - 411001"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City</label>
+                                <input type="text" th:field="*{city}" class="form-control" placeholder="Pune">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State</label>
+                                <input type="text" th:field="*{state}" class="form-control" placeholder="Maharashtra">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Pincode</label>
+                                <input type="text" th:field="*{pincode}" class="form-control" placeholder="411001">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone</label>
+                                <input type="text" th:field="*{phone}" class="form-control" placeholder="9876543210">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" th:field="*{email}" class="form-control" placeholder="shop@gmail.com">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Logo URL</label>
+                                <input type="text" th:field="*{logoUrl}" class="form-control"
+                                       placeholder="https://example.com/logo.png">
+                                <div class="form-text">Direct image link — shown on invoice header</div>
                             </div>
                         </div>
-
-                        <!-- GST & Legal -->
-                        <div class="table-card mb-4">
-                            <h6 class="fw-bold mb-4
-                                   settings-section">
-                                <i class="bi bi-file-earmark-text
-                                      text-warning me-2">
-                                </i>GST & Legal
-                            </h6>
-                            <div class="row g-3">
-
-                                <div class="col-md-6">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        GSTIN
-                                    </label>
-                                    <input type="text" name="shop.gstin" class="form-control"
-                                        th:value="${settings['shop.gstin']}" placeholder="27AABCU9603R1ZX"
-                                        maxlength="15">
-                                    <div class="form-text">
-                                        15-digit GST number
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        FSSAI Number
-                                    </label>
-                                    <input type="text" name="shop.fssai-no" class="form-control"
-                                        th:value="${settings['shop.fssai-no']}" placeholder="10012345678901">
-                                    <div class="form-text">
-                                        14-digit FSSAI license
-                                    </div>
-                                </div>
-
-                                <div class="col-12">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        Terms & Conditions
-                                    </label>
-                                    <textarea name="shop.terms" class="form-control" rows="3"
-                                        placeholder="1. Goods once sold cannot be returned.">
-                                    <th:block th:text="${settings['shop.terms']}"></th:block>
-                                </textarea>
-                                    <div class="form-text">
-                                        Printed strictly at the bottom of the invoice.
-                                    </div>
-                                </div>
-
-                                <div class="col-12">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        Thank You Message
-                                    </label>
-                                    <textarea name="shop.invoice-footer" class="form-control" rows="2"
-                                        placeholder="Thank you for shopping with us! Visit again.">
-                                    <th:block th:text="${settings['shop.invoice-footer']}"></th:block>
-                                </textarea>
-                                    <div class="form-text">
-                                        Personalized note placed above the Terms & Conditions.
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- Payment Settings -->
-                        <div class="table-card">
-                            <h6 class="fw-bold mb-4
-                                   settings-section">
-                                <i class="bi bi-qr-code
-                                      text-success me-2">
-                                </i>Payment Settings
-                            </h6>
-                            <div class="row g-3">
-
-                                <div class="col-md-6">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        UPI ID
-                                        <span class="badge
-                                          bg-success ms-1" style="font-size:10px">
-                                            QR Auto-generated
-                                        </span>
-                                    </label>
-                                    <input type="text" name="shop.upi-id" class="form-control"
-                                        th:value="${settings['shop.upi-id']}" placeholder="9876543210@paytm">
-                                    <div class="form-text">
-                                        UPI ID for QR code on bills
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label
-                                              fw-semibold">
-                                        Bank Details
-                                    </label>
-                                    <input type="text" name="shop.bank-details" class="form-control"
-                                        th:value="${settings['shop.bank-details']}"
-                                        placeholder="HDFC Bank A/c: 1234567890">
-                                    <div class="form-text">
-                                        Shown on invoice for NEFT
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
                     </div>
 
-                    <!-- RIGHT COLUMN: Preview + Save -->
-                    <div class="col-lg-5">
-
-                        <!-- Save Button -->
-                        <div class="table-card mb-4">
-                            <button type="submit" class="btn btn-primary
-                                       w-100 py-2 fw-bold">
-                                <i class="bi bi-check-circle
-                                      me-2"></i>
-                                Save All Settings
-                            </button>
-                            <p class="small text-muted
-                                  text-center mt-2 mb-0">
-                                Changes take effect immediately
-                                — no restart needed
-                            </p>
-                        </div>
-
-                        <!-- Live Preview -->
-                        <div class="table-card mb-4">
-                            <h6 class="fw-bold mb-3">
-                                <i class="bi bi-eye
-                                      me-2 text-primary">
-                                </i>Invoice Header Preview
-                            </h6>
-                            <div id="previewBox" class="p-3 rounded text-center" style="background:#ffffff;
-                                    color:#000000; border: 1px dashed #dee2e6;
-                                    min-height:100px">
-                                <img id="prevLogo" src="" alt="Shop Logo"
-                                    style="max-height: 50px; display: none; margin: 0 auto 10px auto; border-radius: 4px;">
-                                <div class="fw-bold fs-5" id="prevName">
-                                    My Grocery Store
-                                </div>
-                                <div class="small opacity-75" id="prevAddress">
-                                    Your Address Here
-                                </div>
-                                <div class="small opacity-75" id="prevPhone">
-                                    Phone: 9999999999
-                                </div>
-                                <div class="small opacity-50 mt-1" id="prevGstin">
-                                    GSTIN: —
-                                </div>
+                    <!-- GST & Legal -->
+                    <div class="table-card mb-4">
+                        <h6 class="fw-bold mb-4 settings-section">
+                            <i class="bi bi-file-earmark-text text-warning me-2"></i>GST & Legal
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">GSTIN</label>
+                                <input type="text" th:field="*{gstin}" class="form-control"
+                                       placeholder="27AABCU9603R1ZX" maxlength="15">
+                                <div class="form-text">15-digit GST number</div>
                             </div>
-                            <p class="small text-muted
-                                  mt-2 mb-0 text-center">
-                                Live preview as you type
-                            </p>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">FSSAI Number</label>
+                                <input type="text" th:field="*{fssaiNo}" class="form-control"
+                                       placeholder="10012345678901">
+                                <div class="form-text">14-digit FSSAI license</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Thank You Message</label>
+                                <textarea th:field="*{thankYouMsg}" class="form-control" rows="2"
+                                          placeholder="Thank you for shopping with us! Visit again."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Terms & Conditions</label>
+                                <textarea th:field="*{terms}" class="form-control" rows="3"
+                                          placeholder="1. Goods once sold cannot be returned."></textarea>
+                                <div class="form-text">Printed at the bottom of the invoice</div>
+                            </div>
                         </div>
+                    </div>
 
-
-
+                    <!-- Payment Settings -->
+                    <div class="table-card">
+                        <h6 class="fw-bold mb-4 settings-section">
+                            <i class="bi bi-qr-code text-success me-2"></i>Payment Settings
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    UPI ID
+                                    <span class="badge bg-success ms-1" style="font-size:10px">QR Auto-generated</span>
+                                </label>
+                                <input type="text" th:field="*{upiId}" class="form-control"
+                                       placeholder="9876543210@paytm">
+                                <div class="form-text">UPI ID for QR code on bills</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Bank Details</label>
+                                <input type="text" th:field="*{bankDetails}" class="form-control"
+                                       placeholder="HDFC Bank A/c: 1234567890, IFSC: HDFC0001234">
+                                <div class="form-text">Shown on invoice for NEFT payments</div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
-            </form>
 
-        </div>
+                <!-- RIGHT COLUMN -->
+                <div class="col-lg-5">
+
+                    <!-- Save Button -->
+                    <div class="table-card mb-4">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                            <i class="bi bi-check-circle me-2"></i>Save All Settings
+                        </button>
+                        <p class="small text-muted text-center mt-2 mb-0">Changes take effect immediately</p>
+                    </div>
+
+                    <!-- Live Invoice Preview -->
+                    <div class="table-card mb-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-eye me-2 text-primary"></i>Invoice Header Preview</h6>
+                        <div id="previewBox" class="p-3 rounded text-center"
+                             style="background:#fff;border:1px dashed #dee2e6;min-height:100px;">
+                            <img id="prevLogo" src="" alt="Logo"
+                                 style="max-height:50px;display:none;margin:0 auto 10px;border-radius:4px;">
+                            <div class="fw-bold fs-5" id="prevName">My Grocery Store</div>
+                            <div class="small opacity-75" id="prevAddress">Your Address Here</div>
+                            <div class="small opacity-75" id="prevPhone"></div>
+                            <div class="small opacity-50 mt-1" id="prevGstin"></div>
+                        </div>
+                        <p class="small text-muted mt-2 mb-0 text-center">Live preview as you type</p>
+                    </div>
+
+                    <!-- Subscription Info (read-only) -->
+                    <div class="table-card mb-4" th:if="${shop != null and shop.subscriptionEndDate != null}">
+                        <h6 class="fw-bold mb-3 settings-section">
+                            <i class="bi bi-calendar-check text-info me-2"></i>Subscription
+                        </h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Valid Until</span>
+                            <span class="fw-bold"
+                                  th:text="${#temporals.format(shop.subscriptionEndDate, 'dd MMM yyyy')}">—</span>
+                        </div>
+                        <div class="mt-2">
+                            <span th:if="${shop.subscriptionActive}"
+                                  class="badge bg-success">Active</span>
+                            <span th:unless="${shop.subscriptionActive}"
+                                  class="badge bg-danger">Expired — Contact support</span>
+                        </div>
+                    </div>
+
+                    <!-- User Management -->
+                    <div class="table-card">
+                        <h6 class="fw-bold mb-3 settings-section">
+                            <i class="bi bi-people-fill text-primary me-2"></i>User Accounts
+                        </h6>
+
+                        <div th:if="${users != null and !users.isEmpty()}">
+                            <div th:each="user : ${users}"
+                                 class="d-flex justify-content-between align-items-center
+                                        py-2 border-bottom">
+                                <div>
+                                    <div class="fw-semibold small" th:text="${user.fullName}">Name</div>
+                                    <div class="text-muted" style="font-size:11px;">
+                                        <span th:text="${user.username}">user</span> ·
+                                        <span th:text="${user.role.replace('ROLE_', '')}">CASHIER</span>
+                                        <span th:unless="${user.enabled}"
+                                              class="badge bg-secondary ms-1" style="font-size:9px">Disabled</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-1" th:unless="${user.username == currentUser}">
+                                    <form th:action="@{/settings/users/{id}/toggle(id=${user.id})}" method="post">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button type="submit"
+                                                class="btn btn-xs btn-outline-secondary py-0 px-2"
+                                                style="font-size:11px;"
+                                                th:text="${user.enabled} ? 'Disable' : 'Enable'">Toggle</button>
+                                    </form>
+                                    <form th:action="@{/settings/users/{id}/delete(id=${user.id})}" method="post"
+                                          onsubmit="return confirm('Delete this user?')">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2"
+                                                style="font-size:11px;">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add new user -->
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-primary w-100"
+                                    type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#addUserForm">
+                                <i class="bi bi-person-plus me-1"></i>Add User Account
+                            </button>
+                            <div class="collapse mt-3" id="addUserForm">
+                                <form th:action="@{/settings/users/new}" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <input type="text" name="fullName" class="form-control form-control-sm"
+                                                   placeholder="Full Name" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <input type="text" name="username" class="form-control form-control-sm"
+                                                   placeholder="Username" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <input type="password" name="password" class="form-control form-control-sm"
+                                                   placeholder="Password (min 6 chars)" required minlength="6">
+                                        </div>
+                                        <div class="col-12">
+                                            <select name="role" class="form-select form-select-sm">
+                                                <option value="ROLE_OWNER">Owner (Full Access)</option>
+                                                <option value="ROLE_CASHIER" selected>Cashier (Billing Only)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-sm btn-success w-100">
+                                                <i class="bi bi-person-check me-1"></i>Create Account
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Change own password -->
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-secondary w-100"
+                                    type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#changePwdForm">
+                                <i class="bi bi-key me-1"></i>Change My Password
+                            </button>
+                            <div class="collapse mt-3" id="changePwdForm">
+                                <form th:action="@{/settings/users/{id}/change-password(id=${users != null and !users.isEmpty() ? users[0].id : 0})}"
+                                      method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <input type="password" name="currentPassword"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Current Password" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <input type="password" name="newPassword"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="New Password" required minlength="6">
+                                        </div>
+                                        <div class="col-12">
+                                            <input type="password" name="confirmPassword"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Confirm New Password" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                                                <i class="bi bi-shield-lock me-1"></i>Update Password
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // ── Sidebar ───────────────────────────────────────
-        document.getElementById('sidebarToggle')
-            .addEventListener('click', function () {
-                document.getElementById('sidebar')
-                    .classList.toggle('collapsed');
-                document.getElementById('mainContent')
-                    .classList.toggle('expanded');
-            });
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js?v=25}"></script>
+<script>
+    
 
-        // ── Live Preview ──────────────────────────────────
-        function updatePreview() {
-            const name = document.querySelector(
-                '[name="shop.name"]').value
-                || 'My Grocery Store';
-            const addr = document.querySelector(
-                '[name="shop.address"]').value
-                || 'Your Address Here';
-            const phone = document.querySelector(
-                '[name="shop.phone"]').value
-                || '';
-            const gstin = document.querySelector(
-                '[name="shop.gstin"]').value
-                || '';
-            const logo = document.querySelector(
-                '[name="shop.logo-url"]').value
-                || '';
+    function updatePreview() {
+        const name    = document.querySelector('[id$="shopName"]')?.value || 'My Grocery Store';
+        const addr    = document.querySelector('[id$="address"]')?.value  || '';
+        const phone   = document.querySelector('[id$="phone"]')?.value    || '';
+        const gstin   = document.querySelector('[id$="gstin"]')?.value    || '';
+        const logoUrl = document.querySelector('[id$="logoUrl"]')?.value  || '';
 
-            if (logo.trim() !== '') {
-                document.getElementById('prevLogo').style.display = 'block';
-                document.getElementById('prevLogo').src = logo;
-            } else {
-                document.getElementById('prevLogo').style.display = 'none';
-            }
+        document.getElementById('prevName').textContent    = name;
+        document.getElementById('prevAddress').textContent = addr;
+        document.getElementById('prevPhone').textContent   = phone ? 'Ph: ' + phone : '';
+        document.getElementById('prevGstin').textContent   = gstin ? 'GSTIN: ' + gstin : '';
 
-            document.getElementById('prevName')
-                .textContent = name;
-            document.getElementById('prevAddress')
-                .textContent = addr;
-            document.getElementById('prevPhone')
-                .textContent = phone
-                    ? 'Phone: ' + phone : '';
-            document.getElementById('prevGstin')
-                .textContent = gstin
-                    ? 'GSTIN: ' + gstin : '';
+        const logoEl = document.getElementById('prevLogo');
+        if (logoUrl.trim()) {
+            logoEl.src = logoUrl; logoEl.style.display = 'block';
+        } else {
+            logoEl.style.display = 'none';
         }
+    }
 
-        // Attach live preview to all inputs
-        document.querySelectorAll(
-            'input, textarea').forEach(el => {
-                el.addEventListener('input', updatePreview);
-            });
+    document.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', updatePreview));
+    updatePreview();
+</script>
 
-        // Initial preview on load
-        updatePreview();
-    </script>
 </body>
-
 </html>
+
+
+
+

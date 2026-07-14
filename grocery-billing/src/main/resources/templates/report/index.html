@@ -6,7 +6,7 @@
     <title>Reports | Grocery Billing</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=8}">
     <style>
         .report-card {
             background: white;
@@ -54,23 +54,38 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-brand"><i class="bi bi-shop"></i><span>Grocery Bill</span></div>
     <nav class="sidebar-nav">
-        <a th:href="@{/}" class="nav-link"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
-        <a th:href="@{/products}" class="nav-link"><i class="bi bi-box-seam"></i><span>Products</span></a>
-        <a th:href="@{/suppliers}" class="nav-link">
-            <i class="bi bi-truck"></i><span>Suppliers</span>
+        <a th:href="@{/}" class="nav-link" th:classappend="${requestURI == '/'} ? 'active' : ''"><i class="bi bi-grid-1x2-fill text-primary"></i><span>Dashboard</span></a>
+        <a th:href="@{/products}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/products')} ? 'active' : ''"><i class="bi bi-box-fill text-success"></i><span>Products</span></a>
+        <a th:href="@{/suppliers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/suppliers')} ? 'active' : ''">
+            <i class="bi bi-truck-front-fill text-warning"></i><span>Suppliers</span>
         </a>
-        <a th:href="@{/purchases}" class="nav-link">
-            <i class="bi bi-cart-check"></i><span>Purchases</span>
+        <a th:href="@{/purchases}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/purchases')} ? 'active' : ''">
+            <i class="bi bi-bag-check-fill text-info"></i><span>Purchases</span>
         </a>
-        <a th:href="@{/customers}" class="nav-link"><i class="bi bi-people"></i><span>Customers</span></a>
-        <a th:href="@{/bills/new}" class="nav-link"><i class="bi bi-receipt"></i><span>New Bill</span></a>
-        <a th:href="@{/bills}" class="nav-link"><i class="bi bi-journal-text"></i><span>All Bills</span></a>
-        <a th:href="@{/credit}" class="nav-link"><i class="bi bi-credit-card"></i><span>Credit / Udhari</span></a>
-        <a th:href="@{/reports}" class="nav-link active"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
-    </nav>
-    <div class="sidebar-bottom">
-        <a th:href="@{/settings}" class="nav-link">
-            <i class="bi bi-gear"></i><span>Settings</span>
+        <a th:href="@{/customers}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/customers')} ? 'active' : ''"><i class="bi bi-people-fill text-danger"></i><span>Customers</span></a>
+        <a th:href="@{/bills/new}" class="nav-link" th:classappend="${requestURI != null and (requestURI == '/bills/new' or requestURI == '/bills/quick')} ? 'active' : ''"><i class="bi bi-file-earmark-plus-fill text-primary"></i><span>New Bill</span></a>
+        <a th:href="@{/bills}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/bills') and requestURI != '/bills/new' and !requestURI.contains('/quick')} ? 'active' : ''"><i class="bi bi-receipt text-info"></i><span>All Bills</span></a>
+        <a th:href="@{/credit}" class="nav-link" th:if="${features['enable_credit'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/credit')} ? 'active' : ''"><i class="bi bi-credit-card-fill text-danger"></i><span>Credit / Udhari</span></a>
+        <a th:href="@{/cashflow}" class="nav-link" th:if="${features['enable_cash_flow'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/cashflow')} ? 'active' : ''">
+            <i class="bi bi-wallet2 text-info"></i><span>Cash Flow</span>
+        </a>
+        <a th:href="@{/inventory}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/inventory')} ? 'active' : ''"><i class="bi bi-box-seam-fill text-dark"></i><span>Inventory</span></a>
+
+        <a th:href="@{/expenses}" class="nav-link" th:if="${features['enable_expenses'] == true}" th:classappend="${requestURI != null and requestURI.startsWith('/expenses')} ? 'active' : ''">
+            <i class="bi bi-receipt text-danger"></i><span>Expenses</span>
+        </a>
+
+
+
+        <!-- Accounting -->
+        <a th:href="@{/accounting/dashboard}" class="nav-link" th:if="${features['enable_accounting'] == true}"  th:classappend="${requestURI != null and requestURI.startsWith('/accounting')} ? 'active' : ''">
+            <i class="bi bi-book-half text-secondary"></i><span>Accounting</span>
+        </a>
+
+        <a th:href="@{/reports}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/reports')} ? 'active' : ''"><i class="bi bi-pie-chart-fill text-success"></i><span>Reports</span></a>
+        </nav><div class="sidebar-bottom">
+        <a th:href="@{/settings}" class="nav-link" th:classappend="${requestURI != null and requestURI.startsWith('/settings')} ? 'active' : ''">
+            <i class="bi bi-gear-fill"></i><span>Settings</span>
         </a>
     </div>
 </div>
@@ -175,64 +190,78 @@
                          style="width:48px;height:48px;font-size:22px">
                         <i class="bi bi-calendar-day text-primary"></i>
                     </div>
-                    <h6 class="fw-bold mb-1">Daily Report</h6>
+                    <h6 class="fw-bold mb-1">Daily Sales</h6>
                     <p class="text-muted small mb-0">View all bills for any specific date</p>
                 </a>
             </div>
             <div class="col-md-3">
                 <a th:href="@{/reports/monthly}" class="report-link-card">
-                    <div class="stat-icon bg-success bg-opacity-10 mb-3"
+                    <div class="stat-icon bg-primary bg-opacity-10 mb-3"
                          style="width:48px;height:48px;font-size:22px">
-                        <i class="bi bi-calendar-month text-success"></i>
+                        <i class="bi bi-calendar-month text-primary"></i>
                     </div>
-                    <h6 class="fw-bold mb-1">Monthly Report</h6>
-                    <p class="text-muted small mb-0">Month-wise sales summary for the year</p>
+                    <h6 class="fw-bold mb-1">Monthly Sales</h6>
+                    <p class="text-muted small mb-0">Month-wise sales summary</p>
                 </a>
             </div>
             <div class="col-md-3">
                 <a th:href="@{/reports/gst}" class="report-link-card">
                     <div class="stat-icon bg-warning bg-opacity-10 mb-3"
                          style="width:48px;height:48px;font-size:22px">
-                        <i class="bi bi-receipt-cutoff text-warning"></i>
+                        <i class="bi bi-bank text-warning"></i>
                     </div>
                     <h6 class="fw-bold mb-1">GST Report</h6>
-                    <p class="text-muted small mb-0">CGST + SGST breakdown by date range</p>
+                    <p class="text-muted small mb-0">CGST + SGST breakdown</p>
                 </a>
             </div>
             <div class="col-md-3">
                 <a th:href="@{/reports/credit}" class="report-link-card">
                     <div class="stat-icon bg-danger bg-opacity-10 mb-3"
                          style="width:48px;height:48px;font-size:22px">
-                        <i class="bi bi-credit-card text-danger"></i>
+                        <i class="bi bi-credit-card-fill text-danger"></i>
                     </div>
                     <h6 class="fw-bold mb-1">Credit Report</h6>
-                    <p class="text-muted small mb-0">Pending dues and payment history</p>
+                    <p class="text-muted small mb-0">Pending customer & supplier dues</p>
                 </a>
             </div>
-            <!-- Add as 5th report link card -->
-            <div class="col-md-3">
-                <a th:href="@{/reports/gstr1}" class="report-link-card">
-                    <div class="stat-icon bg-success bg-opacity-10 mb-3"
-                         style="width:48px;height:48px;font-size:22px">
-                        <i class="bi bi-file-earmark-excel text-success"></i>
-                    </div>
-                    <h6 class="fw-bold mb-1">GSTR-1 Export</h6>
-                    <p class="text-muted small mb-0">
-                        Export GST bills for CA filing
-                    </p>
-                </a>
-            </div>
-            <!-- ✅ ADD THIS RIGHT HERE -->
             <div class="col-md-3">
                 <a th:href="@{/reports/profit}" class="report-link-card">
                     <div class="stat-icon bg-success bg-opacity-10 mb-3"
                          style="width:48px;height:48px;font-size:22px">
-                        <i class="bi bi-currency-rupee text-success"></i>
+                        <i class="bi bi-graph-up-arrow text-success"></i>
                     </div>
                     <h6 class="fw-bold mb-1">Profit &amp; Loss</h6>
-                    <p class="text-muted small mb-0">
-                        Revenue vs cost, product margins
-                    </p>
+                    <p class="text-muted small mb-0">Revenue vs cost margins</p>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a th:href="@{/purchases}" class="report-link-card">
+                    <div class="stat-icon bg-info bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-bag-check-fill text-info"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Purchase Report</h6>
+                    <p class="text-muted small mb-0">All inward stock purchases</p>
+                </a>
+            </div>
+            <div class="col-md-3" th:if="${features['enable_expenses'] == true}">
+                <a th:href="@{/expenses}" class="report-link-card">
+                    <div class="stat-icon bg-danger bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-receipt text-danger"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Expenses</h6>
+                    <p class="text-muted small mb-0">Track &amp; manage business expenses</p>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a th:href="@{/inventory}" class="report-link-card">
+                    <div class="stat-icon bg-dark bg-opacity-10 mb-3"
+                         style="width:48px;height:48px;font-size:22px">
+                        <i class="bi bi-box-seam-fill text-dark"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Stock Report</h6>
+                    <p class="text-muted small mb-0">Dead stock, low stock, expiry</p>
                 </a>
             </div>
         </div>
@@ -251,7 +280,7 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold mb-0">
-                            <i class="bi bi-bar-chart me-2 text-primary"></i>
+                            <i class="bi bi-pie-chart-fill me-2 text-primary"></i>
                             Monthly Sales —
                             <span th:text="${currentYear}">2024</span>
                         </h6>
@@ -263,7 +292,7 @@
 
                     <div th:if="${!hasAnySales}"
                          class="text-center py-4 text-muted">
-                        <i class="bi bi-bar-chart"
+                        <i class="bi bi-pie-chart-fill text-success"
                            style="font-size:40px;opacity:0.2"></i>
                         <p class="mt-2 small mb-0">
                             No sales recorded this year yet.
@@ -430,34 +459,92 @@
         <!-- ══ ROW 4: EXPORT DATA (full width, separate from row above) ══ -->
         <div class="report-card">
             <h6 class="fw-bold mb-3">
-                <i class="bi bi-download me-2 text-success"></i>Export Data
+                <i class="bi bi-file-earmark-excel me-2 text-success"></i>Export Excel Reports
             </h6>
-            <form th:action="@{/reports/export/csv}" method="get"
-                  class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold">From Date</label>
-                    <input type="date" name="start" class="form-control"
-                           th:value="${#temporals.format(
-                               #temporals.createNow(), 'yyyy-MM-') + '01'}">
+            
+            <div class="row g-3 mb-3">
+                <!-- Sales -->
+                <div class="col-md-4">
+                    <div class="border rounded p-3 text-center bg-light h-100">
+                        <h6 class="fw-bold"><i class="bi bi-cart me-2 text-primary"></i>Sales Report</h6>
+                        <form method="get" action="/reports/export/excel">
+                            <input type="date" name="start" class="form-control form-control-sm mb-2" required>
+                            <input type="date" name="end" class="form-control form-control-sm mb-2" required>
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100"><i class="bi bi-download"></i> Download</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold">To Date</label>
-                    <input type="date" name="end" class="form-control"
-                           th:value="${#temporals.format(
-                               #temporals.createNow(), 'yyyy-MM-dd')}">
+                
+                <!-- Purchases -->
+                <div class="col-md-4">
+                    <div class="border rounded p-3 text-center bg-light h-100">
+                        <h6 class="fw-bold"><i class="bi bi-bag-check me-2 text-info"></i>Purchase Report</h6>
+                        <form method="get" action="/purchases/export">
+                            <p class="small text-muted mb-2 text-start">Downloads complete purchase ledger with all orders and returns.</p>
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100 mt-4"><i class="bi bi-download"></i> Download</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-success w-100">
-                        <i class="bi bi-filetype-csv me-2"></i>Download CSV
-                    </button>
+                
+                <!-- Expenses -->
+                <div class="col-md-4">
+                    <div class="border rounded p-3 text-center bg-light h-100">
+                        <h6 class="fw-bold"><i class="bi bi-cash-coin me-2 text-danger"></i>Expense Report</h6>
+                        <form method="get" action="/expenses/export">
+                            <input type="date" name="startDate" class="form-control form-control-sm mb-2">
+                            <input type="date" name="endDate" class="form-control form-control-sm mb-2">
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100"><i class="bi bi-download"></i> Download</button>
+                        </form>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="row g-3">
+                <!-- Stock -->
                 <div class="col-md-3">
-                    <a th:href="@{/reports/export/csv}"
-                       class="btn btn-outline-success w-100">
-                        <i class="bi bi-download me-2"></i>This Month (Quick)
-                    </a>
+                    <div class="border rounded p-3 text-center bg-light h-100">
+                        <h6 class="fw-bold"><i class="bi bi-box-seam me-2 text-dark"></i>Stock Report</h6>
+                        <form method="get" action="/inventory/export">
+                            <p class="small text-muted mb-2 text-start">Includes Dead Stock, Fast Moving, Expiry data.</p>
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100 mt-4"><i class="bi bi-download"></i> Download</button>
+                        </form>
+                    </div>
                 </div>
-            </form>
+                
+                <!-- Cash Flow -->
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center bg-light h-100">
+                        <h6 class="fw-bold"><i class="bi bi-wallet2 me-2 text-success"></i>Cash Flow Report</h6>
+                        <form method="get" action="/cashflow/export">
+                            <input type="month" name="month" class="form-control form-control-sm mb-2" required
+                                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM')}">
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100 mt-3"><i class="bi bi-download"></i> Download</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Customers -->
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center bg-light h-100">
+                        <h6 class="fw-bold"><i class="bi bi-people me-2 text-primary"></i>Customer Report</h6>
+                        <form method="get" action="/customers/export/excel">
+                            <p class="small text-muted mb-2 text-start">Downloads complete list of customers and loyalty details.</p>
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100 mt-4"><i class="bi bi-download"></i> Download</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Suppliers -->
+                <div class="col-md-3">
+                    <div class="border rounded p-3 text-center bg-light h-100">
+                        <h6 class="fw-bold"><i class="bi bi-truck me-2 text-warning"></i>Supplier Report</h6>
+                        <form method="get" action="/suppliers/export">
+                            <p class="small text-muted mb-2 text-start">Downloads complete list of suppliers and total payables.</p>
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100 mt-4"><i class="bi bi-download"></i> Download</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- ══ END ROW 4 ══ -->
 
@@ -468,11 +555,12 @@
 <!-- END main-content -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.getElementById('sidebarToggle').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-        document.getElementById('mainContent').classList.toggle('expanded');
-    });
-</script>
+<script th:src="@{/js/app.js?v=25}"></script>
+
+
 </body>
 </html>
+
+
+
+

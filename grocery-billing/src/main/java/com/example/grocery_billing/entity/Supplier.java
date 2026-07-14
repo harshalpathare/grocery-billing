@@ -22,6 +22,12 @@ public class Supplier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ── Shop (multi-tenant) ───────────────────────────────
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    @ToString.Exclude
+    private Shop shop;
+
     @NotBlank
     @Column(nullable = false, length = 100)
     private String name;

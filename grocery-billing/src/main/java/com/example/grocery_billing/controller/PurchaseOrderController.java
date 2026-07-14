@@ -20,6 +20,7 @@ public class PurchaseOrderController {
     private final PurchaseOrderService poService;
     private final SupplierService      supplierService;
     private final ProductService       productService;
+    private final ExcelPurchaseLedgerService excelPurchaseLedgerService;
 
     @GetMapping
     public String list(Model model) {
@@ -28,6 +29,13 @@ public class PurchaseOrderController {
         model.addAttribute("activePage", "purchases");
         model.addAttribute("pageTitle",  "Purchase Orders");
         return "purchase/list";
+    }
+
+    @GetMapping("/export")
+    public void exportPurchaseLedger(jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"purchase_ledger.xlsx\"");
+        excelPurchaseLedgerService.exportPurchaseLedger(response.getOutputStream());
     }
 
     @GetMapping("/new")
@@ -52,6 +60,8 @@ public class PurchaseOrderController {
             @RequestParam(defaultValue = "0")
             BigDecimal taxAmount,
             @RequestParam(required = false) String  notes,
+            @RequestParam(defaultValue = "PURCHASE") String type,
+            @RequestParam(defaultValue = "true") Boolean isGst,
             @RequestParam("productIds")
             List<Long>       productIds,
             @RequestParam("quantities")
@@ -75,7 +85,13 @@ public class PurchaseOrderController {
                         java.time.LocalDate.parse(orderDate));
             }
             po.setSupplierInvoiceNo(supplierInvoiceNo);
-            po.setTaxAmount(taxAmount);
+            
+            po.setType(PurchaseOrder.OrderType.valueOf(type));
+            po.setIsGst(isGst);
+            
+            // If it's not a GST purchase, force tax to 0
+            po.setTaxAmount(isGst ? taxAmount : BigDecimal.ZERO);
+            
             po.setNotes(notes);
 
             // Build items
@@ -160,4 +176,18 @@ public class PurchaseOrderController {
         }
         return "redirect:/purchases/" + id;
     }
+
+    @PostMapping("/bulk-delete")
+    public String bulkDelete(@RequestParam("ids") java.util.List<Long> ids, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            for (Long id : ids) {
+                poService.delete(id);
+            }
+            ra.addFlashAttribute("successMessage", "Selected purchases deleted successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error deleting purchases: " + e.getMessage());
+        }
+        return "redirect:/purchases";
+    }
+
 }

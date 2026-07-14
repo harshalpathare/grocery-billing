@@ -321,17 +321,17 @@ body.mode-58mm .item-name {
 <div class="receipt">
 
   <!-- ── SHOP HEADER ── -->
-  <div class="text-center" style="text-align: center; margin-bottom: 4px;" th:if="${@shopConfig.logoUrl != null and !@shopConfig.logoUrl.isEmpty()}">
-    <img th:src="${@shopConfig.logoUrl}" alt="Shop Logo" style="max-height: 45px; display: block; margin: 0 auto;">
+  <div class="text-center" style="text-align: center; margin-bottom: 4px;" th:if="${currentShop.logoUrl != null and !currentShop.logoUrl.isEmpty()}">
+    <img th:src="${currentShop.logoUrl}" alt="Shop Logo" style="max-height: 45px; display: block; margin: 0 auto;">
   </div>
-  <div class="shop-name" th:text="${@shopConfig.name}">
+  <div class="shop-name" th:text="${currentShop.shopName}">
     MY GROCERY STORE
   </div>
   <div class="shop-info">
-    <span th:text="${@shopConfig.address}">Address</span><br>
-    Ph: <span th:text="${@shopConfig.phone}">Phone</span>
-    <span th:if="${@shopConfig.gstin != null and !@shopConfig.gstin.isEmpty()}">
-            <br>GSTIN: <span th:text="${@shopConfig.gstin}"></span>
+    <span th:text="${currentShop.address}">Address</span><br>
+    Ph: <span th:text="${currentShop.phone}">Phone</span>
+    <span th:if="${currentShop.gstin != null and !currentShop.gstin.isEmpty()}">
+            <br>GSTIN: <span th:text="${currentShop.gstin}"></span>
         </span>
   </div>
 
@@ -376,7 +376,8 @@ body.mode-58mm .item-name {
   <table class="items-table">
     <thead>
     <tr>
-      <th style="width:42mm">Item</th>
+      <th style="width:36mm">Item</th>
+      <th class="center" style="width:12mm" th:if="${bill.isGst}">HSN</th>
       <th class="center" style="width:12mm">Qty</th>
       <th class="right" style="width:12mm">Rate</th>
       <th class="right" style="width:14mm">Amt</th>
@@ -389,6 +390,9 @@ body.mode-58mm .item-name {
                                ? item.productNameSnapshot
                                : item.product.nameEn}">
         Item
+      </td>
+      <td class="center" th:if="${bill.isGst}"
+          th:text="${item.product != null ? item.product.hsnCode : ''}">
       </td>
       <td class="center"
           th:text="${(item.displayQuantity != null ? item.displayQuantity : item.quantity).stripTrailingZeros().toPlainString()} + ' ' + ${(item.billingUnit != null && !item.billingUnit.isBlank()) ? item.billingUnit.toUpperCase() : ((item.product != null && item.product.unit != null) ? item.product.unit.toUpperCase() : 'PIECE')}">
@@ -535,13 +539,13 @@ body.mode-58mm .item-name {
       <hr class="divider">
     </div>
 
-        <span th:text="${@shopConfig.thankYouMsg}" style="display:block; margin-top:6px; font-weight:bold;">
+        <span th:text="${currentShop.thankYouMsg}" style="display:block; margin-top:6px; font-weight:bold;">
             Thank you for shopping with us!
         </span>
         
-    <div th:if="${@shopConfig.terms != null and !@shopConfig.terms.isEmpty()}" style="margin-top: 8px; text-align: left; font-size: 9px; padding-top: 5px; border-top: 1px dashed #ccc;">
+    <div th:if="${currentShop.terms != null and !currentShop.terms.isEmpty()}" style="margin-top: 8px; text-align: left; font-size: 9px; padding-top: 5px; border-top: 1px dashed #ccc;">
         <strong style="display:block; margin-bottom: 2px;">Terms & Conditions:</strong>
-        <div style="white-space: pre-wrap;" th:text="${@shopConfig.terms}"></div>
+        <div style="white-space: pre-wrap;" th:text="${currentShop.terms}"></div>
     </div>
     
 
@@ -568,3 +572,5 @@ body.mode-58mm .item-name {
 </body>
 
 </html>
+
+

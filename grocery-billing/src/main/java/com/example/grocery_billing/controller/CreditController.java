@@ -11,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,21 +24,33 @@ public class CreditController {
 
     private final CustomerService customerService;
     private final QrCodeService   qrCodeService;  // ✅ ADD
-    private final ShopConfig      shopConfig;      // ✅ ADD
+    private final ShopConfig      shopConfig;
+    private final com.example.grocery_billing.service.SupplierService supplierService;
+    private final com.example.grocery_billing.service.ExcelCreditReportService excelCreditReportService;
 
     // ─────────────────────────────────────────────────────
     // CREDIT OVERVIEW PAGE
     // ─────────────────────────────────────────────────────
     @GetMapping
-    public String creditOverview(Model model) {
-        List<Customer> customersWithDues =
-                customerService.getCustomersWithPendingBalance();
+    public String creditOverview(@RequestParam(required = false, defaultValue = "customer") String tab, Model model) {
+        List<Customer> customersWithDues = customerService.getCustomersWithPendingBalance();
+        List<com.example.grocery_billing.entity.Supplier> suppliersWithDues = supplierService.getSuppliersWithPendingBalance();
 
-        model.addAttribute("customers",    customersWithDues);
-        model.addAttribute("totalPending",
-                customerService.getTotalPendingBalance());
-        model.addAttribute("activePage",   "credit");
-        model.addAttribute("pageTitle",    "Credit / Udhari");
+        model.addAttribute("customers", customersWithDues);
+        model.addAttribute("totalCustomerPending", customerService.getTotalPendingBalance());
+        
+        model.addAttribute("suppliers", suppliersWithDues);
+        
+        BigDecimal totalSupplierPending = suppliersWithDues.stream()
+            .map(s -> (s.getTotalPayable() != null ? s.getTotalPayable() : BigDecimal.ZERO)
+                      .subtract(s.getTotalPaid() != null ? s.getTotalPaid() : BigDecimal.ZERO))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        model.addAttribute("totalSupplierPending", totalSupplierPending);
+        
+        model.addAttribute("shopName", shopConfig.getName());
+        model.addAttribute("activeTab", tab);
+        model.addAttribute("activePage", "credit");
+        model.addAttribute("pageTitle", "Credit / Udhari");
         return "credit/overview";
     }
     @GetMapping("/qr")
@@ -216,5 +230,40 @@ public class CreditController {
         }
 
         return "redirect:/credit";
+    }
+
+    // ─────────────────────────────────────────────────────
+    // SUPPLIER PAYMENT (Quick Pay)
+    // ─────────────────────────────────────────────────────
+    @PostMapping("/pay/supplier/{supplierId}")
+    public String processSupplierPayment(
+            @PathVariable Long supplierId,
+            @RequestParam BigDecimal amount,
+            RedirectAttributes redirectAttributes) {
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please enter a valid payment amount.");
+            return "redirect:/credit?tab=supplier";
+        }
+
+        try {
+            supplierService.recordPayment(supplierId, amount);
+            redirectAttributes.addFlashAttribute("successMessage", "Supplier payment of ₹" + amount + " recorded!");
+        } catch (Exception e) {
+            log.error("Error recording supplier payment", e);
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/credit?tab=supplier";
+    }
+
+    // ─────────────────────────────────────────────────────
+    // EXPORT DUES REPORT
+    // ─────────────────────────────────────────────────────
+    @GetMapping("/export")
+    public void exportDuesReport(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"dues_report.xlsx\"");
+        excelCreditReportService.exportDuesReport(response.getOutputStream());
     }
 }

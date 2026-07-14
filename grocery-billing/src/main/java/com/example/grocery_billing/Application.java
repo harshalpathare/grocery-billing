@@ -13,11 +13,7 @@ public class Application {
 		System.out.println("========================================");
 		System.out.println("  Grocery Billing System Started!");
 		System.out.println("  Open: http://localhost:8080");
-		System.out.println("========================================");
-	}
-
+        System.out.println("========================================");
+    }
 }
-
-
-
 

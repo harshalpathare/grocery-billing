@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -25,6 +26,12 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // ── Shop (multi-tenant) ───────────────────────────────
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    @ToString.Exclude
+    private Shop shop;
 
     // ── English name ──────────────────────────────────────
     // At least one of nameEn, nameHi, nameMr must be provided
@@ -93,6 +100,38 @@ public class Product {
     @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
+
+    // ── NEW FIELDS ───────────────────────────────────────
+    @Size(max = 100)
+    @Column(name = "barcode", length = 100)
+    private String barcode;
+
+    @Size(max = 100)
+    @Column(name = "sku", length = 100)
+    private String sku;
+
+    @Size(max = 100)
+    @Column(name = "brand", length = 100)
+    private String brand;
+
+    @Column(name = "mrp", precision = 10, scale = 2)
+    private BigDecimal mrp;
+
+    @DecimalMin(value = "0.0")
+    @Column(name = "min_stock")
+    @Builder.Default
+    private BigDecimal minStock = BigDecimal.ZERO;
+
+    @Column(name = "expiry_date")
+    private LocalDate expiryDate;
+
+    @Size(max = 100)
+    @Column(name = "batch_number", length = 100)
+    private String batchNumber;
+
+    @Size(max = 255)
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
 
     // ── Timestamps ───────────────────────────────────────
     @Column(name = "created_at", updatable = false)

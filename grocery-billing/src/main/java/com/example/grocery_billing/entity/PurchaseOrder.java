@@ -44,6 +44,20 @@ public class PurchaseOrder {
     @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
+    // Order Type
+    public enum OrderType {
+        PURCHASE, RETURN
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_type", length = 20)
+    @Builder.Default
+    private OrderType type = OrderType.PURCHASE;
+
+    @Column(name = "is_gst")
+    @Builder.Default
+    private Boolean isGst = true;
+
     @Column(name = "subtotal", precision = 12, scale = 2)
     @Builder.Default
     private BigDecimal subtotal = BigDecimal.ZERO;

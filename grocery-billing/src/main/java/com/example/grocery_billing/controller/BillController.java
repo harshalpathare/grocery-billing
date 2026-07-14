@@ -1,13 +1,14 @@
 package com.example.grocery_billing.controller;
-import com.example.grocery_billing.config.ShopConfig;
 import com.example.grocery_billing.entity.Bill;
 import com.example.grocery_billing.entity.Customer;
 import com.example.grocery_billing.entity.Product;
+import com.example.grocery_billing.entity.Shop;
 import com.example.grocery_billing.repository.TransactionRepository;
 import com.example.grocery_billing.service.BillService;
 import com.example.grocery_billing.service.CustomerService;
 import com.example.grocery_billing.service.ProductService;
 import com.example.grocery_billing.service.QrCodeService;
+import com.example.grocery_billing.service.ShopService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequestMapping("/bills")
@@ -27,12 +29,14 @@ import java.util.Map;
 @Slf4j
 public class BillController {
 
-    private final ShopConfig            shopConfig;
+    private final ShopService           shopService;
     private final BillService           billService;
     private final CustomerService       customerService;
     private final ProductService        productService;
     private final QrCodeService         qrCodeService;
     private final TransactionRepository transactionRepository;
+    private final com.example.grocery_billing.service.SmsService            smsService;
+    private final com.example.grocery_billing.service.ShopFeatureService    shopFeatureService;
 
     // ─────────────────────────────────────────────────────
     // LIST ALL BILLS
@@ -138,9 +142,55 @@ public class BillController {
         model.addAttribute("upiQrBase64", upiQrBase64);
         model.addAttribute("upiId",
                 qrCodeService.isUpiConfigured()
-                        ? shopConfig.getUpiId() : null);
+                        ? shopService.getEffectiveUpiId() : null);
         model.addAttribute("pageTitle", "Receipt " + bill.getBillNo());
         return "bill/receipt";
+    }
+
+    // ─────────────────────────────────────────────────────
+    // API: FETCH BILL BY NUMBER (FOR RETURNS)
+    // ─────────────────────────────────────────────────────
+    @GetMapping("/api/by-number/{billNo}")
+    @ResponseBody
+    public ResponseEntity<?> getBillByNumber(@PathVariable String billNo) {
+        // Find the bill
+        Long shopId = com.example.grocery_billing.config.ShopContext.getShopId();
+        Bill bill;
+        if (shopId != null) {
+            bill = billService.getAllBills().stream()
+                .filter(b -> b.getBillNo().equalsIgnoreCase(billNo) && b.getShop().getId().equals(shopId))
+                .findFirst().orElse(null);
+        } else {
+            bill = billService.getAllBills().stream()
+                .filter(b -> b.getBillNo().equalsIgnoreCase(billNo))
+                .findFirst().orElse(null);
+        }
+
+        if (bill == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "Bill not found"));
+        }
+
+        // Map to a simpler structure to avoid LAZY fetching serialization errors
+        List<Map<String, Object>> items = bill.getBillItems().stream().map(item -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", item.getId());
+            map.put("productId", item.getProduct() != null ? item.getProduct().getId() : null);
+            map.put("productName", item.getProductNameSnapshot());
+            map.put("quantity", item.getQuantity());
+            map.put("unitPrice", item.getUnitPrice());
+            map.put("itemTotal", item.getItemTotal());
+            map.put("isReturn", item.getIsReturn());
+            return map;
+        }).toList();
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id", bill.getId());
+        response.put("billNo", bill.getBillNo());
+        response.put("billDate", bill.getBillDate());
+        response.put("totalAmount", bill.getTotalAmount());
+        response.put("items", items);
+
+        return ResponseEntity.ok(response);
     }
 
     // ─────────────────────────────────────────────────────
@@ -167,6 +217,7 @@ public class BillController {
             @RequestParam(value = "itemNames", required = false)  List<String> itemNames,
             @RequestParam(value = "itemUnits", required = false)  List<String> itemUnits,
             @RequestParam(value = "gstPercents", required = false) List<BigDecimal> gstPercents,
+            @RequestParam(value = "isReturns", required = false)   List<Boolean>    isReturns,
             @RequestParam("quantities")            List<BigDecimal> quantities,
             @RequestParam("unitPrices")            List<BigDecimal> unitPrices,
             @RequestParam(defaultValue = "false")  boolean    isQuickBill,
@@ -309,13 +360,16 @@ public class BillController {
                     productId = customProduct.getId();
                 }
 
+                Boolean isReturn = (isReturns != null && i < isReturns.size() && isReturns.get(i) != null) ? isReturns.get(i) : false;
+
                 if (productId != null) {
                     items.add(new BillService.BillItemRequest(
                             productId,
                             quantity,
                             unitPrice,
                             invoiceLang,
-                            rowUnit));
+                            rowUnit,
+                            isReturn));
                 }
             }
 
@@ -338,6 +392,18 @@ public class BillController {
                     savedBill.getPaymentStatus(),
                     savedBill.getPaymentMethod());
 
+            // ── STEP 7: Send SMS Notification ─────────────────
+            Map<String, Boolean> features = shopFeatureService.getFeaturesForCurrentShop();
+            if (Boolean.TRUE.equals(features.get("enable_sms")) && savedBill.getCustomer() != null) {
+                try {
+                    Shop shop = shopService.requireCurrentShop();
+                    String shopName = shop != null ? shop.getShopName() : "Our Shop";
+                    smsService.sendBillSms(savedBill.getCustomer(), savedBill, shopName);
+                } catch (Exception ex) {
+                    log.error("Failed to send SMS: {}", ex.getMessage());
+                }
+            }
+
             redirectAttributes.addFlashAttribute("successMessage",
                     "Bill " + savedBill.getBillNo()
                             + " created successfully!");
@@ -349,8 +415,8 @@ public class BillController {
 
         } catch (Exception e) {
             log.error("Error creating bill: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Error: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Failed to create bill.";
+            redirectAttributes.addFlashAttribute("errorMessage", msg);
             
             if (isQuickBill) {
                 return "redirect:/bills/quick";
@@ -441,7 +507,7 @@ public class BillController {
         model.addAttribute("upiQrBase64",         upiQrBase64);
         model.addAttribute("upiId",
                 qrCodeService.isUpiConfigured()
-                        ? shopConfig.getUpiId() : null);
+                        ? shopService.getEffectiveUpiId() : null);
         model.addAttribute("activePage", "bills");
         model.addAttribute("pageTitle",  "Bill " + bill.getBillNo());
         return "bill/view";
@@ -484,7 +550,7 @@ public class BillController {
             if (qr != null) {
                 result.put("status", "ok");
                 result.put("qr",     qr);
-                result.put("upiId",  shopConfig.getUpiId());
+                result.put("upiId",  shopService.getEffectiveUpiId());
             } else {
                 result.put("status",  "error");
                 result.put("message", "UPI not configured");
@@ -517,4 +583,18 @@ public class BillController {
             return null;
         }
     }
+
+    @PostMapping("/bulk-delete")
+    public String bulkDelete(@RequestParam("ids") java.util.List<Long> ids, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            for (Long id : ids) {
+                billService.deleteBill(id);
+            }
+            ra.addFlashAttribute("successMessage", "Selected bills deleted successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error deleting bills: " + e.getMessage());
+        }
+        return "redirect:/bills";
+    }
+
 }

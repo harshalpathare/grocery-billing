@@ -29,6 +29,12 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ── Shop (multi-tenant) ───────────────────────────────
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    @ToString.Exclude
+    private Shop shop;
+
     @NotBlank(message = "Customer name is required")
     @Size(max = 100)
     @Column(nullable = false, length = 100)
@@ -37,7 +43,7 @@ public class Customer {
     // Phone is unique — no two customers with same number
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^[6-9]\\d{9}$", message = "Enter valid 10-digit Indian mobile number")
-    @Column(nullable = false, unique = true, length = 15)
+    @Column(nullable = false, length = 15)
     private String phone;
 
     @Size(max = 255)
@@ -64,6 +70,16 @@ public class Customer {
 
     @Column(name = "notes", length = 500)
     private String notes;
+
+    @Size(max = 15)
+    @Column(length = 15)
+    private String gstin;
+
+    @Column(name = "credit_limit", precision = 12, scale = 2)
+    private BigDecimal creditLimit = BigDecimal.ZERO;
+
+    @Column(name = "loyalty_points")
+    private Integer loyaltyPoints = 0;
 
     @Column(nullable = false)
     private Boolean active = true;

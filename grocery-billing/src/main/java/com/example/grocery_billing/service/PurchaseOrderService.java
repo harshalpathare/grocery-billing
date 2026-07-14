@@ -21,6 +21,8 @@ public class PurchaseOrderService {
         private final PurchaseOrderRepository     poRepository;
         private final ProductRepository           productRepository;
         private final SupplierRepository          supplierRepository;
+        private final ShopRepository              shopRepository;
+        private final CashFlowRepository          cashFlowRepository;
 
     // ── READ ─────────────────────────────────────────────
     public List<PurchaseOrder> getAll() {
@@ -38,6 +40,10 @@ public class PurchaseOrderService {
     public List<PurchaseOrder> getBySupplier(Long supplierId) {
         return poRepository.findBySupplierId(supplierId,
                 Sort.by(Sort.Direction.DESC, "orderDate"));
+    }
+
+    public List<PurchaseOrder> getPurchasesBetween(LocalDate start, LocalDate end) {
+        return poRepository.findByOrderDateBetweenOrderByOrderDateDesc(start, end);
     }
 
     // ── GENERATE PO NUMBER ────────────────────────────────
@@ -83,7 +89,12 @@ public class PurchaseOrderService {
             if (product != null && item.getQuantity() != null) {
                 BigDecimal current = product.getStockQty() != null
                         ? product.getStockQty() : BigDecimal.ZERO;
-                BigDecimal updated = current.subtract(item.getQuantity());
+                BigDecimal updated;
+                if (po.getType() == PurchaseOrder.OrderType.RETURN) {
+                    updated = current.add(item.getQuantity()); // Reverse the return
+                } else {
+                    updated = current.subtract(item.getQuantity()); // Reverse the purchase
+                }
                 product.setStockQty(updated.max(BigDecimal.ZERO));
                 productRepository.save(product);
             }
@@ -100,9 +111,21 @@ public class PurchaseOrderService {
                         supplier.getTotalPayable() != null
                                 ? supplier.getTotalPayable()
                                 : BigDecimal.ZERO;
-                supplier.setTotalPayable(
-                        current.subtract(po.getTotalAmount())
-                                .max(BigDecimal.ZERO));
+                if (po.getType() == PurchaseOrder.OrderType.RETURN) {
+                    supplier.setTotalPayable(current.add(po.getTotalAmount())); // Reverse the return
+                } else {
+                    supplier.setTotalPayable(
+                            current.subtract(po.getTotalAmount())
+                                    .max(BigDecimal.ZERO));
+                }
+                
+                // Reverse the amount paid on this PO from supplier totalPaid
+                BigDecimal poPaid = po.getAmountPaid() != null ? po.getAmountPaid() : BigDecimal.ZERO;
+                if (poPaid.compareTo(BigDecimal.ZERO) > 0 && po.getType() != PurchaseOrder.OrderType.RETURN) {
+                    BigDecimal currentPaid = supplier.getTotalPaid() != null ? supplier.getTotalPaid() : BigDecimal.ZERO;
+                    supplier.setTotalPaid(currentPaid.subtract(poPaid).max(BigDecimal.ZERO));
+                }
+
                 supplier.updateBalance();
                 supplierRepository.save(supplier);
             }
@@ -114,8 +137,11 @@ public class PurchaseOrderService {
     public void markAsPaid(Long id, BigDecimal amountPaid) {
         PurchaseOrder po = getById(id);
 
-        po.setAmountPaid(amountPaid != null
-                ? amountPaid : po.getTotalAmount());
+        BigDecimal alreadyPaid = po.getAmountPaid() != null ? po.getAmountPaid() : BigDecimal.ZERO;
+        BigDecimal newAmountPaid = amountPaid != null ? amountPaid : po.getTotalAmount();
+        BigDecimal difference = newAmountPaid.subtract(alreadyPaid);
+
+        po.setAmountPaid(newAmountPaid);
 
         BigDecimal total = po.getTotalAmount() != null
                 ? po.getTotalAmount() : BigDecimal.ZERO;
@@ -136,7 +162,7 @@ public class PurchaseOrderService {
         poRepository.save(po);
 
         // ✅ UPDATE SUPPLIER HERE — only from PO pay
-        if (po.getSupplier() != null) {
+        if (po.getSupplier() != null && difference.compareTo(BigDecimal.ZERO) != 0) {
             Supplier supplier = supplierRepository
                     .findById(po.getSupplier().getId())
                     .orElse(null);
@@ -146,10 +172,22 @@ public class PurchaseOrderService {
                                 ? supplier.getTotalPaid()
                                 : BigDecimal.ZERO;
                 supplier.setTotalPaid(
-                        currentPaid.add(paid));
+                        currentPaid.add(difference).max(BigDecimal.ZERO));
                 supplier.updateBalance();
                 supplierRepository.save(supplier);
             }
+        }
+        
+        // ✅ Automatic Cash Flow (OUT)
+        if (difference.compareTo(BigDecimal.ZERO) > 0) {
+            CashFlow cf = new CashFlow();
+            cf.setShop(po.getSupplier() != null ? po.getSupplier().getShop() : null);
+            cf.setTransactionDate(LocalDate.now());
+            cf.setType(CashFlow.TransactionType.OUT);
+            cf.setAmount(difference);
+            cf.setCategory("Purchases");
+            cf.setDescription("PO #" + po.getPoNumber());
+            cashFlowRepository.save(cf);
         }
     }
     @Transactional
@@ -184,11 +222,16 @@ public class PurchaseOrderService {
             BigDecimal currentStock = product.getStockQty() != null
                     ? product.getStockQty() : BigDecimal.ZERO;
             BigDecimal addQty = req.quantity();
-            product.setStockQty(currentStock.add(addQty));
+            
+            if (po.getType() == PurchaseOrder.OrderType.RETURN) {
+                // Reverse stock
+                product.setStockQty(currentStock.subtract(addQty).max(BigDecimal.ZERO));
+            } else {
+                product.setStockQty(currentStock.add(addQty));
+                // ✅ Update product cost price ONLY on purchase, not on return
+                product.setCostPrice(req.unitCost());
+            }
 
-            // ✅ Update product cost price
-            // Uses the latest purchase price
-            product.setCostPrice(req.unitCost());
             productRepository.save(product);
 
             log.info("Stock updated: {} +{} = {}",
@@ -212,8 +255,18 @@ public class PurchaseOrderService {
                         supplier.getTotalPayable() != null
                                 ? supplier.getTotalPayable()
                                 : BigDecimal.ZERO;
-                supplier.setTotalPayable(
-                        current.add(saved.getTotalAmount()));
+                
+                if (po.getType() == PurchaseOrder.OrderType.RETURN) {
+                    // It's a return, we subtract from payable
+                    supplier.setTotalPayable(
+                            current.subtract(saved.getTotalAmount())
+                                    .max(BigDecimal.ZERO));
+                } else {
+                    // It's a purchase, we add to payable
+                    supplier.setTotalPayable(
+                            current.add(saved.getTotalAmount()));
+                }
+                
                 supplier.updateBalance();
                 supplierRepository.save(supplier);
             }

@@ -6,6 +6,7 @@
     <title>Quick Bill | POS Mode</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --pos-bg: #f4f7fb;
@@ -27,7 +28,7 @@
         body {
             background: var(--pos-bg);
             color: var(--pos-text);
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Noto Sans Devanagari', 'Segoe UI', system-ui, sans-serif;
             margin: 0;
             min-height: 100vh;
             overflow: auto;
@@ -64,11 +65,12 @@
             letter-spacing: 1px;
         }
         /* ── LAYOUT ── */
+        body { overflow: hidden; margin: 0; padding: 0; }
         .pos-layout {
             display: flex;
-            height: calc(100vh - 56px);
-            /* leave space for the fixed topbar */
-            margin-top: 56px;
+            height: 100vh;
+            padding-top: 56px;
+            box-sizing: border-box;
             width: 100%;
             overflow-x: visible;
         }
@@ -82,7 +84,7 @@
             /* keep the summary visible while left column scrolls */
             position: sticky;
             top: 0;
-            align-self: flex-start;
+            align-self: stretch;
             height: 100%;
             min-width: 0;
             min-height: 0;
@@ -100,6 +102,7 @@
             padding: 16px;
             /* allow dropdown/panel to escape — avoid clipping category panel */
             overflow: visible;
+            min-height: 0;
         }
         .pos-quick-section {
             background: var(--pos-card);
@@ -114,6 +117,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-top: 12px;
+            flex: 0 0 auto;
         }
         .pos-shelf { padding: 10px; }
         /* ensure category shelf can position an absolute panel */
@@ -185,17 +189,19 @@
             background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
             color: var(--pos-text);
             border-radius: 999px;
-            padding: 9px 14px;
+            padding: 11px 14px 9px;
             font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
-            min-height: 40px;
+            min-height: 44px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
             box-shadow: 0 1px 2px rgba(15,23,42,0.04);
             transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+            line-height: 1.6;
+            overflow: visible;
         }
         .pos-chip.active {
             background: linear-gradient(180deg, #5fa0ff 0%, #4f97ff 100%);
@@ -286,7 +292,7 @@
             border-left: 1px solid var(--pos-border);
             display: flex;
             flex-direction: column;
-            padding: 16px;
+            padding: 12px 14px;
         }
         .pos-right-body {
             flex: 1 1 auto;
@@ -298,8 +304,8 @@
         .pos-right-pay {
             flex: 0 0 auto;
             border-top: 1px solid var(--pos-border);
-            padding-top: 16px;
-            margin-top: 12px;
+            padding-top: 12px;
+            margin-top: 8px;
             background: var(--pos-card);
         }
         /* ── SEARCH BOX ── */
@@ -435,6 +441,12 @@
             .pos-right { position: relative; top: auto; height: auto; }
             /* Prevent double-tap zoom on buttons */
             button, a, input, select { touch-action: manipulation; }
+            /* Item rows — allow wrapping on very narrow screens */
+            .pos-item-row { flex-wrap: wrap !important; padding: 8px !important; }
+            .pos-item-name-wrap { flex: 1 1 100% !important; min-width: 0 !important; max-width: 100% !important; padding: 0 0 6px 0 !important; }
+            .pos-item-price-wrap { flex: 1 1 auto !important; }
+            /* Topbar — wrap on small screens */
+            .pos-topbar { flex-wrap: wrap; height: auto; min-height: 56px; padding: 8px 12px; gap: 8px; }
         }
         @media (max-width: 900px) and (min-width: 701px) {
             button, a, input, select { touch-action: manipulation; }
@@ -536,8 +548,8 @@
             background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
             border: 1px solid var(--pos-border);
             border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 6px 16px rgba(15,23,42,0.05);
+            padding: 10px 12px;
+            box-shadow: 0 4px 12px rgba(15,23,42,0.04);
         }
         .pos-summary-row {
             display: flex;
@@ -546,11 +558,11 @@
             padding: 4px 0;
         }
         .pos-grand-total {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
             color: var(--pos-green);
-            margin: 10px 0 2px;
-            padding-top: 10px;
+            margin: 6px 0 2px;
+            padding-top: 8px;
             border-top: 1px dashed var(--pos-border);
             line-height: 1.2;
         }
@@ -563,9 +575,9 @@
         /* Payment buttons */
         .pos-pay-btn {
             border: none;
-            border-radius: 10px;
-            padding: 16px;
-            font-size: 16px;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
             display: flex;
@@ -574,8 +586,8 @@
             gap: 8px;
             transition: transform 0.1s, opacity 0.2s;
             width: 100%;
-            min-height: 52px;
-            margin-bottom: 10px;
+            min-height: 46px;
+            margin-bottom: 8px;
         }
         .pos-pay-btn:hover { transform: scale(1.02); }
         .pos-pay-btn:active { transform: scale(0.98); }
@@ -704,9 +716,9 @@
         Quick Bill
         <span class="pos-badge">POS MODE</span>
     </div>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
-        <span style="color:var(--pos-muted);font-size:13px;" id="posTime"></span>
-        <div class="pos-lang-wrap">
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+        <span style="color:var(--pos-muted);font-size:13px;" id="posTime" class="d-none d-xl-inline text-nowrap"></span>
+        <div class="pos-lang-wrap d-none d-md-flex text-nowrap">
             <span class="pos-lang-label">Item Name</span>
             <select id="langSelector" class="pos-lang-select" aria-label="Item name language">
                 <option value="en" selected>English</option>
@@ -714,7 +726,7 @@
                 <option value="mr">Marathi</option>
             </select>
         </div>
-        <div class="btn-group btn-group-sm" role="group" aria-label="GST mode">
+        <div class="btn-group btn-group-sm text-nowrap" role="group" aria-label="GST mode">
             <button type="button" class="btn btn-outline-secondary" id="gstModeBtn" onclick="setQuickBillGst(true)">
                 GST
             </button>
@@ -722,24 +734,37 @@
                 Non-GST
             </button>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openQuickManualItemModal()">
-            <i class="bi bi-plus-circle me-1"></i>Add Item
+        <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" onclick="openQuickManualItemModal()">
+            <i class="bi bi-plus-circle"></i><span class="d-none d-xl-inline ms-1">Add Item</span>
         </button>
-        <button type="button" class="btn btn-sm btn-success" onclick="openInlineProductModal()">
-            <i class="bi bi-plus-circle me-1"></i>Add Product
+        <button type="button" class="btn btn-sm btn-success text-nowrap" onclick="openInlineProductModal()">
+            <i class="bi bi-plus-circle"></i><span class="d-none d-xl-inline ms-1">Add Product</span>
         </button>
-        <span class="shortcut-hint">F2 = Search</span>
-        <span class="shortcut-hint">F10 = Save</span>
-        <span class="shortcut-hint">Esc = Clear</span>
-        <a th:href="@{/bills/new}" style="color:var(--pos-muted);font-size:13px;text-decoration:none;">
-            <i class="bi bi-arrow-left me-1"></i>Full Mode
+        <span class="shortcut-hint d-none d-xxl-inline text-nowrap">F2 = Search</span>
+        <span class="shortcut-hint d-none d-xxl-inline text-nowrap">F10 = Save</span>
+        <span class="shortcut-hint d-none d-xxl-inline text-nowrap">Esc = Clear</span>
+
+        <!-- POS ADVANCED FEATURES DROPDOWN -->
+        <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="More Options">
+                <i class="bi bi-three-dots-vertical"></i><span class="d-none d-xl-inline ms-1">More</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><a class="dropdown-item" href="#" onclick="holdCurrentBill()"><i class="bi bi-pause-circle text-warning me-2"></i>Hold Bill</a></li>
+                <li><a class="dropdown-item" href="#" onclick="openResumeModal()"><i class="bi bi-play-circle text-info me-2"></i>Resume Bill</a></li>
+                <li><a class="dropdown-item" href="#" onclick="openReturnModal()"><i class="bi bi-arrow-return-left text-danger me-2"></i>Return / Exchange</a></li>
+                <li><a class="dropdown-item" href="#" onclick="openReprintModal()"><i class="bi bi-printer text-secondary me-2"></i>Reprint Bill</a></li>
+            </ul>
+        </div>
+        <a th:href="@{/bills/new}" style="color:var(--pos-muted);font-size:13px;text-decoration:none;" class="d-none d-xxl-inline text-nowrap" title="Full Mode">
+            <i class="bi bi-arrow-left"></i><span class="ms-1">Full Mode</span>
         </a>
-        <a th:href="@{/}" style="color:var(--pos-muted);font-size:13px;text-decoration:none;">
-            <i class="bi bi-house me-1"></i>Dashboard
+        <a th:href="@{/}" style="color:var(--pos-muted);font-size:13px;text-decoration:none;" class="d-none d-xxl-inline text-nowrap" title="Dashboard">
+            <i class="bi bi-house"></i><span class="ms-1">Dashboard</span>
         </a>
         <!-- Recent Bills button -->
-        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleRecentBills()" title="Recent Bills">
-            <i class="bi bi-clock-history me-1"></i>Recent Bills
+        <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="toggleRecentBills()" title="Recent Bills">
+            <i class="bi bi-clock-history"></i><span class="d-none d-xxl-inline ms-1">Recent Bills</span>
         </button>
     </div>
 </div>
@@ -793,12 +818,12 @@
         </a>
     </div>
     <div th:if="${recentBills == null or recentBills.isEmpty()}" style="text-align:center;color:var(--pos-muted);padding:40px 0;">
-        <i class="bi bi-receipt" style="font-size:32px;opacity:0.3;"></i>
+        <i class="bi bi-file-earmark-plus-fill text-primary" style="font-size:32px;opacity:0.3;"></i>
         <p style="margin-top:10px;font-size:13px;">No bills yet</p>
     </div>
     <div style="margin-top:12px;text-align:center;">
         <a th:href="@{/bills}" class="btn btn-sm btn-outline-primary" style="width:100%;">
-            <i class="bi bi-journal-text me-1"></i>View All Bills
+            <i class="bi bi-journals me-1"></i>View All Bills
         </a>
     </div>
 </div>
@@ -812,7 +837,7 @@
             <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 12px;"></button>
         </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" style="font-size:14px; padding: 10px 15px;">
+        <div th:if="${errorMessage != null && !errorMessage.contains('Credit Limit Exceeded')}" class="alert alert-danger alert-dismissible fade show shadow-sm" style="font-size:14px; padding: 10px 15px;">
             <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" style="padding: 12px;"></button>
         </div>
@@ -822,7 +847,7 @@
     <div class="pos-left">
 
         <!-- Search bar -->
-        <div style="position:relative">
+        <div style="position:relative; flex: 0 0 auto;">
             <input type="text" id="posSearch" class="pos-search"
                    placeholder="🔍  Type product name in English, Hindi or Marathi..."
                    autocomplete="off">
@@ -901,12 +926,12 @@
         <div class="pos-right-body">
 
             <!-- Bill number -->
-            <div style="color:var(--pos-muted);font-size:12px;margin-bottom:12px;">
+            <div style="color:var(--pos-muted);font-size:12px;margin-bottom:8px;">
                 Bill: <span style="color:var(--pos-text);font-weight:600;" th:text="${nextBillNo}">BILL-2024-0001</span>
             </div>
 
             <!-- Customer selector -->
-            <div style="margin-bottom:12px;">
+            <div style="margin-bottom:8px;">
                 <label style="font-size:12px;color:var(--pos-muted);margin-bottom:4px;display:block;">Customer</label>
                 <div class="customer-search-wrap">
                     <input type="text" id="customerSearch" class="customer-search-input"
@@ -929,7 +954,7 @@
             </div>
 
             <!-- Discount -->
-            <div style="margin-bottom:12px;">
+            <div style="margin-bottom:10px;">
                 <label style="font-size:12px;color:var(--pos-muted);margin-bottom:4px;display:block;">Discount (₹)</label>
                 <input type="number" id="posDiscount" class="pos-discount-input"
                        placeholder="0.00" value="0" min="0" step="0.01"
@@ -960,7 +985,7 @@
 
         <!-- Payment Buttons -->
         <div class="pos-right-pay">
-            <p style="font-size:12px;color:var(--pos-muted);margin-bottom:10px;">
+            <p style="font-size:12px;color:var(--pos-muted);margin-bottom:6px;">
                 <i class="bi bi-keyboard me-1"></i>Choose payment method:
             </p>
             <button type="button" class="pos-pay-btn pos-pay-cash" onclick="showConfirmModal('CASH')" id="btnCash">
@@ -971,7 +996,7 @@
                 <i class="bi bi-qr-code"></i> UPI
             </button>
             <button type="button" class="pos-pay-btn pos-pay-credit" onclick="showConfirmModal('CREDIT')" id="btnCredit">
-                <i class="bi bi-credit-card"></i> Credit (Udhari)
+                <i class="bi bi-credit-card-fill text-danger"></i> Credit (Udhari)
             </button>
         </div>
     </div>
@@ -985,7 +1010,7 @@
             <!-- Header -->
             <div class="modal-header" style="background:#1a1f2e;color:white;border:none;padding:14px 20px;">
                 <div>
-                    <h6 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Confirm Bill</h6>
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-file-earmark-plus-fill me-2"></i>Confirm Bill</h6>
                     <div style="font-size:11px;opacity:0.7;margin-top:2px;">Review before saving</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -1057,7 +1082,7 @@
             <div class="modal-header border-0 pb-0">
                 <div class="d-flex align-items-center gap-2">
                     <div class="stat-icon bg-primary bg-opacity-10" style="width:40px;height:40px;font-size:18px">
-                        <i class="bi bi-box-seam text-primary"></i>
+                        <i class="bi bi-box-fill text-primary"></i>
                     </div>
                     <div>
                         <h5 class="modal-title mb-0">Add New Product</h5>
@@ -1249,6 +1274,7 @@
 </datalist>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js?v=25}"></script>
 <script th:inline="javascript">
     // ── State ─────────────────────────────────────────────
     let items = [];       // [{id, name, unit, price, gst, qty}]
@@ -1988,6 +2014,7 @@
             container.style.display = 'none';
             itemBar.style.display = 'none';
             recalcTotal();
+            clearDraft();
             return;
         }
 
@@ -2003,11 +2030,11 @@
             const qtyVal = parseFloat(item.qty) || 0;
             const presetVal = isGram && [250,500,750].includes(Math.round(qtyVal)) ? String(Math.round(qtyVal)) : '';
             return `
-            <div class="pos-item-row" id="itemrow-${i}" style="display:flex;align-items:center;gap:8px;padding:6px 12px;">
+            <div class="pos-item-row" id="itemrow-${i}" style="display:flex;align-items:center;gap:8px;padding:6px 12px; ${item.isReturn ? 'background-color:#fee2e2;' : ''}">
 
                 <!-- col 1: name -->
-                <div style="flex:0 0 140px;min-width:140px;overflow:hidden;display:flex;align-items:center;">
-                    <div class="pos-item-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(item.name)}</div>
+                <div style="flex:0 0 140px;min-width:140px;overflow:visible;display:flex;align-items:center;">
+                    <div class="pos-item-name" style="white-space:nowrap;overflow:visible;text-overflow:ellipsis;padding-top:4px;">${escHtml(item.name)}</div>
                 </div>
 
                 <!-- col 2: price input · fills empty space -->
@@ -2167,15 +2194,15 @@
 
     // ── Recalc total ──────────────────────────────────────
     function recalcTotal() {
-        const subtotal  = items.reduce((s, i) => s + (i.price * i.qty * getBillingFactor(i.billingUnit || i.unit)), 0);
+        const subtotal  = items.reduce((s, i) => s + (i.isReturn ? -1 : 1) * (i.price * i.qty * getBillingFactor(i.billingUnit || i.unit)), 0);
         const gstTotal  = quickBillHasGst ? items.reduce((s, i) => {
             const gstPct = parseFloat(i.gst) || 0;
-            const lineTotal = i.price * i.qty * getBillingFactor(i.billingUnit || i.unit);
+            const lineTotal = (i.isReturn ? -1 : 1) * i.price * i.qty * getBillingFactor(i.billingUnit || i.unit);
             return s + (lineTotal * gstPct / 100);
         }, 0) : 0;
         const discount  = parseFloat(document.getElementById('posDiscount').value) || 0;
-        const total     = Math.max(0, subtotal + gstTotal - discount);
-        const totalQty  = items.reduce((s, i) => s + i.qty, 0);
+        const total     = subtotal + gstTotal - discount;
+        const totalQty  = items.reduce((s, i) => s + (i.isReturn ? -i.qty : i.qty), 0);
 
         document.getElementById('rSubtotal').textContent = subtotal.toFixed(2);
         document.getElementById('rGst').textContent = gstTotal.toFixed(2);
@@ -2234,12 +2261,13 @@
             const billingUnit = normalizeBillingUnit(item.billingUnit || item.unit);
             const quantity = item.qty;
             hiddenDiv.innerHTML += `
-                <input type="hidden" name="productIds"  value="${item.id == null ? '' : item.id}">
+                <input type="hidden" name="productIds"  value="${item.id == null || String(item.id).startsWith('r_') ? '' : item.id}">
                 <input type="hidden" name="itemNames"  value="${escHtml(item.name || '')}">
                 <input type="hidden" name="itemUnits"  value="${escHtml(billingUnit || item.unit || '')}">
                 <input type="hidden" name="gstPercents"  value="${item.gst ?? 0}">
                 <input type="hidden" name="quantities"  value="${quantity}">
                 <input type="hidden" name="unitPrices"  value="${item.price}">
+                <input type="hidden" name="isReturns"  value="${item.isReturn ? 'true' : 'false'}">
             `;
         });
         document.getElementById('quickBillForm').submit();
@@ -2412,6 +2440,294 @@
             }
         }
     });
+
+    // ==========================================
+    // POS ADVANCED FEATURES: HOLD, RESUME, RETURN, REPRINT
+    // ==========================================
+
+    function holdCurrentBill() {
+        if (items.length === 0) {
+            alert("Cart is empty.");
+            return;
+        }
+        let refName = prompt("Enter a reference name for this held bill (e.g., Customer Name):");
+        if (!refName) return;
+
+        let held = JSON.parse(localStorage.getItem('pos_held_bills') || '[]');
+        held.push({
+            id: Date.now(),
+            ref: refName,
+            date: new Date().toLocaleString(),
+            items: JSON.parse(JSON.stringify(items)),
+            isGst: quickBillHasGst,
+            customer: document.getElementById('posCustomer').value,
+            walkIn: document.getElementById('walkInCustomerName').value
+        });
+        localStorage.setItem('pos_held_bills', JSON.stringify(held));
+        clearAll();
+        alert("Bill held successfully!");
+    }
+
+    function openResumeModal() {
+        let held = JSON.parse(localStorage.getItem('pos_held_bills') || '[]');
+        let tbody = document.getElementById('resumeModalBody');
+        if (held.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No held bills.</td></tr>';
+        } else {
+            tbody.innerHTML = held.map(h => `
+                <tr>
+                    <td>${escHtml(h.ref)}</td>
+                    <td>${h.date}</td>
+                    <td>${h.items.length} items</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-primary" onclick="resumeBill(${h.id})">Resume</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        new bootstrap.Modal(document.getElementById('resumeModal')).show();
+    }
+
+    function resumeBill(id) {
+        let held = JSON.parse(localStorage.getItem('pos_held_bills') || '[]');
+        let idx = held.findIndex(h => h.id === id);
+        if (idx !== -1) {
+            let h = held[idx];
+            items = h.items;
+            setQuickBillGst(h.isGst);
+            document.getElementById('posCustomer').value = h.customer;
+            document.getElementById('walkInCustomerName').value = h.walkIn;
+            if (h.customer) {
+                document.getElementById('walkInCustomerName').style.display = 'none';
+            } else {
+                document.getElementById('walkInCustomerName').style.display = 'block';
+            }
+            held.splice(idx, 1);
+            localStorage.setItem('pos_held_bills', JSON.stringify(held));
+            renderItems();
+            bootstrap.Modal.getInstance(document.getElementById('resumeModal')).hide();
+        }
+    }
+
+    function openReturnModal() {
+        document.getElementById('returnBillNo').value = '';
+        document.getElementById('returnModalBody').innerHTML = '';
+        new bootstrap.Modal(document.getElementById('returnModal')).show();
+    }
+
+    function searchBillForReturn() {
+        let billNo = document.getElementById('returnBillNo').value.trim();
+        if (!billNo) return;
+        fetch('/bills/api/by-number/' + billNo)
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(data => {
+                window.returnBillData = data;
+                let html = data.items.map(item => `
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input return-check" value="${item.id}">
+                        </td>
+                        <td>${escHtml(item.productName)}</td>
+                        <td>${item.quantity}</td>
+                        <td>₹${item.unitPrice.toFixed(2)}</td>
+                        <td style="width:100px;">
+                            <input type="number" class="form-control form-control-sm return-qty" id="retQty_${item.id}" max="${item.quantity}" min="0.01" step="0.01" value="${item.quantity}" disabled>
+                        </td>
+                    </tr>
+                `).join('');
+                document.getElementById('returnModalBody').innerHTML = html;
+                
+                document.querySelectorAll('.return-check').forEach(chk => {
+                    chk.addEventListener('change', (e) => {
+                        document.getElementById('retQty_' + e.target.value).disabled = !e.target.checked;
+                    });
+                });
+            })
+            .catch(() => {
+                document.getElementById('returnModalBody').innerHTML = '<tr><td colspan="5" class="text-danger text-center">Bill not found or error loading items.</td></tr>';
+            });
+    }
+
+    function processReturns() {
+        let checks = document.querySelectorAll('.return-check:checked');
+        if (checks.length === 0) return;
+
+        checks.forEach(chk => {
+            let itemId = parseInt(chk.value);
+            let item = window.returnBillData.items.find(i => i.id === itemId);
+            if (item) {
+                let qtyToReturn = parseFloat(document.getElementById('retQty_' + itemId).value) || 0;
+                if (qtyToReturn > 0 && qtyToReturn <= item.quantity) {
+                    let cartItem = {
+                        id: item.productId || ('r_'+item.id),
+                        name: item.productName + " (Return)",
+                        unit: 'piece',
+                        category: 'Return',
+                        stockQty: 0,
+                        price: item.unitPrice,
+                        gst: 0,
+                        isReturn: true,
+                        qty: qtyToReturn
+                    };
+                    items.push(cartItem);
+                }
+            }
+        });
+        renderItems();
+        bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
+    }
+
+    function openReprintModal() {
+        let billNo = prompt("Enter Bill Number to reprint:");
+        if (billNo) {
+            fetch('/bills/api/by-number/' + billNo)
+                .then(res => res.ok ? res.json() : Promise.reject())
+                .then(data => {
+                    window.open('/bills/' + data.id + '/receipt', 'ReceiptWindow', 'width=400,height=600');
+                })
+                .catch(() => alert("Bill not found!"));
+        }
+    }
+
+</script>
+
+<!-- Modals for POS Features -->
+<!-- Resume Modal -->
+<div class="modal fade" id="resumeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title"><i class="bi bi-play-circle text-info me-2"></i>Resume Held Bill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Reference</th>
+                            <th>Date Held</th>
+                            <th>Items</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="resumeModalBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Return Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title"><i class="bi bi-arrow-return-left text-danger me-2"></i>Return / Exchange Items</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <input type="text" id="returnBillNo" class="form-control" placeholder="Enter Bill Number (e.g., BILL-2024-001)">
+                    <button class="btn btn-primary" onclick="searchBillForReturn()">Search</button>
+                </div>
+                <table class="table mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:40px;"></th>
+                            <th>Product</th>
+                            <th>Orig Qty</th>
+                            <th>Price</th>
+                            <th>Return Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="returnModalBody"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="processReturns()">Add Returns to Cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── CREDIT LIMIT EXCEEDED MODAL ── -->
+<div class="modal fade" id="creditLimitModal" tabindex="-1" aria-labelledby="creditLimitModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white border-0 py-3 px-4" style="background: linear-gradient(135deg, #dc3545, #991b1b);">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="creditLimitModalTitle">
+                    <i class="bi bi-shield-lock-fill fs-4"></i>
+                    Credit Limit Exceeded
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle mb-3" style="width: 80px; height: 80px;">
+                    <i class="bi bi-exclamation-octagon-fill" style="font-size: 42px;"></i>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-2">Transaction Restricted</h5>
+                
+                <div class="alert alert-danger text-start small mb-3 border-danger shadow-sm" style="border-radius: 12px; background-color: #fff5f5;">
+                    <div class="fw-bold mb-1 text-danger">
+                        <i class="bi bi-person-fill me-1"></i>Customer Credit Limit Restriction
+                    </div>
+                    <div th:text="${errorMessage}" class="text-secondary fw-semibold">
+                        Credit Limit Exceeded for Harshal Pathare | Limit: ₹1,000.00 | Dues: ₹0.00 | Attempted Credit: ₹1,042.00 (Exceeds by ₹42.00). Please collect cash or digital payment.
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 text-start border">
+                    <div class="d-flex align-items-center gap-2 text-primary small fw-bold mb-1">
+                        <i class="bi bi-lightbulb-fill"></i>
+                        <span>Recommended Resolution</span>
+                    </div>
+                    <div class="small text-muted">
+                        Please inform the customer to pay the bill amount using <strong>CASH</strong> or <strong>UPI</strong>. You can click <strong>"Switch to Cash Payment"</strong> below to automatically switch the payment mode.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0 py-3 px-4 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Close
+                </button>
+                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" onclick="switchToCashAndSubmit()" data-bs-dismiss="modal">
+                    <i class="bi bi-cash-stack me-1"></i> Switch to Cash Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function() {
+        var errorMsg = /*[[${errorMessage}]]*/ null;
+        if (errorMsg && errorMsg.indexOf('Credit Limit Exceeded') !== -1) {
+            var modalEl = document.getElementById('creditLimitModal');
+            if (modalEl) {
+                var bsModal = new bootstrap.Modal(modalEl);
+                bsModal.show();
+            }
+        }
+    });
+
+    function switchToCashAndSubmit() {
+        var methodSelect = document.getElementById('posPaymentMethod') || document.getElementById('paymentMethod');
+        if (methodSelect) {
+            methodSelect.value = 'CASH';
+            var event = new Event('change', { bubbles: true });
+            methodSelect.dispatchEvent(event);
+        }
+        if (typeof showPosToast === 'function') {
+            showPosToast('Switched payment mode to CASH', 'success');
+        }
+    }
+    /*]]>*/
 </script>
 </body>
 </html>
+
+
+

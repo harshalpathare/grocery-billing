@@ -107,7 +107,7 @@ public class PdfInvoiceService {
         qrCell.addElement(qrLabel);
 
         Font upiFont = bold(8, C_ACCENT);
-        Paragraph upiLabel = new Paragraph(shopConfig.getUpiId(), upiFont);
+        Paragraph upiLabel = new Paragraph(bill.getShop().getUpiId(), upiFont);
         upiLabel.setAlignment(Element.ALIGN_CENTER);
         qrCell.addElement(upiLabel);
 
@@ -135,7 +135,7 @@ public class PdfInvoiceService {
 
         Font upiIdFont = bold(9, C_GREEN);
         instrCell.addElement(new Paragraph(
-                "UPI ID: " + shopConfig.getUpiId(), upiIdFont));
+                "UPI ID: " + bill.getShop().getUpiId(), upiIdFont));
 
         t.addCell(qrCell);
         t.addCell(instrCell);
@@ -160,7 +160,7 @@ public class PdfInvoiceService {
         if ("UPI".equals(bill.getPaymentMethod())) {
             //addUpiQrSection(doc, bill);
         }
-        addTermsAndSignature(doc);
+        addTermsAndSignature(doc, bill);
 
         doc.close();
         return baos.toByteArray();
@@ -229,9 +229,9 @@ public class PdfInvoiceService {
         taxLabel.setSpacingAfter(2);
         cell.addElement(taxLabel);
 
-        if (shopConfig.getLogoUrl() != null && !shopConfig.getLogoUrl().isBlank()) {
+        if (bill.getShop().getLogoUrl() != null && !bill.getShop().getLogoUrl().isBlank()) {
             try {
-                com.lowagie.text.Image logo = com.lowagie.text.Image.getInstance(new java.net.URL(shopConfig.getLogoUrl()));
+                com.lowagie.text.Image logo = com.lowagie.text.Image.getInstance(new java.net.URL(bill.getShop().getLogoUrl()));
                 logo.scaleToFit(80, 80);
                 logo.setAlignment(Element.ALIGN_CENTER);
                 cell.addElement(logo);
@@ -240,21 +240,21 @@ public class PdfInvoiceService {
             }
         }
 
-        Paragraph shopName = new Paragraph(shopConfig.getName().toUpperCase(), bold(20, C_BLACK));
+        Paragraph shopName = new Paragraph(bill.getShop().getShopName().toUpperCase(), bold(20, C_BLACK));
         shopName.setAlignment(Element.ALIGN_CENTER);
         shopName.setSpacingAfter(3);
         cell.addElement(shopName);
 
         Font addrFont = regular(8, new Color(80, 80, 80));
 
-        Paragraph addr = new Paragraph(shopConfig.getAddress(), addrFont);
+        Paragraph addr = new Paragraph(bill.getShop().getAddress(), addrFont);
         addr.setAlignment(Element.ALIGN_CENTER);
         addr.setSpacingAfter(2);
         cell.addElement(addr);
 
-        String contactLine = "Phone: " + shopConfig.getPhone()
-                + (shopConfig.getEmail() != null && !shopConfig.getEmail().isEmpty()
-                ? "   Email: " + shopConfig.getEmail() : "");
+        String contactLine = "Phone: " + bill.getShop().getPhone()
+                + (bill.getShop().getEmail() != null && !bill.getShop().getEmail().isEmpty()
+                ? "   Email: " + bill.getShop().getEmail() : "");
         Paragraph contact = new Paragraph(contactLine, addrFont);
         contact.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(contact);
@@ -308,8 +308,8 @@ public class PdfInvoiceService {
         mid.setPadding(7);
 
         addLabelValue(mid, "Bill No  :", bill.getBillNo(),       9);
-        addLabelValue(mid, "GST No  :", shopConfig.getGstin(),   8);
-        addLabelValue(mid, "FSSAI   :", shopConfig.getFssaiNo(), 8);
+        addLabelValue(mid, "GST No  :", bill.getShop().getGstin(),   8);
+        addLabelValue(mid, "FSSAI   :", bill.getShop().getFssaiNo(), 8);
 
         // Right: Date, Payment, Status
         PdfPCell right = new PdfPCell();
@@ -427,9 +427,11 @@ public class PdfInvoiceService {
             nameCell.setNoWrap(false);
             nameCell.setLeading(0f, 1.3f);
             t.addCell(nameCell);
-            // HSN (blank — can be extended later)
+            // HSN
             if (hasGst) {
-                td(t, "", mutF, Element.ALIGN_CENTER, rowBg);
+                String hsn = item.getProduct() != null && item.getProduct().getHsnCode() != null 
+                             ? item.getProduct().getHsnCode() : "";
+                td(t, hsn, mutF, Element.ALIGN_CENTER, rowBg);
             }
 
             // Qty
@@ -481,6 +483,11 @@ public class PdfInvoiceService {
                 PdfPCell filler = new PdfPCell(new Phrase(" ", regular(7, C_WHITE)));
                 filler.setBorderColor(C_BORDER);
                 filler.setBorderWidth(0.4f);
+                if (i == fillerRows - 1) {
+                    filler.setBorder(Rectangle.LEFT | Rectangle.RIGHT | Rectangle.BOTTOM);
+                } else {
+                    filler.setBorder(Rectangle.LEFT | Rectangle.RIGHT);
+                }
                 filler.setMinimumHeight(14f);
                 filler.setPadding(3);
                 t.addCell(filler);
@@ -667,7 +674,7 @@ public class PdfInvoiceService {
     // ─────────────────────────────────────────────────────
     //  SECTION 6 — Terms & Signature
     // ─────────────────────────────────────────────────────
-    private void addTermsAndSignature(Document doc) throws Exception {
+    private void addTermsAndSignature(Document doc, Bill bill) throws Exception {
         PdfPTable t = new PdfPTable(2);
         t.setWidthPercentage(100);
         t.setWidths(new float[]{60f, 40f});
@@ -684,7 +691,7 @@ public class PdfInvoiceService {
         Font tf = regular(7, new Color(70, 70, 80));
         Font tb = bold(7, C_ACCENT);
 
-        String termsText = shopConfig.getTerms();
+        String termsText = bill.getShop().getTerms();
         if (termsText != null && !termsText.isBlank()) {
             for (String line : termsText.split("\n")) {
                 left.addElement(new Paragraph(line.trim(), tf));
@@ -700,13 +707,17 @@ public class PdfInvoiceService {
         
         left.addElement(spacer(6));
         
-        if (shopConfig.getThankYouMsg() != null && !shopConfig.getThankYouMsg().isBlank()) {
-            left.addElement(new Paragraph(shopConfig.getThankYouMsg(), bold(8, C_BLACK)));
+        if (bill.getShop().getThankYouMsg() != null && !bill.getShop().getThankYouMsg().isBlank()) {
+            left.addElement(new Paragraph(bill.getShop().getThankYouMsg(), bold(8, C_BLACK)));
             left.addElement(spacer(2));
         }
         left.addElement(spacer(4));
-        left.addElement(new Paragraph("Firm GST No : " + shopConfig.getGstin(), tb));
-        left.addElement(new Paragraph("FSSAI No: "     + shopConfig.getFssaiNo(), tb));
+        if (bill.getShop().getGstin() != null && !bill.getShop().getGstin().isBlank()) {
+            left.addElement(new Paragraph("Firm GST No : " + bill.getShop().getGstin(), tb));
+        }
+        if (bill.getShop().getFssaiNo() != null && !bill.getShop().getFssaiNo().isBlank()) {
+            left.addElement(new Paragraph("FSSAI No: " + bill.getShop().getFssaiNo(), tb));
+        }
 
         // Right: Signature
         PdfPCell right = new PdfPCell();
@@ -716,7 +727,7 @@ public class PdfInvoiceService {
         right.setPadding(7);
         right.setMinimumHeight(80f);
 
-        Paragraph forLine = new Paragraph("For " + shopConfig.getName(), bold(9, C_DARK_NAVY));
+        Paragraph forLine = new Paragraph("For " + bill.getShop().getShopName(), bold(9, C_DARK_NAVY));
         forLine.setAlignment(Element.ALIGN_CENTER);
         right.addElement(forLine);
         right.addElement(spacer(30));

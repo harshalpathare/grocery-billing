@@ -45,18 +45,31 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new DisabledException("Account is disabled: " + username);
         }
 
+        if (user.getShop() != null && !user.getShop().getActive()) {
+            throw new DisabledException("Your shop account has been deactivated by the administrator.");
+        }
+
+        if (user.getShop() != null && !user.getShop().isSubscriptionActive()) {
+            throw new DisabledException("Your shop's subscription has expired. Please contact support.");
+        }
+
         // Update last login time
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
         log.info("User logged in: {}", username);
 
+        String role = user.getRole();
+        if (role != null && !role.startsWith("ROLE_")) {
+            role = "ROLE_" + role.toUpperCase();
+        }
+
         // Return Spring Security's UserDetails object
         // Spring Security uses this to verify the password
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                List.of(new SimpleGrantedAuthority(user.getRole()))
+                List.of(new SimpleGrantedAuthority(role))
         );
     }
 }

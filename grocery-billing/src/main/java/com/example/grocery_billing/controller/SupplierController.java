@@ -4,6 +4,8 @@ import com.example.grocery_billing.entity.PurchaseOrder;
 import com.example.grocery_billing.entity.Supplier;
 import com.example.grocery_billing.service.PurchaseOrderService;
 import com.example.grocery_billing.service.SupplierService;
+import com.example.grocery_billing.service.ExcelSupplierLedgerService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,8 +21,9 @@ import java.util.List;
 public class SupplierController {
 
     private final SupplierService supplierService;
-    // Add to SupplierController fields
     private final PurchaseOrderService poService;
+    private final ExcelSupplierLedgerService excelSupplierLedgerService;
+    
     @GetMapping
     public String list(Model model) {
         model.addAttribute("suppliers",
@@ -91,52 +94,43 @@ public class SupplierController {
     }
 
     // ✅ FIXED: supplier list pay button
-// should record against a PO, not directly
     @PostMapping("/{id}/pay")
     public String pay(
             @PathVariable Long id,
             @RequestParam java.math.BigDecimal amount,
             RedirectAttributes ra) {
         try {
-            Supplier s = supplierService.getById(id);
+            supplierService.recordPayment(id, amount);
+            updatePoStatuses(id, amount);
 
-            BigDecimal currentPaid =
-                    s.getTotalPaid() != null
-                            ? s.getTotalPaid() : BigDecimal.ZERO;
-            BigDecimal payable =
-                    s.getTotalPayable() != null
-                            ? s.getTotalPayable() : BigDecimal.ZERO;
-            BigDecimal balance =
-                    payable.subtract(currentPaid);
-
-            if (balance.compareTo(
-                    java.math.BigDecimal.ZERO) <= 0) {
-                ra.addFlashAttribute("errorMessage",
-                        "No pending balance.");
-                return "redirect:/suppliers";
-            }
-
-            // Clamp to max balance
-            java.math.BigDecimal safeAmt =
-                    amount.min(balance);
-
-            // ✅ Update supplier balance
-            s.setTotalPaid(currentPaid.add(safeAmt));
-            s.updateBalance();
-            supplierService.save(s);
-
-            // ✅ Update PO statuses for this supplier
-            updatePoStatuses(id, safeAmt);
-
-            ra.addFlashAttribute("successMessage",
-                    "Payment of ₹" + safeAmt
-                            + " recorded successfully!");
-
+            ra.addFlashAttribute("successMessage", "Payment of ₹" + amount + " recorded successfully!");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage",
-                    e.getMessage());
+            ra.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/suppliers";
+    }
+
+    @GetMapping("/{id}/ledger")
+    public String viewLedger(@PathVariable Long id, Model model) {
+        Supplier supplier = supplierService.getById(id);
+        List<SupplierService.LedgerEntry> ledger = supplierService.getLedger(id);
+
+        model.addAttribute("supplier", supplier);
+        model.addAttribute("ledger", ledger);
+        model.addAttribute("activePage", "suppliers");
+        model.addAttribute("pageTitle", "Supplier Ledger - " + supplier.getName());
+        return "supplier/ledger";
+    }
+
+    @GetMapping("/{id}/ledger/export")
+    public void exportLedger(@PathVariable Long id, HttpServletResponse response) throws Exception {
+        Supplier supplier = supplierService.getById(id);
+        List<SupplierService.LedgerEntry> ledger = supplierService.getLedger(id);
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"supplier_ledger_" + supplier.getName().replaceAll("\\s+", "_") + ".xlsx\"");
+
+        excelSupplierLedgerService.exportToExcel(supplier, ledger, response.getOutputStream());
     }
 
     // ── Helper: update PO payment statuses ───────────────
@@ -194,4 +188,18 @@ public class SupplierController {
             poService.saveDirectly(po);
         }
     }
+
+    @PostMapping("/bulk-delete")
+    public String bulkDelete(@RequestParam("ids") java.util.List<Long> ids, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            for (Long id : ids) {
+                supplierService.delete(id);
+            }
+            ra.addFlashAttribute("successMessage", "Selected suppliers deleted successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error deleting suppliers: " + e.getMessage());
+        }
+        return "redirect:/suppliers";
+    }
+
 }

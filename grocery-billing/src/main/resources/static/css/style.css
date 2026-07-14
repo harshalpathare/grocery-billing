@@ -2,16 +2,20 @@
    GROCERY BILLING SYSTEM - CUSTOM STYLES
    ========================================= */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-    --sidebar-width: 240px;
-    --sidebar-bg: #1a1f2e;
-    --sidebar-text: #a8b2c8;
-    --sidebar-active: #4f97ff;
+    --sidebar-width: 252px;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #475569;
+    --sidebar-text-hover: #0f172a;
+    --sidebar-active: #6366f1;
+    --sidebar-active-bg: rgba(99, 102, 241, 0.1);
     --navbar-height: 60px;
-    --primary-color: #4f97ff;
-    --success-color: #28a745;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
+    --primary-color: #6366f1;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
 }
 
 * {
@@ -19,8 +23,8 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f2f5;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f1f5f9;
     margin: 0;
     padding: 0;
 }
@@ -33,112 +37,211 @@ body {
     width: var(--sidebar-width);
     height: 100vh;
     background: var(--sidebar-bg);
+    background-clip: padding-box;
     color: var(--sidebar-text);
-    z-index: 1000;
-    transition: width 0.3s ease;
+    z-index: 1050;
+    transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
     overflow-x: hidden;
-    /* ✅ NEW: flex column so bottom section sticks to bottom */
     display: flex;
     flex-direction: column;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
 }
 
 .sidebar.collapsed {
-    width: 60px;
+    width: 64px;
 }
 
+.sidebar.collapsed .sidebar-brand {
+    padding: 22px 0 18px;
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-brand span,
+.sidebar.collapsed .sidebar-nav .nav-link span,
+.sidebar.collapsed .sidebar-bottom .nav-link span {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-nav .nav-link,
+.sidebar.collapsed .sidebar-bottom .nav-link {
+    padding: 10px 0;
+    justify-content: center;
+}
+
+/* ---- Brand / Logo ---- */
 .sidebar-brand {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 20px 16px;
-    font-size: 18px;
+    padding: 22px 18px 18px;
+    font-size: 17px;
     font-weight: 700;
-    color: white;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #0f172a;
     white-space: nowrap;
-    /* ✅ NEW: prevent shrinking */
     flex-shrink: 0;
+    letter-spacing: -0.3px;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
 }
 
 .sidebar-brand i {
     font-size: 22px;
-    color: var(--primary-color);
-    min-width: 28px;
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.4);
 }
 
+/* ---- Nav Container ---- */
 .sidebar-nav {
-    padding: 12px 0;
-    /* ✅ NEW: takes all available space, pushes bottom section down */
+    padding: 10px 10px 6px;
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
 
+.sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.12);
+    border-radius: 4px;
+}
+
+/* ---- Nav Links ---- */
 .sidebar-nav .nav-link {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 11px;
+    padding: 10px 12px;
+    margin-bottom: 2px;
     color: var(--sidebar-text);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13.5px;
+    font-weight: 500;
     white-space: nowrap;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
+    border-radius: 10px;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+    position: relative;
+    letter-spacing: 0.1px;
 }
 
 .sidebar-nav .nav-link:hover {
-    background: rgba(255,255,255,0.07);
-    color: white;
+    background: rgba(0,0,0,0.04);
+    color: var(--sidebar-text-hover);
+    transform: translateX(2px);
 }
 
 .sidebar-nav .nav-link.active {
-    background: rgba(79, 151, 255, 0.15);
-    color: var(--primary-color);
-    border-left-color: var(--primary-color);
+    background: var(--sidebar-active-bg);
+    color: var(--sidebar-active);
     font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(99,102,241,0.25);
 }
 
+.sidebar-nav .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--sidebar-active);
+    border-radius: 0 3px 3px 0;
+}
+
+/* ---- Icons ---- */
 .sidebar-nav .nav-link i {
-    font-size: 18px;
-    min-width: 28px;
+    font-size: 17px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+    transition: background 0.18s ease;
 }
 
-/* ✅ NEW: Bottom section of sidebar (Settings link) */
+/* Icon background colours per type */
+.sidebar-nav .nav-link i.text-primary   { background: rgba(99,102,241,0.15);  color: #818cf8 !important; }
+.sidebar-nav .nav-link i.text-success   { background: rgba(16,185,129,0.15);  color: #34d399 !important; }
+.sidebar-nav .nav-link i.text-warning   { background: rgba(245,158,11,0.15);  color: #fbbf24 !important; }
+.sidebar-nav .nav-link i.text-info      { background: rgba(14,165,233,0.15);  color: #38bdf8 !important; }
+.sidebar-nav .nav-link i.text-danger    { background: rgba(239,68,68,0.15);   color: #f87171 !important; }
+.sidebar-nav .nav-link i.text-secondary { background: rgba(148,163,184,0.12); color: #94a3b8 !important; }
+.sidebar-nav .nav-link i.text-dark      { background: rgba(0,0,0,0.05); color: #475569 !important; }
+
+.sidebar-nav .nav-link.active i {
+    background: rgba(99,102,241,0.25) !important;
+}
+
+/* ---- Bottom section (Settings) ---- */
 .sidebar-bottom {
-    padding: 12px 0;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 8px 10px 14px;
+    border-top: 1px solid rgba(0,0,0,0.07);
     flex-shrink: 0;
+    margin-top: auto;
 }
 
 .sidebar-bottom .nav-link {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 11px;
+    padding: 10px 12px;
     color: var(--sidebar-text);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13.5px;
+    font-weight: 500;
     white-space: nowrap;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
+    border-radius: 10px;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+    letter-spacing: 0.1px;
 }
 
 .sidebar-bottom .nav-link:hover {
-    background: rgba(255,255,255,0.07);
-    color: white;
+    background: rgba(0,0,0,0.04);
+    color: var(--sidebar-text-hover);
+    transform: translateX(2px);
 }
 
 .sidebar-bottom .nav-link.active {
-    background: rgba(79, 151, 255, 0.15);
-    color: var(--primary-color);
-    border-left-color: var(--primary-color);
+    background: var(--sidebar-active-bg);
+    color: #fff;
     font-weight: 600;
 }
 
 .sidebar-bottom .nav-link i {
-    font-size: 18px;
-    min-width: 28px;
+    font-size: 17px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: rgba(148,163,184,0.12);
+    color: #94a3b8 !important;
 }
+
+.sidebar-bottom .nav-link.active i,
+.sidebar-bottom .nav-link:hover i {
+    background: rgba(99,102,241,0.2);
+    color: #a5b4fc !important;
+}
+
 
 /* ========== MAIN CONTENT ========== */
 .main-content {
@@ -148,7 +251,7 @@ body {
 }
 
 .main-content.expanded {
-    margin-left: 60px;
+    margin-left: 64px;
 }
 
 /* ========== TOP NAVBAR ========== */

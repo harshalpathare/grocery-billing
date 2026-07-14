@@ -25,4 +25,34 @@ public interface BillItemRepository extends JpaRepository<BillItem, Long> {
             @Param("start") LocalDate start,
             @Param("end") LocalDate end
     );
+
+    // ── Inventory Queries (Shop-scoped) ───────────────────
+    @Query("SELECT bi.product, SUM(bi.quantity) as totalQty " +
+            "FROM BillItem bi JOIN bi.bill b " +
+            "WHERE b.shop.id = :shopId AND b.billDate >= :since " +
+            "GROUP BY bi.product " +
+            "ORDER BY totalQty DESC")
+    List<Object[]> findFastMovingProductsByShop(@Param("shopId") Long shopId, @Param("since") LocalDate since);
+
+    @Query("SELECT bi.product, SUM(bi.quantity) as totalQty " +
+            "FROM BillItem bi JOIN bi.bill b " +
+            "WHERE b.shop.id = :shopId AND b.billDate >= :since " +
+            "GROUP BY bi.product " +
+            "ORDER BY totalQty ASC")
+    List<Object[]> findSlowMovingProductsByShop(@Param("shopId") Long shopId, @Param("since") LocalDate since);
+
+    // ── Inventory Queries (Legacy) ────────────────────────
+    @Query("SELECT bi.product, SUM(bi.quantity) as totalQty " +
+            "FROM BillItem bi JOIN bi.bill b " +
+            "WHERE b.billDate >= :since " +
+            "GROUP BY bi.product " +
+            "ORDER BY totalQty DESC")
+    List<Object[]> findFastMovingProducts(@Param("since") LocalDate since);
+
+    @Query("SELECT bi.product, SUM(bi.quantity) as totalQty " +
+            "FROM BillItem bi JOIN bi.bill b " +
+            "WHERE b.billDate >= :since " +
+            "GROUP BY bi.product " +
+            "ORDER BY totalQty ASC")
+    List<Object[]> findSlowMovingProducts(@Param("since") LocalDate since);
 }
