@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * SUPER ADMIN CONTROLLER
@@ -33,6 +34,50 @@ public class SuperAdminController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final com.example.grocery_billing.service.ShopFeatureService shopFeatureService;
+    private final com.example.grocery_billing.service.SystemSettingService systemSettingService;
+    private final com.example.grocery_billing.service.FileStorageService fileStorageService;
+
+    // ── GLOBAL SETTINGS ───────────────────────────────────
+    @GetMapping("/settings")
+    public String showSettings(Model model) {
+        model.addAttribute("appName", systemSettingService.get("app.name", "Grocery Bill"));
+        model.addAttribute("appNameColor", systemSettingService.get("app.name_color", "#0f172a"));
+        model.addAttribute("appIcon", systemSettingService.get("app.icon", "bi-shop"));
+        model.addAttribute("logoUrl", systemSettingService.get("app.logo_url", ""));
+        model.addAttribute("pageTitle", "Global Settings");
+        model.addAttribute("activePage", "super_settings");
+        return "super/settings";
+    }
+
+    @PostMapping("/settings")
+    public String saveSettings(
+            @RequestParam String appName,
+            @RequestParam(required = false, defaultValue = "#0f172a") String appNameColor,
+            @RequestParam String appIcon,
+            @RequestParam(required = false) String logoUrl,
+            @RequestParam(required = false) MultipartFile logoFile,
+            RedirectAttributes ra) {
+        try {
+            systemSettingService.set("app.name", appName);
+            systemSettingService.set("app.name_color", appNameColor);
+            systemSettingService.set("app.icon", appIcon);
+            
+            String finalLogoUrl = logoUrl != null ? logoUrl : "";
+            if (logoFile != null && !logoFile.isEmpty()) {
+                String uploadedPath = fileStorageService.saveLogo(logoFile);
+                if (uploadedPath != null) {
+                    finalLogoUrl = uploadedPath;
+                }
+            }
+            systemSettingService.set("app.logo_url", finalLogoUrl);
+            
+            ra.addFlashAttribute("successMessage", "Global settings updated successfully!");
+        } catch (Exception e) {
+            log.error("Error saving global settings", e);
+            ra.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+        }
+        return "redirect:/super/settings";
+    }
 
     // ── LIST ALL SHOPS ────────────────────────────────────
     @GetMapping("/shops")

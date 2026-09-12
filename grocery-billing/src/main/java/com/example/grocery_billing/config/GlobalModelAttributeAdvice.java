@@ -14,10 +14,31 @@ public class GlobalModelAttributeAdvice {
     private final ShopService shopService;
     private final ShopConfig shopConfig;
     private final ShopFeatureService shopFeatureService;
+    private final com.example.grocery_billing.service.SystemSettingService systemSettingService;
 
     @ModelAttribute("requestURI")
     public String populateRequestURI(jakarta.servlet.http.HttpServletRequest request) {
         return request.getRequestURI();
+    }
+
+    @ModelAttribute("globalAppName")
+    public String populateGlobalAppName() {
+        return systemSettingService.get("app.name", "Grocery Bill");
+    }
+
+    @ModelAttribute("globalAppIcon")
+    public String populateGlobalAppIcon() {
+        return systemSettingService.get("app.icon", "bi-shop");
+    }
+
+    @ModelAttribute("globalLogoUrl")
+    public String populateGlobalLogoUrl() {
+        return systemSettingService.get("app.logo_url", "");
+    }
+
+    @ModelAttribute("globalAppNameColor")
+    public String populateGlobalAppNameColor() {
+        return systemSettingService.get("app.name_color", "#0f172a");
     }
 
     @ModelAttribute("currentShop")
@@ -39,7 +60,6 @@ public class GlobalModelAttributeAdvice {
     @ModelAttribute("features")
     public java.util.Map<String, Boolean> populateFeatures() {
         java.util.Map<String, Boolean> feats = shopFeatureService.getFeaturesForCurrentShop();
-        System.out.println("GlobalModelAttributeAdvice: ShopID=" + ShopContext.getShopId() + " Features=" + feats);
         return feats;
     }
 }

@@ -4,7 +4,9 @@
  */
 
 
-
+/* ====================================================
+   1. (RESERVED)
+==================================================== */
 
 /* ====================================================
    2. TOAST NOTIFICATION SYSTEM
@@ -122,31 +124,70 @@
 
 /* ====================================================
    4. SIDEBAR TOGGLE
+   NOTE: app.js is loaded with defer, so DOM is fully ready when this runs.
+   No DOMContentLoaded wrapper needed — the script runs after full HTML parsing.
 ==================================================== */
-document.addEventListener('DOMContentLoaded', function () {
-    const toggleBtn = document.getElementById('sidebarToggle');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', function () {
-            document.getElementById('sidebar')?.classList.toggle('collapsed');
-            document.getElementById('mainContent')?.classList.toggle('expanded');
+(function () {
+    var toggleBtn = document.getElementById('sidebarToggle');
+    var sidebar   = document.getElementById('sidebar');
+
+    if (toggleBtn && sidebar) {
+        // Create overlay for mobile off-canvas behaviour
+        var overlay = document.getElementById('sidebarOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'sidebar-overlay';
+            overlay.id = 'sidebarOverlay';
+            document.body.appendChild(overlay);
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.remove('sidebar-open');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        toggleBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (window.innerWidth < 992) {
+                // Mobile: slide-in drawer
+                sidebar.classList.toggle('sidebar-open');
+                overlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('sidebar-open') ? 'hidden' : '';
+            } else {
+                // Desktop: collapse to icon-only rail
+                sidebar.classList.toggle('collapsed');
+                var mainContent = document.getElementById('mainContent');
+                if (mainContent) mainContent.classList.toggle('expanded');
+            }
+        });
+
+        overlay.addEventListener('click', closeMobileSidebar);
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('sidebar-open')) {
+                closeMobileSidebar();
+            }
         });
     }
 
-    // Greeting based on time
-    const greetEl = document.getElementById('greetingTime');
+    // Greeting based on time of day
+    var greetEl = document.getElementById('greetingTime');
     if (greetEl) {
-        const hour = new Date().getHours();
+        var hour = new Date().getHours();
         greetEl.textContent = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
     }
 
-    // Current date
-    const dateEl = document.getElementById('currentDate');
+    // Current date display
+    var dateEl = document.getElementById('currentDate');
     if (dateEl) {
         dateEl.textContent = new Date().toLocaleDateString('en-IN', {
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
     }
-});
+})();
 
 /* ====================================================
    5. AUTO-SCROLL SIDEBAR TO ACTIVE ITEM
@@ -161,5 +202,3 @@ window.addEventListener('load', function() {
         nav.scrollTop = Math.max(0, Math.min(target, nav.scrollHeight - nav.clientHeight));
     }
 });
-
-

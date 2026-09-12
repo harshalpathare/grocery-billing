@@ -1,0 +1,10 @@
+content = open('src/main/resources/templates/expenses/list.html', encoding='utf-8').read()
+lines = content.split('\n')
+btn_line_idx = next(i for i, l in enumerate(lines) if 'sidebarToggle' in l)
+btn_text = lines[btn_line_idx]
+print('Button HTML:', btn_text.strip())
+print()
+print('Has type=submit:', 'type="submit"' in btn_text)
+print('Has onclick:', 'onclick' in btn_text)
+print('Has data-bs-toggle:', 'data-bs-toggle' in btn_text)
+print('Has type=button:', 'type="button"' in btn_text)
