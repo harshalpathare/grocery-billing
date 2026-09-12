@@ -344,3 +344,304 @@ Consider the following:
 
 2026-09-12T07:22:01.846+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : Starting Application using Java 17.0.12 with PID 5024 (C:\Users\patha\Downloads\grocery-billing\grocery-billing\target\classes started by patha in C:\Users\patha\Downloads\grocery-billing\grocery-billing)
 2026-09-12T07:22:01.848+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : No active profile set, falling back to 1 default profile: "default"
+2026-09-12T07:22:02.768+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-12T07:22:02.914+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 141 ms. Found 15 JPA repository interfaces.
+2026-09-12T07:22:03.260+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-09-12T07:22:03.263+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-12T07:22:03.263+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-09-12T07:22:03.304+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1449 ms
+2026-09-12T07:22:03.431+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-09-12T07:22:03.560+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-12T07:22:03.564+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-09-12T07:22:03.577+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7f54a9c8
+2026-09-12T07:22:03.579+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-09-12T07:22:03.581+05:30  WARN 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-12T07:22:03.585+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/bohara_db?useSSL=false&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8&allowPublicKeyRetrieval=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.33
+	Default catalog/schema: bohara_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-12T07:22:04.365+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-12T07:22:04.397+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table bills 
+       modify column payment_status enum ('CREDIT','PAID','PARTIAL')
+2026-09-12T07:22:04.428+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table cash_flow 
+       modify column type enum ('IN','OUT') not null
+2026-09-12T07:22:04.443+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table purchase_orders 
+       modify column payment_status enum ('PAID','PARTIAL','PENDING')
+2026-09-12T07:22:04.465+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table purchase_orders 
+       modify column order_type enum ('PURCHASE','RETURN')
+2026-09-12T07:22:04.486+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    alter table transactions 
+       modify column type enum ('CREDIT','DEBIT') not null
+2026-09-12T07:22:04.558+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-12T07:22:04.779+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] o.s.b.w.s.ServletContextInitializerBeans : Mapping filters: springSecurityFilterChain urls=[/*] order=-100, registration urls=[/*] order=2147483647, characterEncodingFilter urls=[/*] order=-2147483648, formContentFilter urls=[/*] order=-9900, requestContextFilter urls=[/*] order=-105, jwtAuthenticationFilter urls=[/*] order=2147483647
+2026-09-12T07:22:04.780+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] o.s.b.w.s.ServletContextInitializerBeans : Mapping servlets: dispatcherServlet urls=[/]
+2026-09-12T07:22:04.781+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] o.s.boot.web.servlet.RegistrationBean    : Filter registration was not registered (disabled)
+2026-09-12T07:22:05.414+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-09-12T07:22:05.938+05:30  WARN 5024 --- [Grocery Billing System] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-12T07:22:06.635+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 145 mappings in 'requestMappingHandlerMapping'
+2026-09-12T07:22:06.681+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /uploads/**] in 'resourceHandlerMapping'
+2026-09-12T07:22:06.714+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 1 @ModelAttribute, 0 @InitBinder, 2 RequestBodyAdvice, 1 ResponseBodyAdvice
+2026-09-12T07:22:06.777+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2026-09-12T07:22:06.946+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-09-12T07:22:06.955+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] c.example.grocery_billing.Application    : Started Application in 5.179 seconds (process running for 834.125)
+2026-09-12T07:22:07.033+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id 
+    from
+        users u1_0 
+    where
+        u1_0.username=? 
+    limit
+        ?
+2026-09-12T07:22:07.044+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.is_active,
+        s1_0.address,
+        s1_0.bank_details,
+        s1_0.business_type,
+        s1_0.city,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.fssai_no,
+        s1_0.gstin,
+        s1_0.license_key,
+        s1_0.logo_url,
+        s1_0.owner_name,
+        s1_0.phone,
+        s1_0.pincode,
+        s1_0.shop_name,
+        s1_0.state,
+        s1_0.subscription_end_date,
+        s1_0.terms,
+        s1_0.thank_you_msg,
+        s1_0.updated_at,
+        s1_0.upi_id 
+    from
+        shops s1_0 
+    where
+        s1_0.id=?
+2026-09-12T07:22:07.055+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id 
+    from
+        users u1_0 
+    where
+        u1_0.username=? 
+    limit
+        ?
+2026-09-12T07:22:07.068+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.created_at,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.last_login,
+        u1_0.password,
+        u1_0.role,
+        u1_0.shop_id,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2026-09-12T07:22:07.130+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Running one-time supplier balance fix...
+2026-09-12T07:22:07.138+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0
+2026-09-12T07:22:07.157+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        po1_0.id,
+        po1_0.amount_paid,
+        po1_0.created_at,
+        po1_0.is_gst,
+        po1_0.notes,
+        po1_0.order_date,
+        po1_0.payment_status,
+        po1_0.po_number,
+        po1_0.subtotal,
+        po1_0.supplier_id,
+        po1_0.supplier_invoice_no,
+        po1_0.tax_amount,
+        po1_0.total_amount,
+        po1_0.order_type 
+    from
+        purchase_orders po1_0 
+    where
+        po1_0.supplier_id=? 
+    order by
+        po1_0.order_date desc
+2026-09-12T07:22:07.167+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0 
+    where
+        s1_0.id=?
+2026-09-12T07:22:07.177+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Fixed Supplier Harshal Pathare: Payable=0, Paid=0, Balance=0
+2026-09-12T07:22:07.179+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        po1_0.id,
+        po1_0.amount_paid,
+        po1_0.created_at,
+        po1_0.is_gst,
+        po1_0.notes,
+        po1_0.order_date,
+        po1_0.payment_status,
+        po1_0.po_number,
+        po1_0.subtotal,
+        po1_0.supplier_id,
+        po1_0.supplier_invoice_no,
+        po1_0.tax_amount,
+        po1_0.total_amount,
+        po1_0.order_type 
+    from
+        purchase_orders po1_0 
+    where
+        po1_0.supplier_id=? 
+    order by
+        po1_0.order_date desc
+2026-09-12T07:22:07.190+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        s1_0.id,
+        s1_0.active,
+        s1_0.address,
+        s1_0.balance,
+        s1_0.contact_person,
+        s1_0.created_at,
+        s1_0.email,
+        s1_0.gstin,
+        s1_0.name,
+        s1_0.notes,
+        s1_0.phone,
+        s1_0.shop_id,
+        s1_0.total_paid,
+        s1_0.total_payable 
+    from
+        suppliers s1_0 
+    where
+        s1_0.id=?
+2026-09-12T07:22:07.198+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] c.e.g.config.SupplierBalanceFixer        : Fixed Supplier Harshal Pathare`: Payable=2000.00, Paid=2000.00, Balance=0.00
+2026-09-12T07:22:07.205+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-09-12T07:22:07.210+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.217+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.223+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.229+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.235+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.243+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.248+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.255+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.261+05:30 DEBUG 5024 --- [Grocery Billing System] [restartedMain] org.hibernate.SQL                        : 
+    select
+        ss1_0.setting_key,
+        ss1_0.description,
+        ss1_0.setting_value 
+    from
+        system_settings ss1_0 
+    where
+        ss1_0.setting_key=?
+2026-09-12T07:22:07.265+05:30  INFO 5024 --- [Grocery Billing System] [restartedMain] c.e.g.config.AppStartupListener          : ✅ Settings synced from DB to ShopConfig on startup
